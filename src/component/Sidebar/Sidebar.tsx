@@ -1,8 +1,20 @@
 // App.tsx
-import{ useEffect, useRef, useState } from "react";
+import { NavLink } from "react-router-dom";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import "./style.css";
 
-export default function ResizableSidebarApp({children }: {children?:any}) {
+type SidebarItem = {
+  key: string;
+  label: string;
+  path: string;
+};
+
+type SidebarProps = {
+  items?: SidebarItem[];
+  children?: ReactNode;
+};
+
+export default function Sidebar({ items = [], children }: SidebarProps) {
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState<number>(200); // 当前宽度（用于 inline style）
   const [isResizing, setIsResizing] = useState(false); // 鼠标是否在拖拽
@@ -136,10 +148,18 @@ export default function ResizableSidebarApp({children }: {children?:any}) {
           opacity: isCollapsed ? 0 : 1,
         }}
       >
-        <div className="nav-item">Home</div>
-        <div className="nav-item">About</div>
-        <div className="nav-item">Tool</div>
-        {children}
+        <div className="nav-list">
+          {items.map((item) => (
+            <NavLink
+              key={item.key || item.path}
+              to={item.path}
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+            >
+              <span className="nav-label">{item.label}</span>
+            </NavLink>
+          ))}
+          {children}
+        </div>
       </div>
 
       {/* 拖拽条（始终存在） */}

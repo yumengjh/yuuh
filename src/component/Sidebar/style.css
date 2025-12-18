@@ -1,4 +1,4 @@
-/* ===== 容器（只包侧边栏 + resizer） ===== */
+/* ===== 容器（只包侧边栏 + resizer）===== */
 .app-container {
   display: inline-flex;
   align-items: stretch;
@@ -28,7 +28,13 @@
 }
 
 /* Sidebar 内容 */
+.nav-list {
+  display: flex;
+  flex-direction: column;
+}
+
 .nav-item {
+  display: block;
   padding: 8px 10px;
   margin-bottom: 6px;
   border-radius: 8px;
@@ -36,10 +42,21 @@
   color: #262626;
   cursor: pointer;
   user-select: none;
+  text-decoration: none;
 }
 
 .nav-item:hover {
   background: #f5f5f5;
+}
+
+.nav-item.active {
+  background: #e8f2ff;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.nav-label {
+  white-space: nowrap;
 }
 
 /* ===== Resizer ===== */
