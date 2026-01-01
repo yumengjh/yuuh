@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DocumentEngine } from "../engine/engine";
 import { InMemoryStorage } from "../engine/storage";
 import type { RenderNode, DocRevision } from "../engine/types";

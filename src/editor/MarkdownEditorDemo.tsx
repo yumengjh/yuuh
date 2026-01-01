@@ -1,11 +1,22 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 import { useDocumentEngineStore } from "./useDocumentEngineStore";
 
 export default function MarkdownEditorDemo() {
-  const { engine, docId, blockId, markdown, docVer, initialized, init, ensureBlock, setMarkdown, refresh, setEditor } =
-    useDocumentEngineStore();
+  const {
+    engine,
+    docId,
+    blockId,
+    markdown,
+    docVer,
+    initialized,
+    init,
+    ensureBlock,
+    setMarkdown,
+    refresh,
+    setEditor,
+  } = useDocumentEngineStore();
   const syncTimer = useRef<number | null>(null);
   const editorRef = useRef<HTMLDivElement | null>(null);
   const quillRef = useRef<Quill | null>(null);
@@ -68,7 +79,10 @@ export default function MarkdownEditorDemo() {
           docId,
           blockId: id,
           updatedBy: "u_1",
-          payload: { schema: { type: "paragraph", ver: 1 }, body: { richText: { format: "html", source: markdown } } },
+          payload: {
+            schema: { type: "paragraph", ver: 1 },
+            body: { richText: { format: "html", source: markdown } },
+          },
         });
         await refresh();
       }, 1000);
@@ -80,13 +94,32 @@ export default function MarkdownEditorDemo() {
   }, [markdown, blockId, docId, engine, ensureBlock, refresh, initialized]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        width: "100%",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         {/* <h2 style={{ margin: 0 }}>Rich Text Editor</h2> */}
-        <small style={{ color: "#666" }}>docVer {docVer} · Block {blockId ?? "-"}</small>
+        <small style={{ color: "#666" }}>
+          docVer {docVer} · Block {blockId ?? "-"}
+        </small>
       </div>
 
-      <div ref={editorRef} style={{ minHeight: 420 }} aria-label="富文本编辑器" />
+      <div
+        ref={editorRef}
+        style={{ minHeight: 420 }}
+        aria-label="富文本编辑器"
+      />
     </div>
   );
 }

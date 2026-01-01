@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDocumentEngineStore } from "../editor/useDocumentEngineStore";
 
 export default function HistoryPage() {
