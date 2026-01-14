@@ -6,20 +6,26 @@
 }
 
 .dashboard-shell {
-  display: flex;
+  position: relative;
+  display: block;
   min-height: 100vh;
 }
 
 .dashboard-sidebar {
-  display: flex;      /* 关键 */
+  position: fixed;
+  inset: 0 auto 0 0;
+  display: flex;
   align-items: stretch;
+  z-index: 20;
 }
 
 .dashboard-main {
   display: flex;
-  flex: 1;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
+  /* 让 Header / Toolbar / 内容整体在 Sidebar 右侧开始，避免被覆盖 */
+  padding-left: var(--sidebar-width, 0px);
 }
 
 .dashboard-shell > .app-container {

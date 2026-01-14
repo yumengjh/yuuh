@@ -7,7 +7,7 @@ export default function Header() {
     <header className="header">
       {/* 左侧 */}
       <div className="header-left">
-        <span className="header-title">重命名文档124</span>
+        <span className="header-title">未命名文档</span>
         <span className="header-lock"></span>
       </div>
 
@@ -15,7 +15,7 @@ export default function Header() {
       <div className="header-right">
 
         <Tooltip title="当前订阅计划" placement="bottom">
-        <span className="header-badge">ChatGPT 5.2 Pro</span>
+        <span className="header-badge">PLUS</span>
         </Tooltip>
 
 

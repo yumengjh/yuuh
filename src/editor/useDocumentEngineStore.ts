@@ -3,11 +3,12 @@ import { marked } from "marked";
 import { DocumentEngine } from "../engine/engine";
 import { InMemoryStorage } from "../engine/storage";
 import type { DocRevision, RenderNode } from "../engine/types";
-import type Quill from "quill";
+// 为了同时支持 Quill / Tiptap，这里用更宽松的类型
+type AnyEditor = unknown;
 
 type State = {
   engine: DocumentEngine;
-  editor: Quill | null;
+  editor: AnyEditor | null;
   docId: string;
   blockId: string | null;
   markdown: string;
@@ -23,7 +24,7 @@ type Actions = {
   init: () => Promise<void>;
   ensureBlock: () => Promise<string>;
   setMarkdown: (text: string) => void;
-  setEditor: (editor: Quill | null) => void;
+  setEditor: (editor: AnyEditor | null) => void;
   refresh: () => Promise<void>;
   loadVersionPreview: (ver: number) => Promise<void>;
 };

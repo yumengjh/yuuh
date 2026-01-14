@@ -186,6 +186,7 @@
   font-size: 14px;
   color: #1f1f1f;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .fixed-item:hover {
@@ -197,37 +198,6 @@
   font-weight: 600;
 }
 
-.fixed-icon {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  border: 1.5px solid #9aa0a6;
-  position: relative;
-}
-
-.fixed-icon.home::before {
-  content: "";
-  position: absolute;
-  left: 3px;
-  right: 3px;
-  bottom: 2px;
-  height: 5px;
-  border: 1.5px solid #9aa0a6;
-  border-top: none;
-  border-radius: 2px;
-}
-
-.fixed-icon.list::before {
-  content: "";
-  position: absolute;
-  left: 2px;
-  right: 2px;
-  top: 3px;
-  height: 2px;
-  background: #9aa0a6;
-  box-shadow: 0 4px 0 #9aa0a6, 0 8px 0 #9aa0a6;
-}
-
 .sidebar-scroll {
   flex: 1;
   min-height: 0;
@@ -235,36 +205,62 @@
   padding: 4px 8px 12px;
 }
 
-/* Sidebar 内容 */
-.nav-list {
+/* 文档树 */
+.doc-tree {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
-.nav-item {
-  display: block;
-  padding: 8px 10px;
-  margin-bottom: 6px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #262626;
+.doc-node {
+  width: 100%;
+}
+
+.doc-node-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
   cursor: pointer;
-  user-select: none;
-  text-decoration: none;
+  font-size: 13px;
+  color: #262626;
+  text-align: left;
 }
 
-.nav-item:hover {
+.doc-node-btn:hover {
   background: #f5f5f5;
 }
 
-.nav-item.active {
+.doc-node-btn.active {
   background: #e8f2ff;
   color: #0f172a;
   font-weight: 600;
 }
 
-.nav-label {
+.doc-node-arrow {
+  display: inline-block;
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+.doc-node-dot {
+  display: inline-block;
+  width: 6px;
+  text-align: center;
+  font-size: 10px;
+  color: #d1d5db;
+}
+
+.doc-node-title {
   white-space: nowrap;
+}
+
+.doc-node-children {
+  margin-top: 2px;
 }
 
 /* ===== Resizer ===== */

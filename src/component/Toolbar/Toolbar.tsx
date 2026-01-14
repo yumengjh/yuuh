@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Dropdown, Tooltip, message, Input, Modal, Space } from "antd";
-import Quill from "quill";
+import type { Editor } from "@tiptap/react";
 import { useDocumentEngineStore } from "../../editor/useDocumentEngineStore";
 import "./style.css";
 
@@ -12,12 +12,32 @@ type ToolbarItem = {
   type?: "dropdown";
 };
 
-const titleLevelItems = ["正文", "标题 1", "标题 2", "标题 3", "标题 4", "标题 5", "标题 6"].map((level, i) => ({
+const titleLevelItems = [
+  "正文",
+  "标题 1",
+  "标题 2",
+  "标题 3",
+  "标题 4",
+  "标题 5",
+  "标题 6",
+].map((level, i) => ({
   key: `${i}`,
   label: level,
 }));
 
-const fontSizeItems = ["13px", "14px", "15px", "16px", "19px", "22px", "24px", "29px", "32px", "40px", "48px"].map((size) => ({
+const fontSizeItems = [
+  "13px",
+  "14px",
+  "15px",
+  "16px",
+  "19px",
+  "22px",
+  "24px",
+  "29px",
+  "32px",
+  "40px",
+  "48px",
+].map((size) => ({
   key: size,
   label: size,
 }));
@@ -70,146 +90,81 @@ export default function Toolbar() {
   const { editor } = useDocumentEngineStore();
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [linkValue, setLinkValue] = useState("");
-  const editorReady = Boolean(editor);
+  const tiptap = editor as Editor | null;
+  const editorReady = Boolean(tiptap);
+  const [, forceUpdate] = useState(0);
 
-  const ensureSelection = useMemo(() => {
-    return () => {
-      if (!editor) return null;
-      const range = editor.getSelection(true);
-      if (!range) {
-        const len = editor.getLength();
-        editor.setSelection(len, 0);
-        return { index: len, length: 0 };
-      }
-      return range;
+  // 订阅编辑器事务与选区变化，保证激活态可以立即刷新
+  useEffect(() => {
+    if (!tiptap) return;
+
+    const rerender = () => {
+      forceUpdate((v) => v + 1);
     };
-  }, [editor]);
 
-  const toggleInline = (format: string) => {
-    if (!editor) return;
-    const range = ensureSelection();
-    if (!range) return;
-    const current = editor.getFormat(range);
-    const next = !current[format];
-    editor.format(format, next, Quill.sources.USER);
-  };
+    tiptap.on("transaction", rerender);
+    tiptap.on("selectionUpdate", rerender);
 
-  const setHeader = (level: number | false) => {
-    if (!editor) return;
-    const range = ensureSelection();
-    if (!range) return;
-    editor.format("header", level || false, Quill.sources.USER);
-  };
-
-  const setSize = (size: string) => {
-    if (!editor) return;
-    const range = ensureSelection();
-    if (!range) return;
-    editor.format("size", size, Quill.sources.USER);
-  };
-
-  const toggleList = (type: "ordered" | "bullet" | "checked") => {
-    if (!editor) return;
-    const range = ensureSelection();
-    if (!range) return;
-    const current = editor.getFormat(range);
-    const value = type === "checked" ? "checked" : type;
-    const next = current.list === value ? false : value;
-    editor.format("list", next, Quill.sources.USER);
-  };
-
-  const toggleBlock = (format: "blockquote" | "code-block") => {
-    if (!editor) return;
-    const range = ensureSelection();
-    if (!range) return;
-    const current = editor.getFormat(range);
-    const next = !current[format];
-    editor.format(format, next, Quill.sources.USER);
-  };
-
-  const applyAlign = (value: "" | "center" | "justify") => {
-    if (!editor) return;
-    const range = ensureSelection();
-    if (!range) return;
-    const current = editor.getFormat(range);
-    const next = current.align === value ? false : value;
-    editor.format("align", next, Quill.sources.USER);
-  };
-
-  const clearFormat = () => {
-    if (!editor) return;
-    const range = ensureSelection();
-    if (!range) return;
-    editor.removeFormat(range.index, range.length || 0, Quill.sources.USER);
-  };
+    return () => {
+      tiptap.off("transaction", rerender);
+      tiptap.off("selectionUpdate", rerender);
+    };
+  }, [tiptap]);
 
   const openLinkModal = () => {
-    if (!editor) return;
-    const range = ensureSelection();
-    if (!range) return;
-    const current = editor.getFormat(range);
-    setLinkValue(current.link ?? "");
-    setLinkModalOpen(true);
+    message.info("链接功能稍后补充，当前为占位按钮");
   };
 
   const applyLink = () => {
-    if (!editor) return;
-    const range = ensureSelection();
-    if (!range) return;
-    if (!linkValue) {
-      editor.format("link", false, Quill.sources.USER);
-      setLinkModalOpen(false);
-      return;
-    }
-    editor.format("link", linkValue, Quill.sources.USER);
-    setLinkModalOpen(false);
-    message.success("链接已应用");
+    message.info("链接插入暂未实现");
   };
 
   const handleClick = (id: string) => () => {
-    if (!editor) return;
+    if (!tiptap) return;
     switch (id) {
       case "undo":
-        editor.history.undo();
+        tiptap.chain().focus().undo().run();
         break;
       case "redo":
-        editor.history.redo();
+        tiptap.chain().focus().redo().run();
         break;
       case "clearFormat":
-        clearFormat();
+        tiptap.chain().focus().unsetAllMarks().clearNodes().run();
         break;
       case "cursor":
-        editor.focus();
+        tiptap.chain().focus().run();
         break;
       case "bold":
+        tiptap.chain().focus().toggleBold().run();
+        break;
       case "italic":
+        tiptap.chain().focus().toggleItalic().run();
+        break;
       case "strike":
+        tiptap.chain().focus().toggleStrike().run();
+        break;
       case "underline":
-        toggleInline(id);
+        message.info("下划线暂未实现");
         break;
       case "align-left":
-        applyAlign("");
-        break;
       case "align-center":
-        applyAlign("center");
-        break;
       case "align-justify":
-        applyAlign("justify");
+        message.info("对齐方式暂未实现");
         break;
       case "bullet-list":
-        toggleList("bullet");
+        tiptap.chain().focus().toggleBulletList().run();
         break;
       case "ordered-list":
-        toggleList("ordered");
+        tiptap.chain().focus().toggleOrderedList().run();
         break;
       case "check-list":
-        toggleList("checked");
+        message.info("待办列表暂未实现");
         break;
       case "blockquote":
-        toggleBlock("blockquote");
+        tiptap.chain().focus().toggleBlockquote().run();
         break;
       case "code-block":
-        toggleBlock("code-block");
+        tiptap.chain().focus().toggleCodeBlock().run();
         break;
       case "link":
         openLinkModal();
@@ -220,16 +175,52 @@ export default function Toolbar() {
   };
 
   const dropdownHandlers: Record<string, (key: string) => void> = {
-    "text-mode": (key: string) => setHeader(Number(key)),
-    "font-size": (key: string) => setSize(key),
+    "text-mode": (key: string) => {
+      if (!tiptap) return;
+      const level = Number(key);
+      if (level === 0) {
+        tiptap.chain().focus().setParagraph().run();
+      } else if (level >= 1 && level <= 6) {
+        tiptap
+          .chain()
+          .focus()
+          .toggleHeading({ level: level as 1 | 2 | 3 | 4 | 5 | 6 })
+          .run();
+      }
+    },
+    "font-size": () => {
+      message.info("字号调整暂未实现");
+    },
   };
 
   const handleDropdownClick = (id: string) => {
-    if (!editor) return;
+    if (!tiptap) return;
     return ({ key }: { key: string }) => {
       const handler = dropdownHandlers[id];
       if (handler) handler(key);
     };
+  };
+
+  const isActive = (id: string): boolean => {
+    if (!tiptap) return false;
+    switch (id) {
+      case "bold":
+        return tiptap.isActive("bold");
+      case "italic":
+        return tiptap.isActive("italic");
+      case "strike":
+        return tiptap.isActive("strike");
+      case "bullet-list":
+        return tiptap.isActive("bulletList");
+      case "ordered-list":
+        return tiptap.isActive("orderedList");
+      case "blockquote":
+        return tiptap.isActive("blockquote");
+      case "code-block":
+        return tiptap.isActive("codeBlock");
+      default:
+        return false;
+    }
   };
 
   return (
@@ -240,16 +231,23 @@ export default function Toolbar() {
             <button
               key={item.id}
               type="button"
-              className={`toolbar-button ${item.type === "dropdown" ? "dropdown-button" : ""}`}
+              className={`toolbar-button ${
+                item.type === "dropdown" ? "dropdown-button" : ""
+              } ${!item.type && isActive(item.id) ? "active" : ""}`}
               disabled={!editorReady}
               aria-label={item.label}
-              onClick={item.type === "dropdown" ? undefined : handleClick(item.id)}
+              onClick={
+                item.type === "dropdown" ? undefined : handleClick(item.id)
+              }
             >
               <Tooltip placement="bottom" title={item.label}>
                 {item.type === "dropdown" ? (
                   <Dropdown
                     menu={{
-                      items: item.id === "text-mode" ? titleLevelItems : fontSizeItems,
+                      items:
+                        item.id === "text-mode"
+                          ? titleLevelItems
+                          : fontSizeItems,
                       onClick: handleDropdownClick(item.id),
                     }}
                     trigger={["click"]}
@@ -260,8 +258,27 @@ export default function Toolbar() {
                 ) : (
                   <span className="toolbar-content">{item.content}</span>
                 )}
+              
+              {item.type === "dropdown" ? (
+                <span className="caret">
+                  <svg
+                    viewBox="0 0 1024 1024"
+                    version="1.1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    p-id="5562"
+                    id="mx_n_1768397798864"
+                    width="10"
+                    height="10"
+                  >
+                    <path
+                      d="M946.986 372.374L558.08 797.651a61.202 61.202 0 0 1-45.972 20.801 61.202 61.202 0 0 1-45.976-20.801L77.226 372.374c-18.985-20.052-24.852-49.279-15.04-75.093s33.493-43.84 61.014-46.292h777.494c27.627 2.347 51.412 20.265 61.226 46.187 9.92 25.92 4.054 55.038-14.934 75.198z"
+                      p-id="5563"
+                      fill="#1f1f1f"
+                    ></path>
+                  </svg>
+                </span>
+              ) : null}
               </Tooltip>
-              {item.type === "dropdown" ? <span className="caret">v</span> : null}
             </button>
           ))}
         </div>
@@ -276,7 +293,12 @@ export default function Toolbar() {
         cancelText="取消"
       >
         <Space direction="vertical" style={{ width: "100%" }}>
-          <Input value={linkValue} onChange={(e) => setLinkValue(e.target.value)} placeholder="https://example.com" allowClear />
+          <Input
+            value={linkValue}
+            onChange={(e) => setLinkValue(e.target.value)}
+            placeholder="https://example.com"
+            allowClear
+          />
         </Space>
       </Modal>
     </div>
@@ -350,7 +372,11 @@ function ClearFormatIcon({ className }: IconProps) {
 
 function CursorIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path d="m6 4 6 16 2.2-5.8L20 14z" />
     </svg>
   );
@@ -421,7 +447,15 @@ function StrikeIcon({ className }: IconProps) {
 
 function UnderlineIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="17254" width="16" height="16">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 1024 1024"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      p-id="17254"
+      width="16"
+      height="16"
+    >
       <path
         d="M156.09136 918.752731a50.844091 50.844091 0 0 1 0-101.688183h711.81728a50.844091 50.844091 0 0 1 0 101.688183z m50.844092-762.661371a50.844091 50.844091 0 0 1 101.688183 0v305.064549a203.376365 203.376365 0 1 0 406.75273 0v-305.064549a50.844091 50.844091 0 1 1 101.688183 0v305.064549a305.064548 305.064548 0 1 1-610.129096 0z"
         fill="#2c2c2c"
@@ -433,7 +467,11 @@ function UnderlineIcon({ className }: IconProps) {
 
 function AlignLeftIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path d="M4 6h16M4 10h10M4 14h16M4 18h10" />
     </svg>
   );
@@ -441,7 +479,11 @@ function AlignLeftIcon({ className }: IconProps) {
 
 function AlignCenterIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path d="M4 6h16M7 10h10M4 14h16M7 18h10" />
     </svg>
   );
@@ -449,7 +491,11 @@ function AlignCenterIcon({ className }: IconProps) {
 
 function AlignJustifyIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
     </svg>
   );
@@ -457,7 +503,11 @@ function AlignJustifyIcon({ className }: IconProps) {
 
 function BulletListIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <circle cx="6" cy="7" r="1.4" fill="currentColor" />
       <circle cx="6" cy="12" r="1.4" fill="currentColor" />
       <circle cx="6" cy="17" r="1.4" fill="currentColor" />
@@ -468,7 +518,11 @@ function BulletListIcon({ className }: IconProps) {
 
 function NumberListIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path d="M5 7h1.8M5 12h1.8M5 17h1.8" />
       <path d="M10 7h10M10 12h10M10 17h10" />
     </svg>
@@ -477,7 +531,11 @@ function NumberListIcon({ className }: IconProps) {
 
 function CheckListIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path d="M4 6.5 6 9l3-3" />
       <path d="M4 12.5 6 15l3-3" />
       <path d="M4 18.5 6 21l3-3" />
@@ -488,7 +546,11 @@ function CheckListIcon({ className }: IconProps) {
 
 function LinkIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path d="M9 15 7 17a4 4 0 1 1 0-6l2-2" />
       <path d="M15 9 17 7a4 4 0 1 1 0 6l-2 2" />
       <path d="M10.5 13.5 13.5 10.5" />
@@ -498,7 +560,11 @@ function LinkIcon({ className }: IconProps) {
 
 function QuoteIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path d="M7 9.5C7 8 8 7 9.5 7S12 8 12 9.5 11 12 9.5 12H8l-1 4" />
       <path d="M14 9.5C14 8 15 7 16.5 7S19 8 19 9.5 18 12 16.5 12H15l-1 4" />
     </svg>
@@ -507,7 +573,11 @@ function QuoteIcon({ className }: IconProps) {
 
 function CodeIcon({ className }: IconProps) {
   return (
-    <svg className={`toolbar-icon ${className ?? ""}`} viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      className={`toolbar-icon ${className ?? ""}`}
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
       <path d="M9 18 3 12l6-6" />
       <path d="M15 6 21 12l-6 6" />
     </svg>

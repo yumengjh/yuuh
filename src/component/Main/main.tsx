@@ -1,10 +1,6 @@
 import "./style.css";
-import MarkdownEditorDemo from "../../editor/MarkdownEditorDemo";
+import TiptapNotionEditor from "../../editor/TiptapNotionEditor";
 
 export default function List() {
-  return (
-    <>
-      <MarkdownEditorDemo />
-    </>
-  );
+  return <TiptapNotionEditor />;
 }

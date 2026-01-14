@@ -26,7 +26,7 @@ function App() {
             </div>
             <main className="dashboard-content">
               <Suspense
-                fallback={<div className="page-loading">页面加载�?..</div>}
+                fallback={<div className="page-loading">页面加载?..</div>}
               >
                 <Routes>
                   {appRoutes.map((route) => (
