@@ -2,10 +2,11 @@ import { useEffect, useRef } from "react";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 import { useDocumentEngineStore } from "./useDocumentEngineStore";
+import { useDocumentContext } from "../context/documentContext";
 
 export default function MarkdownEditorDemo() {
+  const { currentDocument } = useDocumentContext();
   const {
-    engine,
     docId,
     blockId,
     markdown,
@@ -24,8 +25,9 @@ export default function MarkdownEditorDemo() {
 
   // Initialize document and seed a block
   useEffect(() => {
-    init();
-  }, [init]);
+    if (!currentDocument) return;
+    init(currentDocument.docId, currentDocument.engine);
+  }, [init, currentDocument]);
 
   // Create Quill instance once
   useEffect(() => {
@@ -69,9 +71,10 @@ export default function MarkdownEditorDemo() {
 
   // Sync content to engine with debounce
   useEffect(() => {
-    if (!initialized) return;
+    if (!initialized || !currentDocument || !docId) return;
+    const engine = currentDocument.engine;
     const ensure = async () => {
-      const id = blockId ?? (await ensureBlock());
+      const id = blockId ?? (await ensureBlock(engine));
       if (!id) return;
       if (syncTimer.current) window.clearTimeout(syncTimer.current);
       syncTimer.current = window.setTimeout(async () => {
@@ -84,14 +87,14 @@ export default function MarkdownEditorDemo() {
             body: { richText: { format: "html", source: markdown } },
           },
         });
-        await refresh();
+        await refresh(engine);
       }, 1000);
     };
     ensure();
     return () => {
       if (syncTimer.current) window.clearTimeout(syncTimer.current);
     };
-  }, [markdown, blockId, docId, engine, ensureBlock, refresh, initialized]);
+  }, [markdown, blockId, docId, currentDocument, ensureBlock, refresh, initialized]);
 
   return (
     <div
