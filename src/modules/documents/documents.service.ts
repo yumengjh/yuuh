@@ -60,6 +60,10 @@ export class DocumentsService {
       if (!parentDoc) {
         throw new NotFoundException('父文档不存在');
       }
+      // 不能使用已删除的文档作为父文档
+      if (parentDoc.status === 'deleted') {
+        throw new NotFoundException('父文档不存在');
+      }
       if (parentDoc.workspaceId !== createDocumentDto.workspaceId) {
         throw new BadRequestException('父文档必须属于同一工作空间');
       } 
@@ -260,6 +264,11 @@ export class DocumentsService {
       throw new NotFoundException('文档不存在');
     }
 
+    // 已删除的文档不应该返回
+    if (document.status === 'deleted') {
+      throw new NotFoundException('文档不存在');
+    }
+
     // 检查权限
     await this.checkDocumentAccess(document, userId);
 
@@ -308,6 +317,11 @@ export class DocumentsService {
     });
 
     if (!document) {
+      throw new NotFoundException('文档不存在');
+    }
+
+    // 已删除的文档不能更新
+    if (document.status === 'deleted') {
       throw new NotFoundException('文档不存在');
     }
 
@@ -362,6 +376,11 @@ export class DocumentsService {
       throw new NotFoundException('文档不存在');
     }
 
+    // 已删除的文档不能发布
+    if (document.status === 'deleted') {
+      throw new NotFoundException('文档不存在');
+    }
+
     // 检查编辑权限
     await this.checkDocumentEditPermission(document, userId);
 
@@ -391,6 +410,11 @@ export class DocumentsService {
       throw new NotFoundException('文档不存在');
     }
 
+    // 已删除的文档不能移动
+    if (document.status === 'deleted') {
+      throw new NotFoundException('文档不存在');
+    }
+
     // 检查编辑权限
     await this.checkDocumentEditPermission(document, userId);
 
@@ -405,6 +429,10 @@ export class DocumentsService {
           where: { docId: moveDocumentDto.parentId },
         });
         if (!parentDoc) {
+          throw new NotFoundException('父文档不存在');
+        }
+        // 不能使用已删除的文档作为父文档
+        if (parentDoc.status === 'deleted') {
           throw new NotFoundException('父文档不存在');
         }
         if (parentDoc.workspaceId !== document.workspaceId) {
@@ -500,10 +528,11 @@ export class DocumentsService {
 
       const parent = await this.documentRepository.findOne({
         where: { docId: currentParentId },
-        select: ['parentId'],
+        select: ['parentId', 'status'],
       });
 
-      if (!parent || !parent.parentId) {
+      // 如果父文档不存在或已删除，停止检查
+      if (!parent || parent.status === 'deleted' || !parent.parentId) {
         break;
       }
       currentParentId = parent.parentId;
