@@ -348,26 +348,49 @@ export class WorkspacesService {
       throw new NotFoundException('工作空间不存在');
     }
 
-    const memberList = members.map((member) => ({
-      userId: member.userId,
-      user: {
-        userId: member.user.userId,
-        username: member.user.username,
-        email: member.user.email,
-        displayName: member.user.displayName,
-        avatar: member.user.avatar,
-      },
-      role: member.role,
-      joinedAt: member.joinedAt,
-      invitedBy: member.invitedBy || null,
-    }));
+    // 处理成员列表，确保 user 关系已加载
+    const memberList = await Promise.all(
+      members.map(async (member) => {
+        // 如果 user 关系未加载，尝试单独查询
+        let user = member.user;
+        if (!user) {
+          user = await this.userRepository.findOne({
+            where: { userId: member.userId },
+          });
+        }
+
+        // 如果用户不存在，跳过该成员（可能是数据不一致）
+        if (!user) {
+          return null;
+        }
+
+        return {
+          userId: member.userId,
+          user: {
+            userId: user.userId,
+            username: user.username,
+            email: user.email,
+            displayName: user.displayName,
+            avatar: user.avatar,
+          },
+          role: member.role,
+          joinedAt: member.joinedAt,
+          invitedBy: member.invitedBy || null,
+        };
+      }),
+    );
+
+    // 过滤掉 null 值（用户不存在的成员）
+    const validMemberList = memberList.filter(
+      (member): member is NonNullable<typeof member> => member !== null,
+    );
 
     // 确保 owner 在列表中
-    const ownerInList = memberList.find(
+    const ownerInList = validMemberList.find(
       (m) => m.userId === workspace.ownerId,
     );
     if (!ownerInList && workspace.owner) {
-      memberList.unshift({
+      validMemberList.unshift({
         userId: workspace.owner.userId,
         user: {
           userId: workspace.owner.userId,
@@ -382,7 +405,7 @@ export class WorkspacesService {
       });
     }
 
-    return memberList;
+    return validMemberList;
   }
 
   /**
