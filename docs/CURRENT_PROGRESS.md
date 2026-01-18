@@ -5,7 +5,7 @@
 ## 📊 总体完成度
 
 ```
-已完成: ██████████████████░░ 85%
+已完成: ███████████████████░ 90%
 ```
 
 - ✅ 基础架构：100%
@@ -19,7 +19,8 @@
 - ✅ 标签模块：100%
 - ✅ 收藏模块：100%
 - ✅ 评论模块：100%
-- ❌ 业务模块：90%（工作空间、文档、块、版本控制、资产、标签、收藏、评论已完成）
+- ✅ 搜索模块：100%
+- ❌ 业务模块：95%（工作空间、文档、块、版本控制、资产、标签、收藏、评论、搜索已完成）
 
 ---
 
@@ -141,6 +142,7 @@
 - ✅ 标签模块集成
 - ✅ 收藏模块集成
 - ✅ 评论模块集成
+- ✅ 搜索模块集成
 
 ---
 
@@ -356,15 +358,26 @@
 
 **相关文件：** `comments.module.ts`、`comments.service.ts`、`comments.controller.ts`、`dto/create-comment.dto.ts`、`dto/update-comment.dto.ts`、`dto/query-comments.dto.ts`
 
+### 13. 搜索模块 (search) ✅
+
+**路径：** `src/modules/search/`
+
+**已实现的接口：**
+- ✅ `GET /api/v1/search` - 全局搜索（query、workspaceId?、type?=doc|block|all、page、pageSize）
+- ✅ `POST /api/v1/search/advanced` - 高级搜索（标签、时间范围、createdBy、sortBy、sortOrder）
+
+**功能：**
+- 文档标题：searchVector @@ plainto_tsquery 或 title ILIKE
+- 块内容：BlockVersion.searchVector / plainText，仅最新版本（b.latestVer = bv.ver），权限过滤
+- 高级：tags &&、updatedAt 范围、createdBy、排序（rank/updatedAt/createdAt）
+
+**相关文件：** `search.module.ts`、`search.service.ts`、`search.controller.ts`、`dto/search-query.dto.ts`、`dto/advanced-search.dto.ts`
+
 ### 6. 其他功能模块
 
 **活动日志模块 (activities)**
 - ❌ 记录活动日志
 - ❌ 获取活动日志列表
-
-**搜索模块 (search)**
-- ❌ 全文搜索（PostgreSQL tsvector）
-- ❌ 高级搜索
 
 ---
 
@@ -392,7 +405,8 @@ app/
 │   │   ├── security/         ✅ 安全模块
 │   │   ├── tags/            ✅ 标签模块
 │   │   ├── favorites/       ✅ 收藏模块
-│   │   └── comments/        ✅ 评论模块
+│   │   ├── comments/        ✅ 评论模块
+│   │   └── search/          ✅ 搜索模块
 │   ├── app.module.ts        ✅ 主模块
 │   └── main.ts              ✅ 应用入口
 ├── docs/
@@ -444,7 +458,7 @@ app/
 6. ✅ **标签模块** - 文档分类（已完成）
 7. ✅ **收藏模块** - 用户功能（已完成）
 8. ✅ **评论模块** - 协作功能（已完成）
-9. **搜索模块** - 全文搜索
+9. ✅ **搜索模块** - 全文搜索（已完成）
 
 ### 优先级 P3（优化）
 10. **活动日志模块** - 审计功能
@@ -482,6 +496,7 @@ app/
 - [x] 2026-01-17 - 完成版本控制模块（P1）
 - [x] 2026-01-17 - 完成资产模块（P1）
 - [x] 2026-01-17 - 完成标签、收藏、评论模块（P2）
+- [x] 2026-01-17 - 完成搜索模块（P2）
 - [ ] 待定 - 完成核心功能（P0）
 - [ ] 待定 - 完成增强功能（P1-P2）
 - [ ] 待定 - 项目上线准备
