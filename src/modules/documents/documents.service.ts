@@ -10,12 +10,15 @@ import { Repository, DataSource } from 'typeorm';
 import { Document } from '../../entities/document.entity';
 import { Block } from '../../entities/block.entity';
 import { BlockVersion } from '../../entities/block-version.entity';
+import { DocRevision } from '../../entities/doc-revision.entity';
+import { DocSnapshot } from '../../entities/doc-snapshot.entity';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { generateDocId, generateBlockId, generateVersionId } from '../../common/utils/id-generator.util';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { MoveDocumentDto } from './dto/move-document.dto';
 import { QueryDocumentsDto } from './dto/query-documents.dto';
+import { QueryRevisionsDto } from './dto/query-revisions.dto';
 import { SearchQueryDto } from './dto/search-query.dto';
 
 @Injectable()
@@ -27,6 +30,10 @@ export class DocumentsService {
     private blockRepository: Repository<Block>,
     @InjectRepository(BlockVersion)
     private blockVersionRepository: Repository<BlockVersion>,
+    @InjectRepository(DocRevision)
+    private docRevisionRepository: Repository<DocRevision>,
+    @InjectRepository(DocSnapshot)
+    private docSnapshotRepository: Repository<DocSnapshot>,
     @InjectDataSource()
     private dataSource: DataSource,
     private workspacesService: WorkspacesService,
@@ -117,6 +124,23 @@ export class DocumentsService {
       });
 
       await manager.save(BlockVersion, rootBlockVersion);
+
+      // 创建初始修订记录 (head=1)
+      const docRevisionRepo = manager.getRepository(DocRevision);
+      const initialRevision = docRevisionRepo.create({
+        revisionId: `${docId}@1`,
+        docId,
+        docVer: 1,
+        createdAt: now,
+        createdBy: userId,
+        message: 'Initial version',
+        branch: 'draft',
+        patches: [],
+        rootBlockId,
+        source: 'api',
+        opSummary: {},
+      });
+      await docRevisionRepo.save(initialRevision);
 
       // 在事务内查询完整文档信息
       const savedDocumentWithDetails = await manager.findOne(Document, {
@@ -562,6 +586,237 @@ export class DocumentsService {
       page,
       pageSize,
     };
+  }
+
+  /**
+   * 获取文档修订历史
+   */
+  async getRevisions(docId: string, queryDto: QueryRevisionsDto, userId: string) {
+    const document = await this.findOne(docId, userId);
+    await this.checkDocumentEditPermission(document, userId);
+
+    const { page = 1, pageSize = 20 } = queryDto;
+    const skip = (page - 1) * pageSize;
+
+    const [items, total] = await this.docRevisionRepository.findAndCount({
+      where: { docId },
+      order: { docVer: 'DESC' },
+      skip,
+      take: pageSize,
+    });
+
+    return { items, total, page, pageSize };
+  }
+
+  /**
+   * 版本对比：返回两个版本之间的内容差异
+   */
+  async getDiff(docId: string, fromVer: number, toVer: number, userId: string) {
+    const document = await this.findOne(docId, userId);
+    await this.checkDocumentEditPermission(document, userId);
+
+    if (fromVer > toVer) {
+      throw new BadRequestException('fromVer 不能大于 toVer');
+    }
+    if (fromVer > document.head || toVer > document.head) {
+      throw new BadRequestException('版本号不能超过当前文档 head');
+    }
+
+    const [fromMap, toMap] = await Promise.all([
+      this.getBlockVersionMapForVersion(docId, fromVer),
+      this.getBlockVersionMapForVersion(docId, toVer),
+    ]);
+
+    const [fromTree, toTree] = await Promise.all([
+      this.buildContentTreeFromVersionMap(docId, document.rootBlockId, fromMap),
+      this.buildContentTreeFromVersionMap(docId, document.rootBlockId, toMap),
+    ]);
+
+    return {
+      docId,
+      fromVer,
+      toVer,
+      fromContent: fromTree,
+      toContent: toTree,
+    };
+  }
+
+  /**
+   * 回滚文档到指定版本
+   */
+  async revert(docId: string, version: number, userId: string) {
+    const document = await this.findOne(docId, userId);
+    await this.checkDocumentEditPermission(document, userId);
+
+    if (version > document.head) {
+      throw new BadRequestException('版本号不能超过当前文档 head');
+    }
+    if (version === document.head) {
+      throw new BadRequestException('当前已是该版本，无需回滚');
+    }
+
+    const blockVersionMap = await this.getBlockVersionMapForVersion(docId, version);
+    const revision = await this.docRevisionRepository.findOne({
+      where: { docId, docVer: version },
+    });
+    if (!revision) {
+      throw new NotFoundException('修订版本不存在');
+    }
+
+    return await this.dataSource.transaction(async (manager) => {
+      const docRepo = manager.getRepository(Document);
+      const blockRepo = manager.getRepository(Block);
+      const revRepo = manager.getRepository(DocRevision);
+
+      const doc = await docRepo.findOne({ where: { docId } });
+      if (!doc) throw new NotFoundException('文档不存在');
+
+      const allBlocks = await blockRepo.find({ where: { docId } });
+      const targetBlockIds = new Set(Object.keys(blockVersionMap));
+
+      for (const block of allBlocks) {
+        if (targetBlockIds.has(block.blockId)) {
+          block.latestVer = blockVersionMap[block.blockId];
+          block.isDeleted = false;
+          (block as any).deletedAt = null;
+          (block as any).deletedBy = null;
+        } else {
+          block.isDeleted = true;
+          block.deletedAt = Date.now();
+          block.deletedBy = userId;
+        }
+        await blockRepo.save(block);
+      }
+
+      doc.head += 1;
+      doc.updatedBy = userId;
+      await docRepo.save(doc);
+
+      const newRevision = revRepo.create({
+        revisionId: `${docId}@${doc.head}`,
+        docId,
+        docVer: doc.head,
+        createdAt: Date.now(),
+        createdBy: userId,
+        message: `Revert to version ${version}`,
+        branch: 'draft',
+        patches: [],
+        rootBlockId: doc.rootBlockId,
+        source: 'api',
+        opSummary: { revertedFrom: version },
+      });
+      await revRepo.save(newRevision);
+
+      return this.findOne(docId, userId);
+    });
+  }
+
+  /**
+   * 创建文档快照（保存当前版本的完整块版本映射）
+   */
+  async createSnapshot(docId: string, userId: string) {
+    const document = await this.findOne(docId, userId);
+    await this.checkDocumentEditPermission(document, userId);
+
+    const existing = await this.docSnapshotRepository.findOne({
+      where: { docId, docVer: document.head },
+    });
+    if (existing) {
+      return existing;
+    }
+
+    const blocks = await this.blockRepository.find({
+      where: { docId, isDeleted: false },
+      select: ['blockId', 'latestVer'],
+    });
+    const blockVersionMap: Record<string, number> = {};
+    for (const b of blocks) {
+      blockVersionMap[b.blockId] = b.latestVer;
+    }
+
+    const snapshot = this.docSnapshotRepository.create({
+      snapshotId: `${docId}@snap@${document.head}`,
+      docId,
+      docVer: document.head,
+      createdAt: Date.now(),
+      rootBlockId: document.rootBlockId,
+      blockVersionMap,
+    });
+    return await this.docSnapshotRepository.save(snapshot);
+  }
+
+  /**
+   * 根据 DocRevision 的 createdAt 计算某文档版本对应的块版本映射
+   */
+  private async getBlockVersionMapForVersion(
+    docId: string,
+    docVer: number,
+  ): Promise<Record<string, number>> {
+    const revision = await this.docRevisionRepository.findOne({
+      where: { docId, docVer },
+    });
+    if (!revision) {
+      throw new NotFoundException(`修订版本 ${docVer} 不存在`);
+    }
+
+    const rows = await this.blockVersionRepository
+      .createQueryBuilder('bv')
+      .select('bv.blockId', 'blockId')
+      .addSelect('MAX(bv.ver)', 'maxVer')
+      .where('bv.docId = :docId', { docId })
+      .andWhere('bv.createdAt <= :createdAt', { createdAt: revision.createdAt })
+      .groupBy('bv.blockId')
+      .getRawMany();
+
+    const map: Record<string, number> = {};
+    for (const r of rows) {
+      map[r.blockId] = typeof r.maxVer === 'string' ? parseInt(r.maxVer, 10) : r.maxVer;
+    }
+    return map;
+  }
+
+  /**
+   * 根据块版本映射构建内容树
+   */
+  private async buildContentTreeFromVersionMap(
+    docId: string,
+    rootBlockId: string,
+    blockVersionMap: Record<string, number>,
+  ): Promise<any> {
+    if (!(rootBlockId in blockVersionMap)) return null;
+
+    const entries = Object.entries(blockVersionMap).map(([blockId, ver]) => ({
+      blockId,
+      ver,
+    }));
+    if (entries.length === 0) return null;
+
+    const versions = await this.blockVersionRepository.find({
+      where: entries.map((e) => ({ docId, blockId: e.blockId, ver: e.ver })),
+    });
+    const byBlock = new Map<string, typeof versions[0]>();
+    for (const v of versions) byBlock.set(v.blockId, v);
+
+    const root = byBlock.get(rootBlockId);
+    if (!root) return null;
+
+    const buildNode = (blockId: string): any => {
+      const bv = byBlock.get(blockId);
+      if (!bv) return null;
+      const children = versions
+        .filter((v) => v.parentId === blockId)
+        .sort((a, b) => (a.sortKey || '').localeCompare(b.sortKey || ''))
+        .map((v) => buildNode(v.blockId))
+        .filter(Boolean);
+      return {
+        blockId: bv.blockId,
+        type: (bv.payload as any)?.type || 'paragraph',
+        payload: bv.payload,
+        children,
+      };
+    };
+
+    return buildNode(rootBlockId);
   }
 
   /**

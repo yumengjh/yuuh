@@ -10,6 +10,7 @@ import { Repository, DataSource } from 'typeorm';
 import { Block } from '../../entities/block.entity';
 import { BlockVersion } from '../../entities/block-version.entity';
 import { Document } from '../../entities/document.entity';
+import { DocRevision } from '../../entities/doc-revision.entity';
 import { DocumentsService } from '../documents/documents.service';
 import { generateBlockId, generateVersionId } from '../../common/utils/id-generator.util';
 import { CreateBlockDto } from './dto/create-block.dto';
@@ -226,7 +227,7 @@ export class BlocksService {
   }
 
   /**
-   * 增加文档版本号
+   * 增加文档版本号，并创建文档修订记录
    */
   private async incrementDocumentHead(
     docId: string,
@@ -238,6 +239,23 @@ export class BlocksService {
       document.head += 1;
       document.updatedBy = userId;
       await manager.save(Document, document);
+
+      // 创建文档修订记录 (DocRevision)
+      const docRevisionRepo = manager.getRepository(DocRevision);
+      const revision = docRevisionRepo.create({
+        revisionId: `${docId}@${document.head}`,
+        docId,
+        docVer: document.head,
+        createdAt: Date.now(),
+        createdBy: userId,
+        message: 'Document updated',
+        branch: 'draft',
+        patches: [],
+        rootBlockId: document.rootBlockId,
+        source: 'editor',
+        opSummary: {},
+      });
+      await docRevisionRepo.save(revision);
     }
   }
 

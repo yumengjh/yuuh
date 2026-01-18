@@ -5,7 +5,7 @@
 ## 📊 总体完成度
 
 ```
-已完成: ██████████░░░░░░░░░░ 50%
+已完成: ████████████░░░░░░░░ 60%
 ```
 
 - ✅ 基础架构：100%
@@ -14,7 +14,8 @@
 - ✅ 工作空间模块：100%
 - ✅ 文档模块：100%
 - ✅ 块模块：100%
-- ❌ 业务模块：60%（工作空间、文档、块已完成）
+- ✅ 版本控制模块：100%
+- ❌ 业务模块：70%（工作空间、文档、块、版本控制已完成）
 
 ---
 
@@ -231,15 +232,31 @@
 - `dto/move-block.dto.ts` - 移动块 DTO
 - `dto/batch-block.dto.ts` - 批量操作 DTO
 
-### 4. 版本控制模块
+### 7. 版本控制模块 ✅
 
-**计划路径：** `src/modules/revisions/` 或集成到 `documents/`
+**路径：** 集成在 `src/modules/documents/`
 
-**待实现接口：**
-- ❌ `GET /api/v1/documents/:docId/revisions` - 获取修订历史
-- ❌ `GET /api/v1/documents/:docId/diff` - 版本对比
-- ❌ `POST /api/v1/documents/:docId/revert` - 版本回滚
-- ❌ `POST /api/v1/documents/:docId/snapshots` - 创建快照
+**已实现的接口：**
+- ✅ `GET /api/v1/documents/:docId/revisions` - 获取修订历史
+- ✅ `GET /api/v1/documents/:docId/diff` - 版本对比
+- ✅ `POST /api/v1/documents/:docId/revert` - 版本回滚
+- ✅ `POST /api/v1/documents/:docId/snapshots` - 创建快照
+
+**功能特性：**
+- 文档创建时自动创建初始 DocRevision (head=1)
+- 块变更时（创建/更新/删除/移动、批量）自动创建 DocRevision
+- 基于 DocRevision.createdAt 计算任意版本的块版本映射 (block_version_map)
+- 版本对比返回两个版本的内容树 (fromContent / toContent)
+- 回滚：将各块 latestVer 恢复为目标版本映射，并软删除目标版本中不存在的块
+- 快照：保存当前 head 的 blockVersionMap，已存在则幂等返回
+
+**相关文件：**
+- `documents.controller.ts` - 新增 getRevisions、getDiff、revert、createSnapshot 路由
+- `documents.service.ts` - 新增 getRevisions、getDiff、revert、createSnapshot、getBlockVersionMapForVersion、buildContentTreeFromVersionMap
+- `blocks.service.ts` - incrementDocumentHead 中创建 DocRevision
+- `dto/query-revisions.dto.ts` - 修订列表分页
+- `dto/diff-versions.dto.ts` - 版本对比查询 (fromVer, toVer)
+- `dto/revert-version.dto.ts` - 回滚 body (version)
 
 ### 5. 资产模块 (assets)
 
@@ -333,7 +350,7 @@ app/
 3. ✅ **块模块** - 文档内容的基础单元（已完成）
 
 ### 优先级 P1（重要）
-4. **版本控制模块** - 文档历史管理
+4. ✅ **版本控制模块** - 文档历史管理（已完成）
 5. **资产模块** - 文件上传和管理
 
 ### 优先级 P2（增强）
@@ -373,7 +390,7 @@ app/
 - [x] 2026-01-17 - 完成工作空间模块
 - [x] 2026-01-17 - 完成文档模块
 - [x] 2026-01-17 - 完成块模块
-- [ ] 待定 - 完成块模块
+- [x] 2026-01-17 - 完成版本控制模块（P1）
 - [ ] 待定 - 完成核心功能（P0）
 - [ ] 待定 - 完成增强功能（P1-P2）
 - [ ] 待定 - 项目上线准备
