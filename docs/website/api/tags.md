@@ -319,7 +319,3 @@ async function updateTag(tagId: string, name: string, color: string) {
 }
 ```
 
-## 相关文档
-
-- [API 总览](./overview.md) - 所有 API 接口列表
-- [文档 API](./documents.md) - 文档相关接口（标签在文档中使用）

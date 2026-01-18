@@ -16,7 +16,7 @@ npm install
 
 创建 `.env` 文件（参考 `.env.example`）：
 
-```env
+```txt
 # 应用配置
 APP_PORT=5200
 APP_API_PREFIX=api/v1

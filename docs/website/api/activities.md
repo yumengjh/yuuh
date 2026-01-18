@@ -130,7 +130,3 @@ async function getDocumentActivities(workspaceId: string) {
 }
 ```
 
-## 相关文档
-
-- [API 总览](./overview.md) - 所有 API 接口列表
-- [工作空间 API](./workspaces.md) - 工作空间相关接口

@@ -275,10 +275,3 @@ async function refreshToken() {
 - **超出限制：** 返回 `429 Too Many Requests`
 - **建议：** 合理控制请求频率，避免触发限流
 
-## 相关文档
-
-- [API 总览](./overview.md) - 所有 API 接口列表
-- [认证 API](./auth.md) - 认证相关接口
-- [工作空间 API](./workspaces.md) - 工作空间相关接口
-- [文档 API](./documents.md) - 文档相关接口
-- [块 API](./blocks.md) - 块相关接口

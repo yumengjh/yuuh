@@ -240,8 +240,3 @@ curl -X GET http://localhost:5200/api/v1/auth/me \
   -H "Authorization: Bearer <your-access-token>"
 ```
 
-## 相关文档
-
-- [API 使用指南](./usage.md) - 详细的 API 使用说明
-- [文档操作流程](/workflow/document-workflow) - 完整的操作流程示例
-- [Swagger 文档](http://localhost:5200/api/docs) - 交互式 API 文档

@@ -505,7 +505,3 @@ async function inviteMember(workspaceId: string, email: string, role: string) {
 }
 ```
 
-## 相关文档
-
-- [API 总览](./overview.md) - 所有 API 接口列表
-- [文档 API](./documents.md) - 文档相关接口

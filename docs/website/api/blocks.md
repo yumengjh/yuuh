@@ -455,8 +455,6 @@ Content-Type: application/json
 - `400 Bad Request` - 请求参数错误
 - `403 Forbidden` - 没有权限访问文档
 
-**详细文档：** 请参考 [批量块操作 API 文档](../../BATCH_BLOCKS_API.md)
-
 ## 版本控制参数说明
 
 ### createVersion 参数
@@ -545,9 +543,3 @@ async function batchUpdateBlocks(docId: string, operations: any[]) {
 }
 ```
 
-## 相关文档
-
-- [API 总览](./overview.md) - 所有 API 接口列表
-- [文档 API](./documents.md) - 文档相关接口
-- [批量块操作 API 文档](../../BATCH_BLOCKS_API.md) - 批量操作详细说明
-- [版本控制 API 文档](../../VERSION_CONTROL_API.md) - 版本控制机制说明

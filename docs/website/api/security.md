@@ -208,7 +208,3 @@ async function getAuditLogs(filters?: any) {
 }
 ```
 
-## 相关文档
-
-- [API 总览](./overview.md) - 所有 API 接口列表
-- [安全机制说明](../../SECURITY.md) - 详细的安全机制说明

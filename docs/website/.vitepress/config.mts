@@ -6,6 +6,10 @@ export default defineConfig({
   description: "基于 NestJS 构建的现代化知识库管理系统后端 API 文档",
   lang: 'zh-CN',
   base: '/',
+  ignoreDeadLinks: [
+    /^http:\/\/localhost/,
+    /^https?:\/\/localhost/
+  ],
   
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config

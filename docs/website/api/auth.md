@@ -312,7 +312,3 @@ curl -X GET http://localhost:5200/api/v1/auth/me \
   -H "Authorization: Bearer <your-access-token>"
 ```
 
-## 相关文档
-
-- [API 总览](./overview.md) - 所有 API 接口列表
-- [API 使用指南](./usage.md) - 详细的 API 使用说明

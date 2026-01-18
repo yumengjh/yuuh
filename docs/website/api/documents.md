@@ -739,8 +739,3 @@ Authorization: Bearer <your-access-token>
 - `404 Not Found` - 文档不存在
 - `403 Forbidden` - 没有权限访问
 
-## 相关文档
-
-- [API 总览](./overview.md) - 所有 API 接口列表
-- [块 API](./blocks.md) - 块相关接口
-- [版本控制 API 文档](../../VERSION_CONTROL_API.md) - 版本控制机制说明

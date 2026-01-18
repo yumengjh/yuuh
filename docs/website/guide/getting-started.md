@@ -39,8 +39,3 @@
 - PostgreSQL >= 15
 - pnpm >= 8.x（推荐）或 npm/yarn
 
-## 下一步
-
-- [安装配置](./installation.md) - 了解如何安装和配置项目
-- [环境设置](./setup.md) - 配置开发环境
-- [API 总览](../api/overview.md) - 查看完整的 API 文档

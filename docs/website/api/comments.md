@@ -303,8 +303,3 @@ async function getComments(docId: string, blockId?: string) {
 }
 ```
 
-## 相关文档
-
-- [API 总览](./overview.md) - 所有 API 接口列表
-- [文档 API](./documents.md) - 文档相关接口
-- [块 API](./blocks.md) - 块相关接口
