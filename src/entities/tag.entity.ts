@@ -42,4 +42,13 @@ export class Tag {
 
   @Column({ default: 0 })
   usageCount: number;
+
+  @Column('text', { array: true, default: [] })
+  documentIds: string[];
+
+  @Column({ default: false })
+  isDeleted: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  deletedAt: Date;
 }

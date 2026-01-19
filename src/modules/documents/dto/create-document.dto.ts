@@ -45,7 +45,10 @@ export class CreateDocumentDto {
   @IsString()
   parentId?: string;
 
-  @ApiPropertyOptional({ description: '标签列表', example: ['标签1', '标签2'] })
+  @ApiPropertyOptional({ 
+    description: '标签ID列表（tagId数组），系统会自动校验标签是否存在', 
+    example: ['tag_1234567890_abc123', 'tag_1234567890_def456'] 
+  })
   @IsOptional()
   tags?: string[];
 

@@ -12,6 +12,7 @@ import { Block } from '../../entities/block.entity';
 import { BlockVersion } from '../../entities/block-version.entity';
 import { DocRevision } from '../../entities/doc-revision.entity';
 import { DocSnapshot } from '../../entities/doc-snapshot.entity';
+import { Tag } from '../../entities/tag.entity';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { VersionControlService } from './services/version-control.service';
 import { generateDocId, generateBlockId, generateVersionId } from '../../common/utils/id-generator.util';
@@ -39,6 +40,8 @@ export class DocumentsService {
     private docRevisionRepository: Repository<DocRevision>,
     @InjectRepository(DocSnapshot)
     private docSnapshotRepository: Repository<DocSnapshot>,
+    @InjectRepository(Tag)
+    private tagRepository: Repository<Tag>,
     @InjectDataSource()
     private dataSource: DataSource,
     private workspacesService: WorkspacesService,
@@ -99,6 +102,11 @@ export class DocumentsService {
       });
 
       const savedDocument = await manager.save(Document, document);
+
+      // 校验并处理标签（需要在保存文档后，以便获取docId）
+      if (createDocumentDto.tags && createDocumentDto.tags.length > 0) {
+        await this.validateAndUpdateTags(createDocumentDto.workspaceId, createDocumentDto.tags, manager, 'add', savedDocument.docId);
+      }
 
       // 创建根块
       const rootBlock = manager.create(Block, {
@@ -343,6 +351,22 @@ export class DocumentsService {
       document.visibility = updateDocumentDto.visibility;
     }
     if (updateDocumentDto.tags !== undefined) {
+      // 处理标签变化：更新标签的 usageCount
+      const oldTags = document.tags || [];
+      const newTags = updateDocumentDto.tags || [];
+      
+      // 找出新增和删除的标签
+      const addedTags = newTags.filter(tagId => !oldTags.includes(tagId));
+      const removedTags = oldTags.filter(tagId => !newTags.includes(tagId));
+      
+      // 更新标签的 usageCount 和 documentIds
+      if (addedTags.length > 0) {
+        await this.validateAndUpdateTags(document.workspaceId, addedTags, null, 'add', document.docId);
+      }
+      if (removedTags.length > 0) {
+        await this.validateAndUpdateTags(document.workspaceId, removedTags, null, 'remove', document.docId);
+      }
+      
       document.tags = updateDocumentDto.tags;
     }
     if (updateDocumentDto.category !== undefined) {
@@ -483,6 +507,11 @@ export class DocumentsService {
 
     // 检查删除权限
     await this.checkDocumentDeletePermission(document, userId);
+
+    // 减少标签的使用统计并从 documentIds 中移除
+    if (document.tags && document.tags.length > 0) {
+      await this.validateAndUpdateTags(document.workspaceId, document.tags, null, 'remove', document.docId);
+    }
 
     // 软删除：更新状态
     document.status = 'deleted';
@@ -1112,5 +1141,63 @@ export class DocumentsService {
       hash = hash & hash; // Convert to 32bit integer
     }
     return hash.toString(36);
+  }
+
+  /**
+   * 校验标签ID并更新标签的使用统计
+   * @param workspaceId 工作空间ID
+   * @param tagIds 标签ID数组
+   * @param manager 事务管理器（可选，如果提供则在事务中执行）
+   * @param operation 'add' 增加使用次数，'remove' 减少使用次数
+   */
+  private async validateAndUpdateTags(
+    workspaceId: string,
+    tagIds: string[],
+    manager: any = null,
+    operation: 'add' | 'remove' = 'add',
+    docId?: string,
+  ): Promise<void> {
+    if (!tagIds || tagIds.length === 0) {
+      return;
+    }
+
+    const tagRepo = manager ? manager.getRepository(Tag) : this.tagRepository;
+
+    // 校验所有标签ID是否存在且属于同一工作空间（排除已删除的标签）
+    const tags = await tagRepo.find({
+      where: {
+        tagId: In(tagIds),
+        workspaceId,
+        isDeleted: false,
+      },
+    });
+
+    if (tags.length !== tagIds.length) {
+      const foundTagIds = tags.map(t => t.tagId);
+      const missingTagIds = tagIds.filter(id => !foundTagIds.includes(id));
+      throw new BadRequestException(`以下标签不存在、已删除或不属于该工作空间: ${missingTagIds.join(', ')}`);
+    }
+
+    // 更新标签的使用统计和文档ID列表
+    for (const tag of tags) {
+      if (operation === 'add') {
+        tag.usageCount = (tag.usageCount || 0) + 1;
+        // 添加文档ID到列表（如果提供了docId且不在列表中）
+        if (docId) {
+          const documentIds = tag.documentIds || [];
+          if (!documentIds.includes(docId)) {
+            tag.documentIds = [...documentIds, docId];
+          }
+        }
+      } else {
+        tag.usageCount = Math.max(0, (tag.usageCount || 0) - 1);
+        // 从文档ID列表中移除（如果提供了docId）
+        if (docId) {
+          const documentIds = tag.documentIds || [];
+          tag.documentIds = documentIds.filter(id => id !== docId);
+        }
+      }
+      await tagRepo.save(tag);
+    }
   }
 }
