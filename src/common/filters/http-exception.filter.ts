@@ -14,6 +14,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest();
+    const isProd = process.env.NODE_ENV === 'production';
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
@@ -33,23 +34,30 @@ export class HttpExceptionFilter implements ExceptionFilter {
       }
     }
 
-    // 记录错误日志
-    console.error({
+    // 记录错误日志：生产仅记录必要信息，非生产附带 stack
+    const baseLog = {
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
       status,
       code,
       message,
-      stack: exception instanceof Error ? exception.stack : undefined,
-    });
+    };
+    console.error(
+      isProd
+        ? baseLog
+        : {
+            ...baseLog,
+            stack: exception instanceof Error ? exception.stack : undefined,
+          },
+    );
 
     const errorResponse: ErrorResponse = {
       success: false,
       error: {
         code,
         message,
-        ...(process.env.NODE_ENV === 'development' && {
+        ...(!isProd && {
           stack: exception instanceof Error ? exception.stack : undefined,
         }),
       },
