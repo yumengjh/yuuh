@@ -234,6 +234,11 @@ export class WorkspacesService {
       throw new NotFoundException('工作空间不存在');
     }
 
+    // 已删除（archived）视为不存在，避免重复删除与重复记录
+    if (workspace.status === 'archived') {
+      throw new NotFoundException('工作空间已删除');
+    }
+
     // 只有 owner 可以删除
     if (workspace.ownerId !== userId) {
       throw new ForbiddenException('只有工作空间所有者可以删除工作空间');
