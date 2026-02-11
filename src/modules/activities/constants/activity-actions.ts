@@ -50,6 +50,13 @@ export const TAG_ACTIONS = {
   DELETE: 'tag.delete',
 } as const;
 
+/** 操作类型：设置 */
+export const SETTINGS_ACTIONS = {
+  USER_UPDATE: 'settings.user.update',
+  WORKSPACE_UPDATE: 'settings.workspace.update',
+  WORKSPACE_CLEAR: 'settings.workspace.clear',
+} as const;
+
 /** 实体类型 */
 export const ENTITY_TYPES = {
   DOCUMENT: 'document',
@@ -59,4 +66,5 @@ export const ENTITY_TYPES = {
   FAVORITE: 'favorite',
   COMMENT: 'comment',
   TAG: 'tag',
+  SETTINGS: 'settings',
 } as const;

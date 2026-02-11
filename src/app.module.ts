@@ -17,6 +17,7 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
 import { CommentsModule } from './modules/comments/comments.module';
 import { SearchModule } from './modules/search/search.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
+import { SettingsModule } from './modules/settings/settings.module';
 
 // 导入所有实体
 import { User } from './entities/user.entity';
@@ -35,6 +36,7 @@ import { Activity } from './entities/activity.entity';
 import { Session } from './entities/session.entity';
 import { AuditLog } from './entities/audit-log.entity';
 import { SecurityLog } from './entities/security-log.entity';
+import { SettingsProfile } from './entities/settings-profile.entity';
 
 @Module({
   imports: [
@@ -72,6 +74,7 @@ import { SecurityLog } from './entities/security-log.entity';
           Session,
           AuditLog,
           SecurityLog,
+          SettingsProfile,
         ],
         synchronize: configService.get<string>('app.env') === 'development',
         logging: configService.get<string>('app.env') === 'development',
@@ -97,6 +100,7 @@ import { SecurityLog } from './entities/security-log.entity';
     CommentsModule,
     SearchModule,
     ActivitiesModule,
+    SettingsModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [

@@ -90,3 +90,10 @@ export function generateSnapshotId(docId: string, docVer: number): string {
 export function generateLogId(): string {
   return `log_${Date.now()}_${uuidv4().split('-')[0]}`;
 }
+
+/**
+ * 生成设置配置 ID (sp_xxx)，用于 settings_profiles
+ */
+export function generateSettingsProfileId(): string {
+  return `sp_${Date.now()}_${uuidv4().split('-')[0]}`;
+}
