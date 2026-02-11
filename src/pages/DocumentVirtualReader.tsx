@@ -309,8 +309,7 @@ export default function DocumentVirtualReader({ docId }: DocumentVirtualReaderPr
     return rows;
   }, [items, layout.offsets, shikiHighlighter, themeMode, visibleRange.end, visibleRange.start]);
 
-  const showBottomStatus =
-    status === "append_loading" || hasMore || (Boolean(error) && status !== "append_loading");
+  const showBottomStatus = status === "append_loading" || hasMore || Boolean(error);
 
   useEffect(() => {
     if (!hasMore) return;
