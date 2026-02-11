@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm docs:build"
+  command = "pnpm build"
   publish = "docs/website/.vitepress/dist"
 
 [[redirects]]
