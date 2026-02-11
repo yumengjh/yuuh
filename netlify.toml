@@ -1,6 +1,6 @@
 [build]
   command = "pnpm build"
-  publish = "docs/website/.vitepress/dist"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
