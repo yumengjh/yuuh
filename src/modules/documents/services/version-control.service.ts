@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Document } from '../../../entities/document.entity';
@@ -9,7 +14,7 @@ import { DocRevision } from '../../../entities/doc-revision.entity';
  * 用于管理文档版本的延迟创建机制，确保不同文档之间的隔离
  */
 @Injectable()
-export class VersionControlService {
+export class VersionControlService implements OnModuleDestroy {
   private readonly logger = new Logger(VersionControlService.name);
 
   // 按文档隔离的待创建版本计数器
@@ -21,6 +26,7 @@ export class VersionControlService {
 
   // 清理过期数据的间隔（30分钟）
   private readonly CLEANUP_INTERVAL = 30 * 60 * 1000;
+  private cleanupTimer?: NodeJS.Timeout;
 
   constructor(
     @InjectRepository(Document)
@@ -130,7 +136,7 @@ export class VersionControlService {
    * 启动定期清理任务，清理过期的待创建版本记录
    */
   private startCleanupTask(): void {
-    setInterval(() => {
+    this.cleanupTimer = setInterval(() => {
       const now = Date.now();
       const toDelete: string[] = [];
 
@@ -146,6 +152,8 @@ export class VersionControlService {
         this.logger.warn(`清除文档 ${docId} 的过期待创建版本记录`);
       }
     }, this.CLEANUP_INTERVAL);
+
+    this.cleanupTimer.unref?.();
   }
 
   /**
@@ -157,5 +165,12 @@ export class VersionControlService {
       stats[docId] = data.count;
     }
     return stats;
+  }
+
+  onModuleDestroy(): void {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = undefined;
+    }
   }
 }

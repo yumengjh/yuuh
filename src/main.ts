@@ -5,13 +5,34 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { ConfigService } from '@nestjs/config';
+import boxen from 'boxen';
+import chalk from 'chalk';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const normalizePath = (path = '') => path.replace(/^\/+|\/+$/g, '');
+  const joinPath = (...segments: Array<string | undefined>) =>
+    segments
+      .filter((segment): segment is string => Boolean(segment))
+      .map((segment) => normalizePath(segment))
+      .filter(Boolean)
+      .join('/');
+
+  const apiPrefix = normalizePath(configService.get<string>('app.apiPrefix') || 'api/v1');
+  const swaggerEnabled = configService.get<boolean>('app.swaggerEnabled') ?? true;
+  const configuredSwaggerPath = normalizePath(
+    configService.get<string>('app.swaggerPath') || 'docs',
+  );
+  const swaggerPath = configuredSwaggerPath.startsWith(`${apiPrefix}/`)
+    ? configuredSwaggerPath.slice(apiPrefix.length + 1)
+    : configuredSwaggerPath;
+  const port = configService.get<number>('app.port') || 5200;
+  const swaggerUiPath = joinPath(apiPrefix, swaggerPath);
+  const swaggerJsonPath = joinPath(apiPrefix, `${swaggerPath}-json`);
 
   // 全局前缀
-  app.setGlobalPrefix(configService.get<string>('app.apiPrefix') || 'api/v1');
+  app.setGlobalPrefix(apiPrefix);
 
   // 跨域
   app.enableCors({
@@ -36,19 +57,46 @@ async function bootstrap() {
   // 全局拦截器
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  // Swagger 文档
-  const config = new DocumentBuilder()
-    .setTitle('知识库 API')
-    .setDescription('个人知识库系统 API 文档')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  // Swagger 文档（可通过 SWAGGER_ENABLED 控制是否启用）
+  if (swaggerEnabled) {
+    const config = new DocumentBuilder()
+      .setTitle('知识库 API')
+      .setDescription('个人知识库系统 API 文档')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup(swaggerPath, app, document, {
+      useGlobalPrefix: true,
+      jsonDocumentUrl: `${swaggerPath}-json`,
+      yamlDocumentUrl: `${swaggerPath}-yaml`,
+    });
+  }
 
-  const port = configService.get<number>('app.port') || 5200;
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger docs available at: http://localhost:${port}/api/docs`);
+
+  const startupLines = [
+    `${chalk.bold('Application')} ${chalk.green('RUNNING')}`,
+    `${chalk.bold('Base URL')} ${chalk.cyan(`http://localhost:${port}`)}`,
+    `${chalk.bold('API Prefix')} ${chalk.cyan(`/${apiPrefix}`)}`,
+  ];
+
+  if (swaggerEnabled) {
+    startupLines.push(
+      `${chalk.bold('Swagger UI')} ${chalk.cyan(`http://localhost:${port}/${swaggerUiPath}`)}`,
+      `${chalk.bold('Swagger JSON')} ${chalk.cyan(`http://localhost:${port}/${swaggerJsonPath}`)}`,
+    );
+  }
+
+  console.log(
+    boxen(startupLines.join('\n'), {
+      title: '🚀 Server Ready',
+      titleAlignment: 'center',
+      borderStyle: 'round',
+      borderColor: 'green',
+      padding: { top: 0, right: 1, bottom: 0, left: 1 },
+      margin: { top: 1, bottom: 0, left: 0, right: 0 },
+    }),
+  );
 }
 bootstrap();

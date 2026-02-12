@@ -39,7 +39,8 @@ export default defineConfig({
           text: 'API 概览',
           items: [
             { text: 'API 总览', link: '/api/overview' },
-            { text: 'API 使用指南', link: '/api/usage' }
+            { text: 'API 使用指南', link: '/api/usage' },
+            { text: 'OpenAPI 导出', link: '/api/openapi' }
           ]
         },
         {

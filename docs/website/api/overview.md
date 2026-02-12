@@ -224,6 +224,12 @@ Authorization: Bearer <your-access-token>
 
 **详细文档：** [安全 API](./security.md)
 
+### OpenAPI 导出
+
+支持导出 OpenAPI 3.x 标准文件（JSON / YAML），可用于导入 Apifox 等工具。
+
+**详细文档：** [OpenAPI 导出](./openapi.md)
+
 ## 快速开始
 
 ### 1. 用户注册

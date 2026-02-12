@@ -84,6 +84,7 @@ import { SettingsProfile } from './entities/settings-profile.entity';
           idleTimeoutMillis: configService.get<number>('database.extra.idleTimeoutMillis'),
           connectionTimeoutMillis: configService.get<number>('database.extra.connectionTimeoutMillis'),
         },
+        manualInitialization: process.env.OPENAPI_EXPORT === 'true',
       }),
       inject: [ConfigService],
     }),

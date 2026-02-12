@@ -73,7 +73,7 @@ pnpm run start:prod
 
 启动成功后：
 - API 服务：http://localhost:5200
-- Swagger 文档：http://localhost:5200/api/docs
+- Swagger 文档：http://localhost:5200/api/v1/docs
 
 访问 Swagger 文档页面，如果能看到 API 文档界面，说明安装成功！
 
