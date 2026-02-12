@@ -5,6 +5,14 @@
 - 语言约定：文档与交流均使用中文；代码内保持现有双引号与英文标识。
 - 当前无 Cursor/Copilot 额外规则文件（`.cursor/rules/`、`.cursorrules`、`.github/copilot-instructions.md` 均不存在）。
 
+## Monorepo 迁移说明（2026-02-12）
+- 仓库已改造为 `pnpm workspaces` monorepo。
+- 应用目录：
+  - `apps/web-app`：主 React 应用（原根目录应用）
+  - `apps/docs-web`：文档站 Nuxt 应用
+- 根目录命令应优先使用 workspace 脚本（如 `pnpm dev:web`、`pnpm dev:docs`、`pnpm build`、`pnpm lint`）。
+- 本文档中涉及原 `src/`、`public/`、`vite.config.ts` 等主应用路径时，默认对应 `apps/web-app/` 下同名路径。
+
 ## 环境与包管理
 - Node.js：README 建议 >= 18，依赖列表适配 18+；优先使用最新版 LTS。
 - 包管理器：使用 `pnpm`（锁文件为 `pnpm-lock.yaml`）；不要混用 npm/yarn。
@@ -15,16 +23,16 @@
 
 ## 安装与启动
 - 安装依赖：`pnpm install`。
-- 开发服务器：`pnpm dev`（Vite 默认 5173 端口）。
-- 预览产物：`pnpm preview`（基于 `dist`，端口 3000）。
-- 构建产物：`pnpm build`（先 `tsc -b` 再 `vite build`，并用 `gzipper` 生成 gzip/brotli）。
-- 发布产物位置：`dist/`，构建后生成压缩包；不要手工提交 `dist`。
-- 运行前确保环境变量 `VITE_API_BASE_URL` 设置，未设默认 `http://localhost:5200`。
+- 主应用开发：`pnpm dev:web`（等价 `pnpm dev`，Vite 默认 5173 端口）。
+- 文档站开发：`pnpm dev:docs`（Nuxt 默认配置，当前脚本端口 4300）。
+- 预览主应用：`pnpm preview:web`（基于 `apps/web-app/dist`，端口 3000）。
+- 构建：`pnpm build`（分别构建两个应用）；也可使用 `pnpm build:web` / `pnpm build:docs`。
+- 主应用运行前确保环境变量 `VITE_API_BASE_URL` 设置，未设默认 `http://localhost:5200`。
 
 ## Lint 与格式
-- Lint 命令：`pnpm lint`（eslint.config.js，flat 配置）。
+- Lint 命令：`pnpm lint`（按 workspace 执行各应用 lint）。
 - 扩展：`@eslint/js` recommended、`typescript-eslint` recommended、`react-hooks` recommended、`react-refresh` vite preset。
-- 覆盖范围：`**/*.{ts,tsx}`；`dist` 全局忽略。
+- 主应用 lint 配置位于 `apps/web-app/eslint.config.js`，文档站配置位于 `apps/docs-web/eslint.config.mjs`。
 - 语法目标：ES2020+，React JSX（`react-jsx`）。
 - 若新增文件，确保符合规则后再提交；尽量零 eslint 警告。
 

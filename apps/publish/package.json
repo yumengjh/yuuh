@@ -1,5 +1,5 @@
 {
-  "name": "docs-web",
+  "name": "@infinitedoc/publish",
   "private": true,
   "type": "module",
   "scripts": {

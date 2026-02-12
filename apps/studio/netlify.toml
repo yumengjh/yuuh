@@ -1,6 +1,6 @@
 [build]
-  command = "pnpm build:studio"
-  publish = "apps/studio/dist"
+  command = "pnpm build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"

@@ -11,6 +11,12 @@ node_modules
 dist
 dist-ssr
 *.local
+.turbo
+.pnpm-store
+apps/*/.nuxt
+apps/*/.output
+apps/*/dist
+packages/*/dist
 
 # Editor directories and files
 .vscode/*
