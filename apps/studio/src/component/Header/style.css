@@ -166,3 +166,173 @@
   border-color: #4ade80 !important;
   color: #14532d !important;
 }
+
+.doc-meta-tag-dropdown {
+  padding: 8px;
+}
+
+.doc-meta-tag-disabled {
+  display: block;
+  padding: 8px 4px;
+  font-size: 12px;
+}
+
+.doc-meta-tag-toolbar {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(140px, 1.2fr) 116px 56px;
+  gap: 6px;
+  align-items: center;
+}
+
+.doc-meta-tag-toolbar-compact {
+  margin-bottom: 8px;
+}
+
+.doc-meta-tag-search {
+  min-width: 0;
+}
+
+.doc-meta-tag-create-name {
+  min-width: 0;
+}
+
+.doc-meta-tag-create-color {
+  width: 116px;
+}
+
+.doc-meta-tag-list {
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  background: #ffffff;
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  max-height: 248px;
+  overflow: auto;
+}
+
+.doc-meta-tag-row {
+  min-height: 36px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: #ffffff;
+  cursor: default;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.doc-meta-tag-row:hover {
+  background: #f8fafc;
+  border-color: #e8edf3;
+}
+
+.doc-meta-tag-row-active {
+  background: #f0f6ff;
+  border-color: #cfe0ff;
+}
+
+.doc-meta-tag-row-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.doc-meta-tag-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid #d9d9d9;
+  flex-shrink: 0;
+}
+
+.doc-meta-tag-name-trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: text;
+  text-align: left;
+}
+
+.doc-meta-tag-name {
+  display: block;
+  max-width: 220px;
+}
+
+.doc-meta-tag-inline-editor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-meta-tag-inline-editor .ant-input-affix-wrapper,
+.doc-meta-tag-inline-editor .ant-input {
+  min-width: 0;
+}
+
+.doc-meta-tag-inline-color {
+  width: 108px;
+}
+
+.doc-meta-tag-delete {
+  opacity: 0;
+  padding-inline: 4px !important;
+  transition: opacity 0.15s ease;
+}
+
+.doc-meta-tag-row:hover .doc-meta-tag-delete,
+.doc-meta-tag-delete:focus-visible {
+  opacity: 1;
+}
+
+.doc-meta-tag-delete.ant-btn-loading {
+  opacity: 1;
+}
+
+.doc-meta-tag-empty {
+  display: block;
+  padding: 8px 6px;
+  font-size: 12px;
+}
+
+.doc-meta-tag-hint {
+  margin-top: 6px;
+}
+
+.doc-meta-tag-hint .ant-typography {
+  font-size: 11px;
+}
+
+@media (max-width: 720px) {
+  .doc-meta-tag-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .doc-meta-tag-create-color {
+    width: 100%;
+  }
+
+  .doc-meta-tag-inline-color {
+    width: 92px;
+  }
+
+  .doc-meta-tag-name {
+    max-width: 150px;
+  }
+}

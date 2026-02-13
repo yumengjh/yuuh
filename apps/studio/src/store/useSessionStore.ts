@@ -371,7 +371,7 @@ export const useSessionStore = create<SessionState & SessionActions>((set, get) 
       const result = await apiV1.tags.listTags({
         workspaceId: targetWorkspaceId,
         page: 1,
-        pageSize: 200,
+        pageSize: 100,
       });
       return Array.isArray(result?.items) ? result.items : [];
     } catch {
