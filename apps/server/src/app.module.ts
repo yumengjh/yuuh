@@ -18,6 +18,8 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { SearchModule } from './modules/search/search.module';
 import { ActivitiesModule } from './modules/activities/activities.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { RuntimeConfigModule } from './modules/runtime-config/runtime-config.module';
+import { RuntimeConfigService } from './modules/runtime-config/runtime-config.service';
 
 // 导入所有实体
 import { User } from './entities/user.entity';
@@ -37,15 +39,12 @@ import { Session } from './entities/session.entity';
 import { AuditLog } from './entities/audit-log.entity';
 import { SecurityLog } from './entities/security-log.entity';
 import { SettingsProfile } from './entities/settings-profile.entity';
+import { RuntimeConfig } from './entities/runtime-config.entity';
 
 @Module({
   imports: [
     // 配置模块
     AppConfigModule,
-
-    // 限流（60 秒内最多 100 次，可按路由用 @Throttle / @SkipThrottle 覆盖）
-    // 暂时注释掉以支持批量插入脚本
-    // ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
 
     // 数据库模块
     TypeOrmModule.forRootAsync({
@@ -75,6 +74,7 @@ import { SettingsProfile } from './entities/settings-profile.entity';
           AuditLog,
           SecurityLog,
           SettingsProfile,
+          RuntimeConfig,
         ],
         synchronize: configService.get<string>('app.env') === 'development',
         logging: configService.get<string>('app.env') === 'development',
@@ -82,11 +82,29 @@ import { SettingsProfile } from './entities/settings-profile.entity';
           max: configService.get<number>('database.extra.max'),
           min: configService.get<number>('database.extra.min'),
           idleTimeoutMillis: configService.get<number>('database.extra.idleTimeoutMillis'),
-          connectionTimeoutMillis: configService.get<number>('database.extra.connectionTimeoutMillis'),
+          connectionTimeoutMillis: configService.get<number>(
+            'database.extra.connectionTimeoutMillis',
+          ),
         },
         manualInitialization: process.env.OPENAPI_EXPORT === 'true',
       }),
       inject: [ConfigService],
+    }),
+
+    // 运行时配置模块（支持热更新，供限流等系统能力使用）
+    RuntimeConfigModule,
+
+    // 限流（可运行时热更新 enabled/ttl/limit）
+    ThrottlerModule.forRootAsync({
+      imports: [RuntimeConfigModule],
+      inject: [RuntimeConfigService],
+      useFactory: (runtimeConfigService: RuntimeConfigService) => [
+        {
+          ttl: () => runtimeConfigService.getRateLimitConfigForGuard().ttlMs,
+          limit: () => runtimeConfigService.getRateLimitConfigForGuard().limit,
+          skipIf: () => !runtimeConfigService.getRateLimitConfigForGuard().enabled,
+        },
+      ],
     }),
 
     // 功能模块（SecurityModule 为 @Global，需先加载以便 SecurityService / AuditService 可注入）
@@ -104,10 +122,6 @@ import { SettingsProfile } from './entities/settings-profile.entity';
     SettingsModule.forRoot(),
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    // 暂时注释掉以支持批量插入脚本
-    // { provide: APP_GUARD, useClass: ThrottlerGuard },
-  ],
+  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

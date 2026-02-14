@@ -2,9 +2,9 @@
 
 /**
  * 批量插入块到文档
- * 
+ *
  * 用途：用于测试超大型文档的性能，批量插入大量块内容
- * 
+ *
  * 使用方法：
  *   1. 修改下面的配置变量（鉴权信息和文档信息）
  *   2. 运行脚本：node scripts/batch-insert-blocks.js
@@ -16,12 +16,13 @@
 // ============================================
 
 // 鉴权信息
-const ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1XzE3Njg3MjA5NDM1NjdfYjc0OTJmZGYiLCJpYXQiOjE3NzA2ODIwNDIsImV4cCI6MTc3MDc2ODQ0Mn0.XatpWUxpqR7ZVjqkCH9tkYR4YFsQWnpY_iZwkPAbcqY'; // 替换为实际的访问令牌
+const ACCESS_TOKEN =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1XzE3Njg3MjA5NDM1NjdfYjc0OTJmZGYiLCJpYXQiOjE3NzEwMzc4MjgsImV4cCI6MTc3MTEyNDIyOH0.MzrQpE5afrWieFUm39Gu6pGd-8-7qqPArP0tux-YBCE'; // 替换为实际的访问令牌
 const API_BASE_URL = 'http://localhost:5200/api/v1'; // API 基础地址
 
 // 文档信息
-const DOC_ID = 'doc_1770694626249_2a0cc4bb'; // 要插入块的文档ID
-const WORKSPACE_ID = 'ws_1769825305752_c2175a15'; // 工作空间ID（用于验证）
+const DOC_ID = 'doc_1770727514573_98433282'; // 要插入块的文档ID
+const WORKSPACE_ID = 'ws_1770727507853_799e1401'; // 工作空间ID（用于验证）
 
 // 插入配置
 const BLOCK_COUNT = 2000; // 要插入的块数量
@@ -51,14 +52,14 @@ const requestModule = isHttps ? https : http;
 function makeRequest(options, data = null) {
   return new Promise((resolve, reject) => {
     const url = new URL(options.url || API_BASE_URL + options.path);
-    
+
     const reqOptions = {
       hostname: url.hostname,
       port: url.port || (isHttps ? 443 : 80),
       path: url.pathname + url.search,
       method: options.method || 'GET',
       headers: {
-        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
         'Content-Type': 'application/json',
         ...options.headers,
       },
@@ -99,7 +100,7 @@ function makeRequest(options, data = null) {
  */
 async function createBlock(index, parentId) {
   const payload = BLOCK_CONTENT_TEMPLATE(index);
-  
+
   // 不指定 sortKey，让后端自动生成（推荐方式，避免冲突）
   // 如果需要手动指定，可以使用：const sortKey = String(1000000 + index * 1000);
 
@@ -115,10 +116,13 @@ async function createBlock(index, parentId) {
   };
 
   try {
-    const response = await makeRequest({
-      method: 'POST',
-      path: '/blocks',
-    }, blockData);
+    const response = await makeRequest(
+      {
+        method: 'POST',
+        path: '/blocks',
+      },
+      blockData,
+    );
 
     return response.data.data;
   } catch (error) {
@@ -194,7 +198,7 @@ async function batchCreateBlocks() {
           .catch((error) => {
             failCount++;
             return { success: false, index: i + 1, error: error.message };
-          })
+          }),
       );
     }
 

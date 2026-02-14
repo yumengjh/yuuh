@@ -1,13 +1,8 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { QueryFailedError } from 'typeorm';
 import { ErrorResponse } from '../dto/response.dto';
+import { ErrorCode } from '../errors/error-codes';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -53,6 +48,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       } else {
         message = exceptionResponse as string;
         code = exception.name;
+      }
+
+      if (status === HttpStatus.TOO_MANY_REQUESTS) {
+        code = ErrorCode.RATE_LIMIT_EXCEEDED;
       }
     }
 

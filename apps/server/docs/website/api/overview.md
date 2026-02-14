@@ -24,7 +24,7 @@ http://localhost:5200/api/v1/auth/register
 ```json
 {
   "success": true,
-  "data": { }
+  "data": {}
 }
 ```
 
@@ -54,15 +54,15 @@ Authorization: Bearer <your-access-token>
 
 用户注册、登录、令牌管理等基础认证功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/auth/register` | 用户注册 | 否 |
-| POST | `/auth/login` | 用户登录 | 否 |
-| POST | `/auth/refresh` | 刷新令牌 | 否 |
-| POST | `/auth/logout` | 用户登出 | 是 |
-| GET | `/auth/me` | 获取当前用户 | 是 |
-| PATCH | `/auth/me` | 更新当前用户信息 | 是 |
-| GET | `/auth/users/:userId` | 根据 userId 获取用户信息 | 是 |
+| 方法  | 路径                  | 说明                     | 认证 |
+| ----- | --------------------- | ------------------------ | ---- |
+| POST  | `/auth/register`      | 用户注册                 | 否   |
+| POST  | `/auth/login`         | 用户登录                 | 否   |
+| POST  | `/auth/refresh`       | 刷新令牌                 | 否   |
+| POST  | `/auth/logout`        | 用户登出                 | 是   |
+| GET   | `/auth/me`            | 获取当前用户             | 是   |
+| PATCH | `/auth/me`            | 更新当前用户信息         | 是   |
+| GET   | `/auth/users/:userId` | 根据 userId 获取用户信息 | 是   |
 
 **详细文档：** [认证 API](./auth.md)
 
@@ -70,17 +70,17 @@ Authorization: Bearer <your-access-token>
 
 工作空间的创建、管理、成员管理等功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/workspaces` | 创建工作空间 | 是 |
-| GET | `/workspaces` | 工作空间列表 | 是 |
-| GET | `/workspaces/:workspaceId` | 工作空间详情 | 是 |
-| PATCH | `/workspaces/:workspaceId` | 更新工作空间 | 是 |
-| DELETE | `/workspaces/:workspaceId` | 删除工作空间 | 是 |
-| POST | `/workspaces/:workspaceId/members` | 邀请成员 | 是 |
-| GET | `/workspaces/:workspaceId/members` | 成员列表 | 是 |
-| PATCH | `/workspaces/:workspaceId/members/:userId` | 更新成员角色 | 是 |
-| DELETE | `/workspaces/:workspaceId/members/:userId` | 移除成员 | 是 |
+| 方法   | 路径                                       | 说明         | 认证 |
+| ------ | ------------------------------------------ | ------------ | ---- |
+| POST   | `/workspaces`                              | 创建工作空间 | 是   |
+| GET    | `/workspaces`                              | 工作空间列表 | 是   |
+| GET    | `/workspaces/:workspaceId`                 | 工作空间详情 | 是   |
+| PATCH  | `/workspaces/:workspaceId`                 | 更新工作空间 | 是   |
+| DELETE | `/workspaces/:workspaceId`                 | 删除工作空间 | 是   |
+| POST   | `/workspaces/:workspaceId/members`         | 邀请成员     | 是   |
+| GET    | `/workspaces/:workspaceId/members`         | 成员列表     | 是   |
+| PATCH  | `/workspaces/:workspaceId/members/:userId` | 更新成员角色 | 是   |
+| DELETE | `/workspaces/:workspaceId/members/:userId` | 移除成员     | 是   |
 
 **详细文档：** [工作空间 API](./workspaces.md)
 
@@ -88,23 +88,23 @@ Authorization: Bearer <your-access-token>
 
 文档的创建、编辑、版本控制、发布等功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/documents` | 创建文档 | 是 |
-| GET | `/documents` | 文档列表 | 是 |
-| GET | `/documents/search` | 搜索文档 | 是 |
-| GET | `/documents/:docId` | 文档详情 | 是 |
-| GET | `/documents/:docId/content` | 文档内容/渲染树 | 是 |
-| PATCH | `/documents/:docId` | 更新文档元数据 | 是 |
-| POST | `/documents/:docId/publish` | 发布文档 | 是 |
-| POST | `/documents/:docId/move` | 移动文档 | 是 |
-| DELETE | `/documents/:docId` | 删除文档 | 是 |
-| GET | `/documents/:docId/revisions` | 修订历史 | 是 |
-| GET | `/documents/:docId/diff` | 版本对比 | 是 |
-| POST | `/documents/:docId/revert` | 回滚到指定版本 | 是 |
-| POST | `/documents/:docId/snapshots` | 创建快照 | 是 |
-| POST | `/documents/:docId/commit` | 手动触发创建版本 | 是 |
-| GET | `/documents/:docId/pending-versions` | 获取待创建版本数量 | 是 |
+| 方法   | 路径                                 | 说明               | 认证 |
+| ------ | ------------------------------------ | ------------------ | ---- |
+| POST   | `/documents`                         | 创建文档           | 是   |
+| GET    | `/documents`                         | 文档列表           | 是   |
+| GET    | `/documents/search`                  | 搜索文档           | 是   |
+| GET    | `/documents/:docId`                  | 文档详情           | 是   |
+| GET    | `/documents/:docId/content`          | 文档内容/渲染树    | 是   |
+| PATCH  | `/documents/:docId`                  | 更新文档元数据     | 是   |
+| POST   | `/documents/:docId/publish`          | 发布文档           | 是   |
+| POST   | `/documents/:docId/move`             | 移动文档           | 是   |
+| DELETE | `/documents/:docId`                  | 删除文档           | 是   |
+| GET    | `/documents/:docId/revisions`        | 修订历史           | 是   |
+| GET    | `/documents/:docId/diff`             | 版本对比           | 是   |
+| POST   | `/documents/:docId/revert`           | 回滚到指定版本     | 是   |
+| POST   | `/documents/:docId/snapshots`        | 创建快照           | 是   |
+| POST   | `/documents/:docId/commit`           | 手动触发创建版本   | 是   |
+| GET    | `/documents/:docId/pending-versions` | 获取待创建版本数量 | 是   |
 
 **详细文档：** [文档 API](./documents.md)
 
@@ -112,14 +112,14 @@ Authorization: Bearer <your-access-token>
 
 文档块（内容单元）的创建、更新、移动、删除等功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/blocks` | 创建块 | 是 |
-| PATCH | `/blocks/:blockId/content` | 更新块内容 | 是 |
-| POST | `/blocks/:blockId/move` | 移动块 | 是 |
-| DELETE | `/blocks/:blockId` | 删除块 | 是 |
-| GET | `/blocks/:blockId/versions` | 块版本历史 | 是 |
-| POST | `/blocks/batch` | 批量操作 | 是 |
+| 方法   | 路径                        | 说明       | 认证 |
+| ------ | --------------------------- | ---------- | ---- |
+| POST   | `/blocks`                   | 创建块     | 是   |
+| PATCH  | `/blocks/:blockId/content`  | 更新块内容 | 是   |
+| POST   | `/blocks/:blockId/move`     | 移动块     | 是   |
+| DELETE | `/blocks/:blockId`          | 删除块     | 是   |
+| GET    | `/blocks/:blockId/versions` | 块版本历史 | 是   |
+| POST   | `/blocks/batch`             | 批量操作   | 是   |
 
 **详细文档：** [块 API](./blocks.md)
 
@@ -127,14 +127,14 @@ Authorization: Bearer <your-access-token>
 
 标签的创建、管理、使用统计等功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/tags` | 创建标签 | 是 |
-| GET | `/tags` | 标签列表 | 是 |
-| GET | `/tags/:tagId` | 标签详情 | 是 |
-| GET | `/tags/:tagId/usage` | 标签使用统计 | 是 |
-| PATCH | `/tags/:tagId` | 更新标签 | 是 |
-| DELETE | `/tags/:tagId` | 删除标签 | 是 |
+| 方法   | 路径                 | 说明         | 认证 |
+| ------ | -------------------- | ------------ | ---- |
+| POST   | `/tags`              | 创建标签     | 是   |
+| GET    | `/tags`              | 标签列表     | 是   |
+| GET    | `/tags/:tagId`       | 标签详情     | 是   |
+| GET    | `/tags/:tagId/usage` | 标签使用统计 | 是   |
+| PATCH  | `/tags/:tagId`       | 更新标签     | 是   |
+| DELETE | `/tags/:tagId`       | 删除标签     | 是   |
 
 **详细文档：** [标签 API](./tags.md)
 
@@ -142,11 +142,11 @@ Authorization: Bearer <your-access-token>
 
 文档收藏功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/favorites` | 添加收藏 | 是 |
-| GET | `/favorites` | 收藏列表 | 是 |
-| DELETE | `/favorites/:docId` | 取消收藏 | 是 |
+| 方法   | 路径                | 说明     | 认证 |
+| ------ | ------------------- | -------- | ---- |
+| POST   | `/favorites`        | 添加收藏 | 是   |
+| GET    | `/favorites`        | 收藏列表 | 是   |
+| DELETE | `/favorites/:docId` | 取消收藏 | 是   |
 
 **详细文档：** [收藏 API](./favorites.md)
 
@@ -154,13 +154,13 @@ Authorization: Bearer <your-access-token>
 
 文档和块的评论功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/comments` | 创建评论 | 是 |
-| GET | `/comments` | 评论列表 | 是 |
-| GET | `/comments/:commentId` | 评论详情 | 是 |
-| PATCH | `/comments/:commentId` | 更新评论 | 是 |
-| DELETE | `/comments/:commentId` | 删除评论 | 是 |
+| 方法   | 路径                   | 说明     | 认证 |
+| ------ | ---------------------- | -------- | ---- |
+| POST   | `/comments`            | 创建评论 | 是   |
+| GET    | `/comments`            | 评论列表 | 是   |
+| GET    | `/comments/:commentId` | 评论详情 | 是   |
+| PATCH  | `/comments/:commentId` | 更新评论 | 是   |
+| DELETE | `/comments/:commentId` | 删除评论 | 是   |
 
 **详细文档：** [评论 API](./comments.md)
 
@@ -168,10 +168,10 @@ Authorization: Bearer <your-access-token>
 
 全局搜索和高级搜索功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| GET | `/search` | 全局搜索 | 是 |
-| POST | `/search/advanced` | 高级搜索 | 是 |
+| 方法 | 路径               | 说明     | 认证 |
+| ---- | ------------------ | -------- | ---- |
+| GET  | `/search`          | 全局搜索 | 是   |
+| POST | `/search/advanced` | 高级搜索 | 是   |
 
 **详细文档：** [搜索 API](./search.md)
 
@@ -179,14 +179,14 @@ Authorization: Bearer <your-access-token>
 
 阅读/编辑体验设置与工作空间覆盖配置。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| GET | `/settings/me` | 获取当前用户设置（含默认值） | 是 |
-| PATCH | `/settings/me` | 更新当前用户设置 | 是 |
-| GET | `/settings/effective` | 获取生效设置（可带 workspaceId） | 是 |
-| GET | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置 | 是 |
-| PATCH | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置 | 是 |
-| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置 | 是 |
+| 方法   | 路径                                | 说明                             | 认证 |
+| ------ | ----------------------------------- | -------------------------------- | ---- |
+| GET    | `/settings/me`                      | 获取当前用户设置（含默认值）     | 是   |
+| PATCH  | `/settings/me`                      | 更新当前用户设置                 | 是   |
+| GET    | `/settings/effective`               | 获取生效设置（可带 workspaceId） | 是   |
+| GET    | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置             | 是   |
+| PATCH  | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置             | 是   |
+| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置             | 是   |
 
 **详细文档：** [设置 API](./settings.md)
 
@@ -194,9 +194,9 @@ Authorization: Bearer <your-access-token>
 
 用户活动日志查询功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| GET | `/activities` | 活动日志列表 | 是 |
+| 方法 | 路径          | 说明         | 认证 |
+| ---- | ------------- | ------------ | ---- |
+| GET  | `/activities` | 活动日志列表 | 是   |
 
 **详细文档：** [活动日志 API](./activities.md)
 
@@ -204,12 +204,12 @@ Authorization: Bearer <your-access-token>
 
 文件上传和管理功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/assets/upload` | 上传资产 | 是 |
-| GET | `/assets` | 资产列表 | 是 |
-| GET | `/assets/:assetId/file` | 获取资产文件 | 是 |
-| DELETE | `/assets/:assetId` | 删除资产 | 是 |
+| 方法   | 路径                    | 说明         | 认证 |
+| ------ | ----------------------- | ------------ | ---- |
+| POST   | `/assets/upload`        | 上传资产     | 是   |
+| GET    | `/assets`               | 资产列表     | 是   |
+| GET    | `/assets/:assetId/file` | 获取资产文件 | 是   |
+| DELETE | `/assets/:assetId`      | 删除资产     | 是   |
 
 **详细文档：** [资产 API](./assets.md)
 
@@ -217,12 +217,29 @@ Authorization: Bearer <your-access-token>
 
 安全日志和审计日志查询功能。
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| GET | `/security/events` | 安全日志列表 | 是 |
-| GET | `/security/audit` | 审计日志列表 | 是 |
+| 方法 | 路径               | 说明         | 认证 |
+| ---- | ------------------ | ------------ | ---- |
+| GET  | `/security/events` | 安全日志列表 | 是   |
+| GET  | `/security/audit`  | 审计日志列表 | 是   |
 
 **详细文档：** [安全 API](./security.md)
+
+### 13. 运行时配置 (Runtime Configs)
+
+系统级动态配置管理（当前支持限流热更新）。
+
+| 方法  | 路径                                | 说明         | 认证           |
+| ----- | ----------------------------------- | ------------ | -------------- |
+| GET   | `/runtime-configs/rate-limit`       | 读取限流配置 | 系统管理员令牌 |
+| PATCH | `/runtime-configs/rate-limit`       | 更新限流配置 | 系统管理员令牌 |
+| POST  | `/runtime-configs/rate-limit/reset` | 重置限流配置 | 系统管理员令牌 |
+
+**说明：**
+
+- 该模块不使用 JWT，而是使用 `x-system-admin-token`。
+- 用于运维/平台层控制，不属于普通业务用户接口。
+
+**详细文档：** [运行时配置 API](./runtime-configs.md)
 
 ### OpenAPI 导出
 
