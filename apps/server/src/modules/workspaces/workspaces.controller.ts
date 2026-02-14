@@ -11,13 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiResponse,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { WorkspacesService } from './workspaces.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
@@ -39,20 +33,14 @@ export class WorkspacesController {
   @ApiOperation({ summary: '创建工作空间' })
   @ApiResponse({ status: 201, description: '创建成功' })
   @ApiResponse({ status: 400, description: '请求参数错误' })
-  async create(
-    @Body() createWorkspaceDto: CreateWorkspaceDto,
-    @CurrentUser() user: any,
-  ) {
+  async create(@Body() createWorkspaceDto: CreateWorkspaceDto, @CurrentUser() user: any) {
     return this.workspacesService.create(createWorkspaceDto, user.userId);
   }
 
   @Get()
   @ApiOperation({ summary: '获取工作空间列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
-  async findAll(
-    @Query() paginationDto: PaginationDto,
-    @CurrentUser() user: any,
-  ) {
+  async findAll(@Query() paginationDto: PaginationDto, @CurrentUser() user: any) {
     return this.workspacesService.findAll(user.userId, paginationDto);
   }
 
@@ -62,10 +50,7 @@ export class WorkspacesController {
   @ApiResponse({ status: 200, description: '获取成功' })
   @ApiResponse({ status: 404, description: '工作空间不存在' })
   @ApiResponse({ status: 403, description: '没有权限访问' })
-  async findOne(
-    @Param('workspaceId') workspaceId: string,
-    @CurrentUser() user: any,
-  ) {
+  async findOne(@Param('workspaceId') workspaceId: string, @CurrentUser() user: any) {
     return this.workspacesService.findOne(workspaceId, user.userId);
   }
 
@@ -80,11 +65,7 @@ export class WorkspacesController {
     @Body() updateWorkspaceDto: UpdateWorkspaceDto,
     @CurrentUser() user: any,
   ) {
-    return this.workspacesService.update(
-      workspaceId,
-      updateWorkspaceDto,
-      user.userId,
-    );
+    return this.workspacesService.update(workspaceId, updateWorkspaceDto, user.userId);
   }
 
   @Delete(':workspaceId')
@@ -94,10 +75,7 @@ export class WorkspacesController {
   @ApiResponse({ status: 200, description: '删除成功' })
   @ApiResponse({ status: 404, description: '工作空间不存在' })
   @ApiResponse({ status: 403, description: '只有所有者可以删除' })
-  async remove(
-    @Param('workspaceId') workspaceId: string,
-    @CurrentUser() user: any,
-  ) {
+  async remove(@Param('workspaceId') workspaceId: string, @CurrentUser() user: any) {
     return this.workspacesService.remove(workspaceId, user.userId);
   }
 
@@ -114,11 +92,7 @@ export class WorkspacesController {
     @Body() inviteMemberDto: InviteMemberDto,
     @CurrentUser() user: any,
   ) {
-    return this.workspacesService.inviteMember(
-      workspaceId,
-      inviteMemberDto,
-      user.userId,
-    );
+    return this.workspacesService.inviteMember(workspaceId, inviteMemberDto, user.userId);
   }
 
   @Get(':workspaceId/members')
@@ -127,10 +101,7 @@ export class WorkspacesController {
   @ApiResponse({ status: 200, description: '获取成功' })
   @ApiResponse({ status: 404, description: '工作空间不存在' })
   @ApiResponse({ status: 403, description: '没有权限访问' })
-  async getMemberList(
-    @Param('workspaceId') workspaceId: string,
-    @CurrentUser() user: any,
-  ) {
+  async getMemberList(@Param('workspaceId') workspaceId: string, @CurrentUser() user: any) {
     return this.workspacesService.getMemberList(workspaceId, user.userId);
   }
 
@@ -170,10 +141,6 @@ export class WorkspacesController {
     @Param('userId') userId: string,
     @CurrentUser() user: any,
   ) {
-    return this.workspacesService.removeMember(
-      workspaceId,
-      userId,
-      user.userId,
-    );
+    return this.workspacesService.removeMember(workspaceId, userId, user.userId);
   }
 }

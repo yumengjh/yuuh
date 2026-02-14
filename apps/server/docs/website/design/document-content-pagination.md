@@ -16,6 +16,7 @@
 - **用户体验差**：用户需要等待很长时间才能看到内容
 
 通过分页机制，可以：
+
 - **按需加载**：只加载用户当前需要查看的内容
 - **提升性能**：减少数据传输量和处理时间
 - **改善体验**：快速显示初始内容，后续内容按需加载
@@ -28,12 +29,12 @@ GET /api/v1/documents/:docId/content
 
 ### 查询参数
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `version` | number | ❌ | 文档版本号（不传则使用最新版本 `head`） |
-| `maxDepth` | number | ❌ | 最大层级深度（从根块开始计算，0=只返回根块，1=根块+第一层，默认返回所有层级） |
-| `startBlockId` | string | ❌ | 起始块ID（用于分页，返回该块及其后续兄弟块） |
-| `limit` | number | ❌ | 每页返回的最大块数量（默认1000，最大10000） |
+| 参数           | 类型   | 必填 | 说明                                                                          |
+| -------------- | ------ | ---- | ----------------------------------------------------------------------------- |
+| `version`      | number | ❌   | 文档版本号（不传则使用最新版本 `head`）                                       |
+| `maxDepth`     | number | ❌   | 最大层级深度（从根块开始计算，0=只返回根块，1=根块+第一层，默认返回所有层级） |
+| `startBlockId` | string | ❌   | 起始块ID（用于分页，返回该块及其后续兄弟块）                                  |
+| `limit`        | number | ❌   | 每页返回的最大块数量（默认1000，最大10000）                                   |
 
 ### 响应格式
 
@@ -66,12 +67,12 @@ GET /api/v1/documents/:docId/content
 
 ### 分页字段说明
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `pagination.totalBlocks` | number | 文档中的总块数 |
-| `pagination.returnedBlocks` | number | 本次返回的块数量 |
-| `pagination.hasMore` | boolean | 是否还有更多块未返回 |
-| `pagination.nextStartBlockId` | string | 下次请求的起始块ID（当 `hasMore` 为 `true` 时） |
+| 字段                          | 类型    | 说明                                            |
+| ----------------------------- | ------- | ----------------------------------------------- |
+| `pagination.totalBlocks`      | number  | 文档中的总块数                                  |
+| `pagination.returnedBlocks`   | number  | 本次返回的块数量                                |
+| `pagination.hasMore`          | boolean | 是否还有更多块未返回                            |
+| `pagination.nextStartBlockId` | string  | 下次请求的起始块ID（当 `hasMore` 为 `true` 时） |
 
 ## 使用方法
 
@@ -81,13 +82,16 @@ GET /api/v1/documents/:docId/content
 
 ```typescript
 // 首次加载：只加载根块和第一层子块
-const response1 = await fetch('/api/v1/documents/doc_123/content?maxDepth=1&limit=100');
+const response1 = await fetch(
+  "/api/v1/documents/doc_123/content?maxDepth=1&limit=100",
+);
 
 // 用户展开某个块后，加载该块的子块
 // 前端需要单独请求该块的子块，或使用 startBlockId 继续加载
 ```
 
 **使用场景**：
+
 - 文档大纲视图
 - 折叠/展开功能
 - 层级导航
@@ -98,10 +102,11 @@ const response1 = await fetch('/api/v1/documents/doc_123/content?maxDepth=1&limi
 
 ```typescript
 // 每次最多返回 500 个块
-const response = await fetch('/api/v1/documents/doc_123/content?limit=500');
+const response = await fetch("/api/v1/documents/doc_123/content?limit=500");
 ```
 
 **使用场景**：
+
 - 性能优化
 - 网络带宽限制
 - 内存限制
@@ -112,18 +117,19 @@ const response = await fetch('/api/v1/documents/doc_123/content?limit=500');
 
 ```typescript
 // 首次加载
-const response1 = await fetch('/api/v1/documents/doc_123/content?limit=100');
+const response1 = await fetch("/api/v1/documents/doc_123/content?limit=100");
 const { pagination } = response1.data;
 
 if (pagination.hasMore) {
   // 继续加载后续内容
   const response2 = await fetch(
-    `/api/v1/documents/doc_123/content?startBlockId=${pagination.nextStartBlockId}&limit=100`
+    `/api/v1/documents/doc_123/content?startBlockId=${pagination.nextStartBlockId}&limit=100`,
   );
 }
 ```
 
 **使用场景**：
+
 - 无限滚动
 - 分页浏览
 - 按需加载
@@ -135,12 +141,12 @@ if (pagination.hasMore) {
 ```typescript
 // 只加载前2层，每次最多100个块
 const response = await fetch(
-  '/api/v1/documents/doc_123/content?maxDepth=1&limit=100'
+  "/api/v1/documents/doc_123/content?maxDepth=1&limit=100",
 );
 
 // 从指定块开始，加载后续内容，最多500个块
 const response = await fetch(
-  '/api/v1/documents/doc_123/content?startBlockId=b_xxx&limit=500'
+  "/api/v1/documents/doc_123/content?startBlockId=b_xxx&limit=500",
 );
 ```
 
@@ -151,11 +157,13 @@ const response = await fetch(
 #### 优化前（旧实现）
 
 **问题**：
+
 - 先查询文档版本的所有块版本映射（`getBlockVersionMapForVersion`）
 - 然后查询所有块的完整版本信息（`buildContentTreeFromVersionMap`）
 - 最后在内存中筛选和构建树结构
 
 **查询流程**：
+
 ```
 1. 查询文档版本的所有块版本映射（所有块）
    ↓
@@ -167,6 +175,7 @@ const response = await fetch(
 ```
 
 **性能问题**：
+
 - 对于超大型文档（数千个块），需要查询所有块的版本信息
 - 即使只需要返回少量块，也要查询所有块
 - 数据库查询量大，内存占用高
@@ -174,11 +183,13 @@ const response = await fetch(
 #### 优化后（新实现）
 
 **改进**：
+
 - 当指定 `startBlockId` 时，使用优化的按需查询方式
 - 只查询起始块及其后续块，不查询所有块
 - 递归查询子块时也使用 limit 限制
 
 **查询流程**：
+
 ```
 1. 查询起始块及其版本（1个块）
    ↓
@@ -192,6 +203,7 @@ const response = await fetch(
 ```
 
 **性能优势**：
+
 - 大幅减少数据库查询量
 - 只查询需要的块，不查询所有块
 - 使用 limit 限制查询数量
@@ -210,41 +222,42 @@ const response = await fetch(
 5. **递归查询子块**：递归查询子块时，只查询需要的子块（使用 limit 限制）
 
 **关键逻辑**：
+
 ```typescript
 // 1. 查询起始块（只查询1个块）
 const startBlockVersion = await this.blockVersionRepository
-  .createQueryBuilder('bv')
-  .innerJoin(Block, 'b', 'bv.blockId = b.blockId AND b.isDeleted = false')
-  .where('bv.docId = :docId', { docId })
-  .andWhere('bv.blockId = :blockId', { blockId: startBlockId })
-  .andWhere('bv.createdAt <= :createdAt', { createdAt: revisionCreatedAt })
-  .orderBy('bv.ver', 'DESC')
+  .createQueryBuilder("bv")
+  .innerJoin(Block, "b", "bv.blockId = b.blockId AND b.isDeleted = false")
+  .where("bv.docId = :docId", { docId })
+  .andWhere("bv.blockId = :blockId", { blockId: startBlockId })
+  .andWhere("bv.createdAt <= :createdAt", { createdAt: revisionCreatedAt })
+  .orderBy("bv.ver", "DESC")
   .limit(1)
   .getOne();
 
 // 2. 查询兄弟块（只查询同一父块的子块）
 const siblingsQuery = await this.blockVersionRepository
-  .createQueryBuilder('bv')
-  .innerJoin(Block, 'b', 'bv.blockId = b.blockId AND b.isDeleted = false')
-  .where('bv.docId = :docId', { docId })
-  .andWhere('bv.parentId = :parentId', { parentId: startBlockParentId })
-  .andWhere('bv.createdAt <= :createdAt', { createdAt: revisionCreatedAt })
-  .select('bv.blockId', 'blockId')
-  .addSelect('MAX(bv.ver)', 'maxVer')
-  .addSelect('MAX(bv.sortKey)', 'sortKey')
-  .groupBy('bv.blockId')
+  .createQueryBuilder("bv")
+  .innerJoin(Block, "b", "bv.blockId = b.blockId AND b.isDeleted = false")
+  .where("bv.docId = :docId", { docId })
+  .andWhere("bv.parentId = :parentId", { parentId: startBlockParentId })
+  .andWhere("bv.createdAt <= :createdAt", { createdAt: revisionCreatedAt })
+  .select("bv.blockId", "blockId")
+  .addSelect("MAX(bv.ver)", "maxVer")
+  .addSelect("MAX(bv.sortKey)", "sortKey")
+  .groupBy("bv.blockId")
   .getRawMany();
 
 // 3. 在内存中排序，找到起始块位置
 const sortedSiblings = siblingsQuery.sort((a, b) => {
   return compareSortKey(a.sortKey, b.sortKey);
 });
-const startIndex = sortedSiblings.findIndex(s => s.blockId === startBlockId);
+const startIndex = sortedSiblings.findIndex((s) => s.blockId === startBlockId);
 
 // 4. 只查询起始块及其后续兄弟块（限制数量）
 const blocksToReturn = sortedSiblings.slice(startIndex, startIndex + limit);
 const versions = await this.blockVersionRepository.find({
-  where: blocksToReturn.map(s => ({
+  where: blocksToReturn.map((s) => ({
     docId,
     blockId: s.blockId,
     ver: s.maxVer,
@@ -255,11 +268,11 @@ const versions = await this.blockVersionRepository.find({
 const getChildrenBlocks = async (parentId, remainingLimit) => {
   // 只查询该父块的子块，使用 limit 限制
   const childRows = await this.blockVersionRepository
-    .createQueryBuilder('bv')
-    .where('bv.parentId = :parentId', { parentId })
+    .createQueryBuilder("bv")
+    .where("bv.parentId = :parentId", { parentId })
     .limit(remainingLimit) // 限制查询数量
     .getRawMany();
-  
+
   // 递归查询子块的子块...
 };
 ```
@@ -274,6 +287,7 @@ const getChildrenBlocks = async (parentId, remainingLimit) => {
 4. **构建树结构**：构建完整的树结构
 
 **关键逻辑**：
+
 ```typescript
 // 1. 查询所有块版本映射（所有块）
 const blockVersionMap = await this.getBlockVersionMapForVersion(docId, docVer);
@@ -311,15 +325,16 @@ if (startBlockId && shouldStart && blockId !== startBlockId) {
 3. **递归处理子块**：对每个子块递归应用深度限制
 
 **关键逻辑**：
+
 ```typescript
 // 伪代码
 const buildNode = (blockId: string, depth: number = 0) => {
   if (maxDepth !== undefined && depth > maxDepth) {
     return null; // 超过最大深度，不返回
   }
-  
+
   // 处理子块，深度 +1
-  const children = childVersions.map(v => buildNode(v.blockId, depth + 1));
+  const children = childVersions.map((v) => buildNode(v.blockId, depth + 1));
   return { ...block, children };
 };
 ```
@@ -334,6 +349,7 @@ const buildNode = (blockId: string, depth: number = 0) => {
 4. **标记是否有更多**：设置 `hasMore = true` 表示还有更多内容
 
 **关键逻辑**：
+
 ```typescript
 // 伪代码
 let returnedBlocks = 0;
@@ -345,7 +361,7 @@ const buildNode = (blockId: string) => {
     nextStartBlockId = blockId; // 记录下一个起始点
     return null; // 停止返回
   }
-  
+
   returnedBlocks++;
   // 继续处理子块...
 };
@@ -361,11 +377,12 @@ const buildNode = (blockId: string) => {
 4. **只返回后续块**：只返回起始块及其后续的兄弟块
 
 **关键逻辑**：
+
 ```typescript
 // 伪代码
 if (startBlockId && shouldStart && blockId === startBlockParentId) {
   const siblings = 获取所有子块并排序();
-  const startIndex = siblings.findIndex(s => s.blockId === startBlockId);
+  const startIndex = siblings.findIndex((s) => s.blockId === startBlockId);
   if (startIndex >= 0) {
     // 只返回起始块及其后续的兄弟块
     childrenToProcess = siblings.slice(startIndex);
@@ -396,6 +413,7 @@ if (startBlockId) {
 ```
 
 **特点**：
+
 - 只查询起始块及其后续块
 - 递归查询子块时也使用 limit 限制
 - 大幅减少数据库查询量
@@ -416,6 +434,7 @@ return await this.buildContentTreeFromVersionMap(
 ```
 
 **特点**：
+
 - 需要查询所有块的版本映射
 - 适合需要完整文档内容的场景
 - 对于超大型文档，性能较差
@@ -427,12 +446,12 @@ return await this.buildContentTreeFromVersionMap(
 ```typescript
 // 只查询起始块及其版本（1次查询，1个块）
 const startBlockVersion = await this.blockVersionRepository
-  .createQueryBuilder('bv')
-  .innerJoin(Block, 'b', 'bv.blockId = b.blockId AND b.isDeleted = false')
-  .where('bv.docId = :docId', { docId })
-  .andWhere('bv.blockId = :blockId', { blockId: startBlockId })
-  .andWhere('bv.createdAt <= :createdAt', { createdAt: revisionCreatedAt })
-  .orderBy('bv.ver', 'DESC')
+  .createQueryBuilder("bv")
+  .innerJoin(Block, "b", "bv.blockId = b.blockId AND b.isDeleted = false")
+  .where("bv.docId = :docId", { docId })
+  .andWhere("bv.blockId = :blockId", { blockId: startBlockId })
+  .andWhere("bv.createdAt <= :createdAt", { createdAt: revisionCreatedAt })
+  .orderBy("bv.ver", "DESC")
   .limit(1)
   .getOne();
 ```
@@ -442,19 +461,20 @@ const startBlockVersion = await this.blockVersionRepository
 ```typescript
 // 只查询起始块的兄弟块（1次查询，只查询同一父块的子块）
 const siblingsQuery = await this.blockVersionRepository
-  .createQueryBuilder('bv')
-  .innerJoin(Block, 'b', 'bv.blockId = b.blockId AND b.isDeleted = false')
-  .where('bv.docId = :docId', { docId })
-  .andWhere('bv.parentId = :parentId', { parentId: startBlockParentId })
-  .andWhere('bv.createdAt <= :createdAt', { createdAt: revisionCreatedAt })
-  .select('bv.blockId', 'blockId')
-  .addSelect('MAX(bv.ver)', 'maxVer')
-  .addSelect('MAX(bv.sortKey)', 'sortKey')
-  .groupBy('bv.blockId')
+  .createQueryBuilder("bv")
+  .innerJoin(Block, "b", "bv.blockId = b.blockId AND b.isDeleted = false")
+  .where("bv.docId = :docId", { docId })
+  .andWhere("bv.parentId = :parentId", { parentId: startBlockParentId })
+  .andWhere("bv.createdAt <= :createdAt", { createdAt: revisionCreatedAt })
+  .select("bv.blockId", "blockId")
+  .addSelect("MAX(bv.ver)", "maxVer")
+  .addSelect("MAX(bv.sortKey)", "sortKey")
+  .groupBy("bv.blockId")
   .getRawMany();
 ```
 
 **优化点**：
+
 - 使用 `GROUP BY` 和 `MAX` 一次性获取每个块的最大版本号
 - 只查询同一父块的子块，不查询所有块
 - 减少数据库查询次数和数据量
@@ -465,7 +485,7 @@ const siblingsQuery = await this.blockVersionRepository
 // 只查询起始块及其后续兄弟块的完整版本信息
 const blocksToReturn = sortedSiblings.slice(startIndex, startIndex + limit);
 const versions = await this.blockVersionRepository.find({
-  where: blocksToReturn.map(s => ({
+  where: blocksToReturn.map((s) => ({
     docId,
     blockId: s.blockId,
     ver: s.maxVer,
@@ -474,6 +494,7 @@ const versions = await this.blockVersionRepository.find({
 ```
 
 **优化点**：
+
 - 只查询需要的块，不查询所有块
 - 使用 limit 限制查询数量
 
@@ -484,11 +505,11 @@ const versions = await this.blockVersionRepository.find({
 const getChildrenBlocks = async (parentId, remainingLimit) => {
   // 只查询该父块的子块，使用 limit 限制
   const childRows = await this.blockVersionRepository
-    .createQueryBuilder('bv')
-    .where('bv.parentId = :parentId', { parentId })
+    .createQueryBuilder("bv")
+    .where("bv.parentId = :parentId", { parentId })
     .limit(remainingLimit) // 限制查询数量
     .getRawMany();
-  
+
   // 递归查询子块的子块...
   for (const child of children) {
     const grandchildren = await getChildrenBlocks(
@@ -500,6 +521,7 @@ const getChildrenBlocks = async (parentId, remainingLimit) => {
 ```
 
 **优化点**：
+
 - 递归查询子块时也使用 limit 限制
 - 只查询需要的子块，不查询所有子块
 - 避免深度递归导致的性能问题
@@ -514,13 +536,13 @@ const blockVersionMap = await this.getBlockVersionMapForVersion(docId, docVer);
 
 // 内部实现：
 const rows = await this.blockVersionRepository
-  .createQueryBuilder('bv')
-  .innerJoin(Block, 'b', 'bv.blockId = b.blockId AND b.isDeleted = false')
-  .select('bv.blockId', 'blockId')
-  .addSelect('MAX(bv.ver)', 'maxVer')
-  .where('bv.docId = :docId', { docId })
-  .andWhere('bv.createdAt <= :createdAt', { createdAt: revision.createdAt })
-  .groupBy('bv.blockId')
+  .createQueryBuilder("bv")
+  .innerJoin(Block, "b", "bv.blockId = b.blockId AND b.isDeleted = false")
+  .select("bv.blockId", "blockId")
+  .addSelect("MAX(bv.ver)", "maxVer")
+  .where("bv.docId = :docId", { docId })
+  .andWhere("bv.createdAt <= :createdAt", { createdAt: revision.createdAt })
+  .groupBy("bv.blockId")
   .getRawMany();
 // 这会查询文档的所有块
 ```
@@ -544,14 +566,14 @@ const buildNode = (blockId: string, depth: number = 0): any => {
   if (maxDepth !== undefined && depth > maxDepth) {
     return null;
   }
-  
+
   // 2. 检查数量限制
   if (returnedBlocks >= limit) {
     hasMore = true;
     nextStartBlockId = blockId;
     return null;
   }
-  
+
   // 3. 检查起始块
   if (startBlockId && !shouldStart) {
     if (blockId === startBlockId) {
@@ -560,23 +582,23 @@ const buildNode = (blockId: string, depth: number = 0): any => {
       return null; // 继续查找
     }
   }
-  
+
   // 4. 过滤前置内容
   if (startBlockId && shouldStart && blockId !== startBlockId) {
     if (当前块是起始块的兄弟块 && 排在起始块之前) {
       return null; // 跳过
     }
   }
-  
+
   // 5. 获取并处理子块（从已查询的 versions 中筛选）
   const childVersions = versions
     .filter((v) => v.parentId === blockId)
     .sort((a, b) => compareSortKey(a.sortKey, b.sortKey));
-  
+
   const children = childVersions
-    .map(v => buildNode(v.blockId, depth + 1))
+    .map((v) => buildNode(v.blockId, depth + 1))
     .filter(Boolean);
-  
+
   // 6. 返回节点
   return {
     blockId,
@@ -614,8 +636,8 @@ const blockVersionMap = await getBlockVersionMapForVersion(docId, docVer);
 ```typescript
 // 排序逻辑
 childVersions.sort((a, b) => {
-  const sortKeyA = a.sortKey || '500000';
-  const sortKeyB = b.sortKey || '500000';
+  const sortKeyA = a.sortKey || "500000";
+  const sortKeyB = b.sortKey || "500000";
   const result = compareSortKey(sortKeyA, sortKeyB);
   if (result === 0) {
     return a.blockId.localeCompare(b.blockId); // 稳定排序
@@ -645,7 +667,7 @@ visitedBlocks.add(blockId);
 ```typescript
 // 推荐：只加载前2层，最多100个块
 const response = await fetch(
-  '/api/v1/documents/doc_123/content?maxDepth=1&limit=100'
+  "/api/v1/documents/doc_123/content?maxDepth=1&limit=100",
 );
 ```
 
@@ -659,13 +681,13 @@ let hasMore = true;
 while (hasMore) {
   const url = startBlockId
     ? `/api/v1/documents/doc_123/content?startBlockId=${startBlockId}&limit=100`
-    : '/api/v1/documents/doc_123/content?limit=100';
-  
+    : "/api/v1/documents/doc_123/content?limit=100";
+
   const response = await fetch(url);
   const { tree, pagination } = response.data;
-  
+
   // 处理返回的内容...
-  
+
   hasMore = pagination.hasMore;
   startBlockId = pagination.nextStartBlockId;
 }
@@ -682,19 +704,19 @@ while (hasMore) {
 
 ```typescript
 try {
-  const response = await fetch('/api/v1/documents/doc_123/content');
+  const response = await fetch("/api/v1/documents/doc_123/content");
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   const data = await response.json();
-  
+
   if (!data.success) {
     throw new Error(data.error.message);
   }
-  
+
   // 处理数据...
 } catch (error) {
-  console.error('加载文档内容失败:', error);
+  console.error("加载文档内容失败:", error);
   // 显示错误提示...
 }
 ```
@@ -732,7 +754,7 @@ try {
 ```typescript
 // 只加载前3层，用于显示文档大纲
 const response = await fetch(
-  '/api/v1/documents/doc_123/content?maxDepth=2&limit=200'
+  "/api/v1/documents/doc_123/content?maxDepth=2&limit=200",
 );
 ```
 
@@ -746,15 +768,15 @@ let allBlocks = [];
 const loadMore = async () => {
   const url = startBlockId
     ? `/api/v1/documents/doc_123/content?startBlockId=${startBlockId}&limit=50`
-    : '/api/v1/documents/doc_123/content?limit=50';
-  
+    : "/api/v1/documents/doc_123/content?limit=50";
+
   const response = await fetch(url);
   const { tree, pagination } = response.data;
-  
+
   // 扁平化树结构，添加到列表
   const blocks = flattenTree(tree);
   allBlocks = [...allBlocks, ...blocks];
-  
+
   if (pagination.hasMore) {
     startBlockId = pagination.nextStartBlockId;
   } else {
@@ -768,12 +790,12 @@ const loadMore = async () => {
 ```typescript
 // 首次只加载根块和第一层
 const response1 = await fetch(
-  '/api/v1/documents/doc_123/content?maxDepth=0&limit=1'
+  "/api/v1/documents/doc_123/content?maxDepth=0&limit=1",
 );
 
 // 用户点击展开后，加载该块的子块
 const response2 = await fetch(
-  `/api/v1/documents/doc_123/content?startBlockId=${blockId}&limit=100`
+  `/api/v1/documents/doc_123/content?startBlockId=${blockId}&limit=100`,
 );
 ```
 
@@ -841,6 +863,7 @@ const response2 = await fetch(
 ### 何时使用优化路径（指定 startBlockId）
 
 ✅ **推荐使用**：
+
 - 分页加载文档内容
 - 无限滚动场景
 - 从指定位置开始加载
@@ -849,12 +872,14 @@ const response2 = await fetch(
 ### 何时使用传统路径（不指定 startBlockId）
 
 ✅ **可以使用**：
+
 - 需要完整文档内容
 - 小型文档（<100 个块）
 - 需要统计总块数
 - 需要完整树结构
 
 ⚠️ **注意**：
+
 - 对于超大型文档，传统路径性能较差
 - 建议使用优化路径（指定 startBlockId）
 

@@ -10,9 +10,7 @@ import { AuditLogInterceptor } from './interceptors/audit-log.interceptor';
 
 @Global()
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([SecurityLog, AuditLog]),
-  ],
+  imports: [TypeOrmModule.forFeature([SecurityLog, AuditLog])],
   controllers: [SecurityController],
   providers: [
     SecurityService,

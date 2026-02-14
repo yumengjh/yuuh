@@ -28,6 +28,7 @@
 ```
 
 **关键点：**
+
 - 创建文档时会**自动创建根块**（`rootBlockId`），无需手动创建
 - 创建块时，`parentId` 不传或为空字符串时，块会挂到根块下
 - 所有操作都需要 `accessToken`（除注册/登录外）
@@ -43,6 +44,7 @@
 **接口：** `POST /api/v1/auth/register`
 
 **请求：**
+
 ```json
 {
   "username": "john_doe",
@@ -53,6 +55,7 @@
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -71,6 +74,7 @@
 **接口：** `POST /api/v1/auth/login`
 
 **请求：**
+
 ```json
 {
   "emailOrUsername": "john@example.com",
@@ -89,11 +93,13 @@
 **接口：** `POST /api/v1/workspaces`
 
 **请求头：**
+
 ```
 Authorization: Bearer <accessToken>
 ```
 
 **请求：**
+
 ```json
 {
   "name": "我的工作空间",
@@ -103,6 +109,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -120,6 +127,7 @@ Authorization: Bearer <accessToken>
 **需要保存：** `workspaceId`（用于创建文档）
 
 **说明：**
+
 - 创建者自动成为 `owner`
 - 可通过 `GET /api/v1/workspaces` 获取工作空间列表
 
@@ -132,11 +140,13 @@ Authorization: Bearer <accessToken>
 **接口：** `POST /api/v1/documents`
 
 **请求头：**
+
 ```
 Authorization: Bearer <accessToken>
 ```
 
 **请求：**
+
 ```json
 {
   "workspaceId": "ws_1705123456789_abc123",
@@ -149,6 +159,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -167,6 +178,7 @@ Authorization: Bearer <accessToken>
 **需要保存：** `docId`、`rootBlockId`
 
 **重要说明：**
+
 - 创建文档时，系统会**自动创建根块**（`rootBlockId`）
 - 根块类型为 `root`，初始 `payload` 为 `{ type: 'root', children: [] }`
 - 后续创建的子块，如果不指定 `parentId` 或传空字符串，会挂到根块下
@@ -180,11 +192,13 @@ Authorization: Bearer <accessToken>
 **接口：** `POST /api/v1/blocks`
 
 **请求头：**
+
 ```
 Authorization: Bearer <accessToken>
 ```
 
 **请求（挂到根块下）：**
+
 ```json
 {
   "docId": "doc_1705123456789_xyz456",
@@ -196,6 +210,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **请求（不指定 parentId，默认挂到根块）：**
+
 ```json
 {
   "docId": "doc_1705123456789_xyz456",
@@ -206,6 +221,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -222,6 +238,7 @@ Authorization: Bearer <accessToken>
 **需要保存：** `blockId`（用于后续更新、移动、删除）
 
 **说明：**
+
 - `parentId` 可选：不传或为空时，块会挂到根块（`rootBlockId`）下
 - `sortKey` 用于排序，如 `"0"`、`"1"`、`"0.5"` 等
 - `type` 可以是 `paragraph`、`heading`、`list` 等
@@ -236,11 +253,13 @@ Authorization: Bearer <accessToken>
 **接口：** `PATCH /api/v1/blocks/:blockId/content`
 
 **请求头：**
+
 ```
 Authorization: Bearer <accessToken>
 ```
 
 **请求：**
+
 ```json
 {
   "payload": { "text": "这是更新后的内容" },
@@ -249,6 +268,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -261,6 +281,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **说明：**
+
 - 每次更新会创建新版本（`version` 递增）
 - 如果 `payload` 的 hash 未变化，不会创建新版本，返回当前版本
 
@@ -273,6 +294,7 @@ Authorization: Bearer <accessToken>
 **接口：** `POST /api/v1/blocks/:blockId/move`
 
 **请求：**
+
 ```json
 {
   "parentId": "b_1705123456789_root789",
@@ -282,6 +304,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -295,6 +318,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **说明：**
+
 - 移动操作会创建新版本
 - `parentId` 必须属于同一文档
 - 不能移动到自身或形成循环引用
@@ -308,6 +332,7 @@ Authorization: Bearer <accessToken>
 **接口：** `POST /api/v1/blocks/batch`
 
 **请求：**
+
 ```json
 {
   "docId": "doc_1705123456789_xyz456",
@@ -345,6 +370,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -353,8 +379,18 @@ Authorization: Bearer <accessToken>
     "success": 4,
     "failed": 0,
     "results": [
-      { "success": true, "operation": "create", "blockId": "...", "version": 1 },
-      { "success": true, "operation": "update", "blockId": "...", "version": 2 },
+      {
+        "success": true,
+        "operation": "create",
+        "blockId": "...",
+        "version": 1
+      },
+      {
+        "success": true,
+        "operation": "update",
+        "blockId": "...",
+        "version": 2
+      },
       { "success": true, "operation": "delete" },
       { "success": true, "operation": "move", "blockId": "...", "version": 2 }
     ]
@@ -371,11 +407,13 @@ Authorization: Bearer <accessToken>
 **接口：** `GET /api/v1/documents/:docId/content?version=<可选>`
 
 **请求头：**
+
 ```
 Authorization: Bearer <accessToken>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -401,6 +439,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **说明：**
+
 - `version` 查询参数可选，不传则使用最新版本（`head`）
 - `tree` 包含根块及其子块的树形结构
 
@@ -413,11 +452,13 @@ Authorization: Bearer <accessToken>
 **接口：** `POST /api/v1/documents/:docId/publish`
 
 **请求头：**
+
 ```
 Authorization: Bearer <accessToken>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -431,6 +472,7 @@ Authorization: Bearer <accessToken>
 ```
 
 **说明：**
+
 - 将 `publishedHead` 设置为当前 `head`
 - 已发布的版本可通过 `GET /api/v1/documents/:docId/content?version=<publishedHead>` 获取
 
@@ -443,6 +485,7 @@ Authorization: Bearer <accessToken>
 **接口：** `PATCH /api/v1/documents/:docId`
 
 **请求：**
+
 ```json
 {
   "title": "更新后的标题",
@@ -522,6 +565,7 @@ Document（文档）
 ```
 
 **计算方式：**
+
 - 根据 `DocRevision.createdAt` 时间点，查找该时间点之前每个块的最新版本
 - 例如：文档版本 5 的 `createdAt` 是 `2026-01-17 10:00:00`
   - 块001在 `10:00:00` 之前有版本 1、2、3，则使用版本 3
@@ -530,11 +574,13 @@ Document（文档）
 ### 获取文档内容的流程
 
 **获取最新版本（默认）：**
+
 ```http
 GET /api/v1/documents/:docId/content
 ```
 
 **流程：**
+
 1. 获取文档信息，得到 `head`（当前版本号，如 `5`）
 2. 找到 `docVer = 5` 的 `DocRevision`
 3. 根据 `DocRevision.createdAt` 计算 `blockVersionMap`
@@ -542,11 +588,13 @@ GET /api/v1/documents/:docId/content
 5. 构建树形结构（根据 `parentId` 和 `sortKey` 排序）
 
 **获取指定版本：**
+
 ```http
 GET /api/v1/documents/:docId/content?version=3
 ```
 
 **流程：**
+
 1. 找到 `docVer = 3` 的 `DocRevision`
 2. 根据 `DocRevision.createdAt` 计算 `blockVersionMap`
 3. 根据 `blockVersionMap` 获取每个块的 `BlockVersion`
@@ -565,12 +613,14 @@ Document: head = 1
 ```
 
 **操作 1：更新块 A 的内容**
+
 ```
 POST /api/v1/blocks/b_a/content
 { payload: { text: "更新后的内容" } }
 ```
 
 结果：
+
 ```
 Document: head = 2  (递增)
   Block A: latestVer = 2  (递增)
@@ -580,12 +630,14 @@ Document: head = 2  (递增)
 ```
 
 **操作 2：创建新块 B**
+
 ```
 POST /api/v1/blocks
 { docId: "...", type: "paragraph", payload: { text: "新块" } }
 ```
 
 结果：
+
 ```
 Document: head = 3  (递增)
   Block A: latestVer = 2
@@ -595,17 +647,19 @@ Document: head = 3  (递增)
 ```
 
 **获取版本 2 的内容：**
+
 ```
 GET /api/v1/documents/:docId/content?version=2
 ```
 
 系统会：
+
 1. 找到 `DocRevision v2`（`createdAt = "2026-01-17 10:01:00"`）
 2. 计算 `blockVersionMap`：
    ```json
    {
      "b_root": 1,
-     "b_a": 2  // 在 10:01:00 之前，块A的最新版本是 2
+     "b_a": 2 // 在 10:01:00 之前，块A的最新版本是 2
      // 块B在 10:01:00 时还不存在，所以不在映射中
    }
    ```
@@ -618,6 +672,7 @@ GET /api/v1/documents/:docId/content?version=2
 **接口：** `GET /api/v1/documents/:docId/diff?fromVer=2&toVer=3`
 
 **原理：**
+
 - 分别计算两个版本的 `blockVersionMap`
 - 构建两个版本的内容树
 - 返回差异（新增、删除、修改的块）
@@ -625,17 +680,20 @@ GET /api/v1/documents/:docId/content?version=2
 #### 版本回滚
 
 **接口：** `POST /api/v1/documents/:docId/revert`
+
 ```json
 { "version": 2 }
 ```
 
 **流程：**
+
 1. 计算目标版本（版本2）的 `blockVersionMap`
 2. 将所有块的 `latestVer` 恢复为目标版本映射中的版本号
 3. 软删除目标版本中不存在的块（如块B在版本2时不存在，则删除）
 4. 创建新的 `DocRevision`（`head` 递增，如从 3 变为 4）
 
 **结果：**
+
 ```
 Document: head = 4  (递增)
   Block A: latestVer = 2  (恢复为版本2)
@@ -650,6 +708,7 @@ Document: head = 4  (递增)
 **用途：** 保存当前版本的完整 `blockVersionMap`，用于快速恢复
 
 **存储：** `DocSnapshot` 表
+
 ```typescript
 {
   snapshotId: "doc_123@snap@5",
@@ -664,6 +723,7 @@ Document: head = 4  (递增)
 ```
 
 **说明：**
+
 - 快照是幂等的：如果已存在相同 `docVer` 的快照，直接返回
 - 快照保存的是当前 `head` 的完整状态，可用于快速回滚
 
@@ -700,6 +760,7 @@ Document: head = 4  (递增)
 **方法 1：** 创建时获取（见步骤 2）
 
 **方法 2：** 从工作空间列表获取
+
 ```http
 GET /api/v1/workspaces?page=1&pageSize=20
 Authorization: Bearer <accessToken>
@@ -708,6 +769,7 @@ Authorization: Bearer <accessToken>
 响应中的 `data.items[].workspaceId`
 
 **方法 3：** 从工作空间详情获取
+
 ```http
 GET /api/v1/workspaces/:workspaceId
 Authorization: Bearer <accessToken>
@@ -720,6 +782,7 @@ Authorization: Bearer <accessToken>
 **方法 1：** 创建时获取（见步骤 3）
 
 **方法 2：** 从文档列表获取
+
 ```http
 GET /api/v1/documents?workspaceId=<workspaceId>&page=1&pageSize=20
 Authorization: Bearer <accessToken>
@@ -728,6 +791,7 @@ Authorization: Bearer <accessToken>
 响应中的 `data.items[].docId`、`data.items[].rootBlockId`
 
 **方法 3：** 从文档详情获取
+
 ```http
 GET /api/v1/documents/:docId
 Authorization: Bearer <accessToken>
@@ -742,6 +806,7 @@ Authorization: Bearer <accessToken>
 **方法 1：** 创建时获取（见步骤 4）
 
 **方法 2：** 从文档内容树获取
+
 ```http
 GET /api/v1/documents/:docId/content
 Authorization: Bearer <accessToken>
@@ -750,6 +815,7 @@ Authorization: Bearer <accessToken>
 遍历 `data.tree` 及其 `children`，提取 `blockId`
 
 **方法 3：** 从块版本历史获取（如果已知块存在）
+
 ```http
 GET /api/v1/blocks/:blockId/versions?page=1&pageSize=20
 Authorization: Bearer <accessToken>
@@ -762,6 +828,7 @@ Authorization: Bearer <accessToken>
 **方法 1：** 创建文档时返回（见步骤 3）
 
 **方法 2：** 从文档详情获取
+
 ```http
 GET /api/v1/documents/:docId
 Authorization: Bearer <accessToken>
@@ -770,6 +837,7 @@ Authorization: Bearer <accessToken>
 响应中的 `data.rootBlockId`
 
 **方法 3：** 从文档内容树获取
+
 ```http
 GET /api/v1/documents/:docId/content
 Authorization: Bearer <accessToken>
@@ -784,7 +852,7 @@ Authorization: Bearer <accessToken>
 ### TypeScript / JavaScript (Fetch API)
 
 ```typescript
-const BASE_URL = 'http://localhost:5200/api/v1';
+const BASE_URL = "http://localhost:5200/api/v1";
 
 // 存储必要的 ID
 let accessToken: string;
@@ -796,117 +864,117 @@ let blockId: string;
 // 1. 登录
 async function login() {
   const res = await fetch(`${BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      emailOrUsername: 'john@example.com',
-      password: 'SecurePass123!',
+      emailOrUsername: "john@example.com",
+      password: "SecurePass123!",
     }),
   });
   const data = await res.json();
   if (data.success) {
     accessToken = data.data.accessToken;
-    console.log('登录成功，accessToken:', accessToken);
+    console.log("登录成功，accessToken:", accessToken);
   }
 }
 
 // 2. 创建工作空间
 async function createWorkspace() {
   const res = await fetch(`${BASE_URL}/workspaces`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
-      name: '我的工作空间',
-      description: '示例',
-      icon: '📁',
+      name: "我的工作空间",
+      description: "示例",
+      icon: "📁",
     }),
   });
   const data = await res.json();
   if (data.success) {
     workspaceId = data.data.workspaceId;
-    console.log('工作空间创建成功，workspaceId:', workspaceId);
+    console.log("工作空间创建成功，workspaceId:", workspaceId);
   }
 }
 
 // 3. 创建文档
 async function createDocument() {
   const res = await fetch(`${BASE_URL}/documents`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       workspaceId,
-      title: '我的第一篇文档',
-      visibility: 'workspace',
-      tags: ['示例'],
+      title: "我的第一篇文档",
+      visibility: "workspace",
+      tags: ["示例"],
     }),
   });
   const data = await res.json();
   if (data.success) {
     docId = data.data.docId;
     rootBlockId = data.data.rootBlockId;
-    console.log('文档创建成功，docId:', docId, 'rootBlockId:', rootBlockId);
+    console.log("文档创建成功，docId:", docId, "rootBlockId:", rootBlockId);
   }
 }
 
 // 4. 创建块（挂到根块下）
 async function createBlock() {
   const res = await fetch(`${BASE_URL}/blocks`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       docId,
-      type: 'paragraph',
-      payload: { text: '这是第一段内容' },
+      type: "paragraph",
+      payload: { text: "这是第一段内容" },
       parentId: rootBlockId, // 或省略，默认挂到根块
-      sortKey: '1',
+      sortKey: "1",
     }),
   });
   const data = await res.json();
   if (data.success) {
     blockId = data.data.blockId;
-    console.log('块创建成功，blockId:', blockId);
+    console.log("块创建成功，blockId:", blockId);
   }
 }
 
 // 5. 更新块内容
 async function updateBlock() {
   const res = await fetch(`${BASE_URL}/blocks/${blockId}/content`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
-      payload: { text: '更新后的内容' },
-      plainText: '更新后的内容',
+      payload: { text: "更新后的内容" },
+      plainText: "更新后的内容",
     }),
   });
   const data = await res.json();
   if (data.success) {
-    console.log('块更新成功，新版本:', data.data.version);
+    console.log("块更新成功，新版本:", data.data.version);
   }
 }
 
 // 6. 获取文档内容树
 async function getDocumentContent() {
   const res = await fetch(`${BASE_URL}/documents/${docId}/content`, {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   const data = await res.json();
   if (data.success) {
-    console.log('文档内容树:', data.data.tree);
+    console.log("文档内容树:", data.data.tree);
     // tree 包含根块和所有子块的树形结构
   }
 }
@@ -914,14 +982,14 @@ async function getDocumentContent() {
 // 7. 发布文档
 async function publishDocument() {
   const res = await fetch(`${BASE_URL}/documents/${docId}/publish`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   const data = await res.json();
   if (data.success) {
-    console.log('文档已发布，publishedHead:', data.data.publishedHead);
+    console.log("文档已发布，publishedHead:", data.data.publishedHead);
   }
 }
 
@@ -988,17 +1056,17 @@ curl -X GET "http://localhost:5200/api/v1/documents/$DOC_ID/content" \
 
 // 4. 批量创建多个块
 const blocks = [
-  { type: 'heading', payload: { text: '标题1', level: 1 }, sortKey: '1' },
-  { type: 'paragraph', payload: { text: '段落1' }, sortKey: '2' },
-  { type: 'paragraph', payload: { text: '段落2' }, sortKey: '3' },
+  { type: "heading", payload: { text: "标题1", level: 1 }, sortKey: "1" },
+  { type: "paragraph", payload: { text: "段落1" }, sortKey: "2" },
+  { type: "paragraph", payload: { text: "段落2" }, sortKey: "3" },
 ];
 
 for (const block of blocks) {
   await fetch(`${BASE_URL}/blocks`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       docId,
@@ -1014,17 +1082,17 @@ for (const block of blocks) {
 ```typescript
 // 先创建父块
 const parentRes = await fetch(`${BASE_URL}/blocks`, {
-  method: 'POST',
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
   },
   body: JSON.stringify({
     docId,
-    type: 'list',
-    payload: { type: 'unordered', items: [] },
+    type: "list",
+    payload: { type: "unordered", items: [] },
     parentId: rootBlockId,
-    sortKey: '1',
+    sortKey: "1",
   }),
 });
 const parentData = await parentRes.json();
@@ -1032,17 +1100,17 @@ const parentBlockId = parentData.data.blockId;
 
 // 再创建子块（挂到父块下）
 await fetch(`${BASE_URL}/blocks`, {
-  method: 'POST',
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
   },
   body: JSON.stringify({
     docId,
-    type: 'list-item',
-    payload: { text: '列表项1' },
+    type: "list-item",
+    payload: { text: "列表项1" },
     parentId: parentBlockId, // 挂到父块
-    sortKey: '1',
+    sortKey: "1",
     indent: 1,
   }),
 });
@@ -1054,16 +1122,16 @@ await fetch(`${BASE_URL}/blocks`, {
 async function getFullDocument(docId: string) {
   // 获取文档详情
   const docRes = await fetch(`${BASE_URL}/documents/${docId}`, {
-    headers: { 'Authorization': `Bearer ${accessToken}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
   const doc = await docRes.json();
-  
+
   // 获取文档内容树
   const contentRes = await fetch(`${BASE_URL}/documents/${docId}/content`, {
-    headers: { 'Authorization': `Bearer ${accessToken}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
   const content = await contentRes.json();
-  
+
   return {
     meta: doc.data, // 文档元数据（标题、标签等）
     tree: content.data.tree, // 块树结构
@@ -1072,23 +1140,23 @@ async function getFullDocument(docId: string) {
 
 // 递归渲染块树
 function renderBlockTree(node: any): string {
-  if (!node) return '';
-  
-  let html = '';
+  if (!node) return "";
+
+  let html = "";
   switch (node.type) {
-    case 'paragraph':
+    case "paragraph":
       html = `<p>${node.payload.text}</p>`;
       break;
-    case 'heading':
+    case "heading":
       html = `<h${node.payload.level}>${node.payload.text}</h${node.payload.level}>`;
       break;
     // ... 其他类型
   }
-  
+
   if (node.children && node.children.length > 0) {
-    html += node.children.map(renderBlockTree).join('');
+    html += node.children.map(renderBlockTree).join("");
   }
-  
+
   return html;
 }
 ```
@@ -1098,28 +1166,28 @@ function renderBlockTree(node: any): string {
 ```typescript
 // 先创建标签（可选）
 const tagRes = await fetch(`${BASE_URL}/tags`, {
-  method: 'POST',
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
   },
   body: JSON.stringify({
     workspaceId,
-    name: '重要',
-    color: '#ff4d4f',
+    name: "重要",
+    color: "#ff4d4f",
   }),
 });
-const tagId = tagRes.json().then(d => d.data.tagId);
+const tagId = tagRes.json().then((d) => d.data.tagId);
 
 // 更新文档，添加标签
 await fetch(`${BASE_URL}/documents/${docId}`, {
-  method: 'PATCH',
+  method: "PATCH",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken}`,
   },
   body: JSON.stringify({
-    tags: ['示例', '重要'], // 标签名数组
+    tags: ["示例", "重要"], // 标签名数组
   }),
 });
 ```

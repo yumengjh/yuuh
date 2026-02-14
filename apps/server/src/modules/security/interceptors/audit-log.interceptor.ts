@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -34,17 +29,26 @@ function getResourceId(
   body: unknown,
 ): string {
   if (opts.resourceIdKey) {
-    const v = (data as Record<string, string>)?.[opts.resourceIdKey]
-      ?? params?.[opts.resourceIdKey]
-      ?? (body as Record<string, string>)?.[opts.resourceIdKey];
+    const v =
+      (data as Record<string, string>)?.[opts.resourceIdKey] ??
+      params?.[opts.resourceIdKey] ??
+      (body as Record<string, string>)?.[opts.resourceIdKey];
     if (v) return String(v);
   }
   const d = data as Record<string, string> | undefined;
   const id =
-    d?.docId ?? d?.workspaceId ?? d?.assetId ?? d?.blockId ?? d?.id
-    ?? params?.docId ?? params?.workspaceId ?? params?.assetId ?? params?.blockId ?? params?.id
-    ?? (body as Record<string, string> | undefined)?.docId
-    ?? (body as Record<string, string> | undefined)?.workspaceId;
+    d?.docId ??
+    d?.workspaceId ??
+    d?.assetId ??
+    d?.blockId ??
+    d?.id ??
+    params?.docId ??
+    params?.workspaceId ??
+    params?.assetId ??
+    params?.blockId ??
+    params?.id ??
+    (body as Record<string, string> | undefined)?.docId ??
+    (body as Record<string, string> | undefined)?.workspaceId;
   return id ?? 'unknown';
 }
 

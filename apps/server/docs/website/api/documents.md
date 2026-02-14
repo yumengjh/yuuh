@@ -4,23 +4,23 @@
 
 ## 接口列表
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/documents` | 创建文档 | 是 |
-| GET | `/documents` | 文档列表 | 是 |
-| GET | `/documents/search` | 搜索文档 | 是 |
-| GET | `/documents/:docId` | 文档详情 | 是 |
-| GET | `/documents/:docId/content` | 文档内容/渲染树 | 是 |
-| PATCH | `/documents/:docId` | 更新文档元数据 | 是 |
-| POST | `/documents/:docId/publish` | 发布文档 | 是 |
-| POST | `/documents/:docId/move` | 移动文档 | 是 |
-| DELETE | `/documents/:docId` | 删除文档 | 是 |
-| GET | `/documents/:docId/revisions` | 修订历史 | 是 |
-| GET | `/documents/:docId/diff` | 版本对比 | 是 |
-| POST | `/documents/:docId/revert` | 回滚到指定版本 | 是 |
-| POST | `/documents/:docId/snapshots` | 创建快照 | 是 |
-| POST | `/documents/:docId/commit` | 手动触发创建版本 | 是 |
-| GET | `/documents/:docId/pending-versions` | 获取待创建版本数量 | 是 |
+| 方法   | 路径                                 | 说明               | 认证 |
+| ------ | ------------------------------------ | ------------------ | ---- |
+| POST   | `/documents`                         | 创建文档           | 是   |
+| GET    | `/documents`                         | 文档列表           | 是   |
+| GET    | `/documents/search`                  | 搜索文档           | 是   |
+| GET    | `/documents/:docId`                  | 文档详情           | 是   |
+| GET    | `/documents/:docId/content`          | 文档内容/渲染树    | 是   |
+| PATCH  | `/documents/:docId`                  | 更新文档元数据     | 是   |
+| POST   | `/documents/:docId/publish`          | 发布文档           | 是   |
+| POST   | `/documents/:docId/move`             | 移动文档           | 是   |
+| DELETE | `/documents/:docId`                  | 删除文档           | 是   |
+| GET    | `/documents/:docId/revisions`        | 修订历史           | 是   |
+| GET    | `/documents/:docId/diff`             | 版本对比           | 是   |
+| POST   | `/documents/:docId/revert`           | 回滚到指定版本     | 是   |
+| POST   | `/documents/:docId/snapshots`        | 创建快照           | 是   |
+| POST   | `/documents/:docId/commit`           | 手动触发创建版本   | 是   |
+| GET    | `/documents/:docId/pending-versions` | 获取待创建版本数量 | 是   |
 
 ## 创建文档
 
@@ -29,12 +29,14 @@
 **说明：** 创建新文档，系统会自动创建根块和初始版本
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
 ```
 
 **请求体：**
+
 ```json
 {
   "workspaceId": "ws_1705123456789_abc123",
@@ -50,18 +52,19 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `workspaceId` | string | ✅ | 工作空间ID |
-| `title` | string | ✅ | 文档标题，1-255个字符 |
-| `icon` | string | ❌ | 文档图标（emoji），最多10个字符 |
-| `cover` | string | ❌ | 文档封面URL，最多500个字符 |
-| `visibility` | string | ❌ | 可见性：`private`（默认）、`workspace`、`public` |
-| `parentId` | string | ❌ | 父文档ID（用于文档树结构） |
-| `tags` | string[] | ❌ | 标签ID列表（tagId数组），系统会自动校验标签是否存在并更新使用统计 |
-| `category` | string | ❌ | 分类，最多50个字符 |
+| 字段          | 类型     | 必填 | 说明                                                              |
+| ------------- | -------- | ---- | ----------------------------------------------------------------- |
+| `workspaceId` | string   | ✅   | 工作空间ID                                                        |
+| `title`       | string   | ✅   | 文档标题，1-255个字符                                             |
+| `icon`        | string   | ❌   | 文档图标（emoji），最多10个字符                                   |
+| `cover`       | string   | ❌   | 文档封面URL，最多500个字符                                        |
+| `visibility`  | string   | ❌   | 可见性：`private`（默认）、`workspace`、`public`                  |
+| `parentId`    | string   | ❌   | 父文档ID（用于文档树结构）                                        |
+| `tags`        | string[] | ❌   | 标签ID列表（tagId数组），系统会自动校验标签是否存在并更新使用统计 |
+| `category`    | string   | ❌   | 分类，最多50个字符                                                |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -83,6 +86,7 @@ Content-Type: application/json
 ```
 
 **重要说明：**
+
 - 创建文档时会**自动创建根块**（`rootBlockId`），无需手动创建
 - 创建文档时会**自动创建初始版本**（`head = 1`）
 - 如果指定了 `parentId`，父文档必须属于同一工作空间
@@ -91,6 +95,7 @@ Content-Type: application/json
   - 标签的 `usageCount` 会自动更新（+1）
 
 **状态码：**
+
 - `201 Created` - 创建成功
 - `400 Bad Request` - 请求参数错误
 - `403 Forbidden` - 没有权限访问工作空间
@@ -102,26 +107,28 @@ Content-Type: application/json
 **说明：** 获取文档列表，支持多种过滤条件
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **查询参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `workspaceId` | string | ❌ | 工作空间ID（不传则查询有权限的所有空间） |
-| `status` | string | ❌ | 文档状态：`draft`、`normal`、`archived` |
-| `visibility` | string | ❌ | 可见性：`private`、`workspace`、`public` |
-| `parentId` | string | ❌ | 父文档ID（用于查询子文档） |
-| `tags` | string[] | ❌ | 标签ID过滤（tagId数组），查询包含指定标签的文档 |
-| `category` | string | ❌ | 分类过滤 |
-| `sortBy` | string | ❌ | 排序字段：`updatedAt`（默认）、`createdAt`、`title` |
-| `sortOrder` | string | ❌ | 排序顺序：`DESC`（默认）、`ASC` |
-| `page` | number | ❌ | 页码，默认 1 |
-| `pageSize` | number | ❌ | 每页数量，默认 20 |
+| 参数          | 类型     | 必填 | 说明                                                |
+| ------------- | -------- | ---- | --------------------------------------------------- |
+| `workspaceId` | string   | ❌   | 工作空间ID（不传则查询有权限的所有空间）            |
+| `status`      | string   | ❌   | 文档状态：`draft`、`normal`、`archived`             |
+| `visibility`  | string   | ❌   | 可见性：`private`、`workspace`、`public`            |
+| `parentId`    | string   | ❌   | 父文档ID（用于查询子文档）                          |
+| `tags`        | string[] | ❌   | 标签ID过滤（tagId数组），查询包含指定标签的文档     |
+| `category`    | string   | ❌   | 分类过滤                                            |
+| `sortBy`      | string   | ❌   | 排序字段：`updatedAt`（默认）、`createdAt`、`title` |
+| `sortOrder`   | string   | ❌   | 排序顺序：`DESC`（默认）、`ASC`                     |
+| `page`        | number   | ❌   | 页码，默认 1                                        |
+| `pageSize`    | number   | ❌   | 每页数量，默认 20                                   |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -144,6 +151,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **状态码：**
+
 - `200 OK` - 获取成功
 
 ## 搜索文档
@@ -153,22 +161,24 @@ Authorization: Bearer <your-access-token>
 **说明：** 搜索文档，支持全文搜索
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **查询参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `query` | string | ✅ | 搜索关键词 |
-| `workspaceId` | string | ❌ | 工作空间ID |
-| `status` | string | ❌ | 文档状态：`draft`、`normal`、`archived` |
-| `tags` | string[] | ❌ | 标签ID过滤（tagId数组），搜索包含指定标签的文档 |
-| `page` | number | ❌ | 页码，默认 1 |
-| `pageSize` | number | ❌ | 每页数量，默认 20 |
+| 参数          | 类型     | 必填 | 说明                                            |
+| ------------- | -------- | ---- | ----------------------------------------------- |
+| `query`       | string   | ✅   | 搜索关键词                                      |
+| `workspaceId` | string   | ❌   | 工作空间ID                                      |
+| `status`      | string   | ❌   | 文档状态：`draft`、`normal`、`archived`         |
+| `tags`        | string[] | ❌   | 标签ID过滤（tagId数组），搜索包含指定标签的文档 |
+| `page`        | number   | ❌   | 页码，默认 1                                    |
+| `pageSize`    | number   | ❌   | 每页数量，默认 20                               |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -190,11 +200,13 @@ Authorization: Bearer <your-access-token>
 ```
 
 **搜索说明：**
+
 - 使用 PostgreSQL 的 `tsvector` 进行全文搜索
 - 搜索文档标题和内容
 - 支持中文搜索
 
 **状态码：**
+
 - `200 OK` - 搜索成功
 
 ## 获取文档详情
@@ -204,17 +216,19 @@ Authorization: Bearer <your-access-token>
 **说明：** 获取文档的详细信息
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `docId` | string | 文档ID |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -240,6 +254,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `404 Not Found` - 文档不存在
 - `403 Forbidden` - 没有权限访问
@@ -251,26 +266,28 @@ Authorization: Bearer <your-access-token>
 **说明：** 获取文档的内容树（渲染树），支持分页加载，适用于超大型文档
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `docId` | string | 文档ID |
 
 **查询参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `version` | number | ❌ | 文档版本号（不传则使用最新版本 `head`） |
-| `maxDepth` | number | ❌ | 最大层级深度（从根块开始计算，0=只返回根块，1=根块+第一层，默认返回所有层级） |
-| `startBlockId` | string | ❌ | 起始块ID（用于分页，返回该块及其后续兄弟块） |
-| `limit` | number | ❌ | 每页返回的最大块数量（默认1000，最大10000） |
+| 参数           | 类型   | 必填 | 说明                                                                          |
+| -------------- | ------ | ---- | ----------------------------------------------------------------------------- |
+| `version`      | number | ❌   | 文档版本号（不传则使用最新版本 `head`）                                       |
+| `maxDepth`     | number | ❌   | 最大层级深度（从根块开始计算，0=只返回根块，1=根块+第一层，默认返回所有层级） |
+| `startBlockId` | string | ❌   | 起始块ID（用于分页，返回该块及其后续兄弟块）                                  |
+| `limit`        | number | ❌   | 每页返回的最大块数量（默认1000，最大10000）                                   |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -316,21 +333,23 @@ Authorization: Bearer <your-access-token>
 
 **字段说明：**
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `tree` | object | 文档内容树（根块及其子块） |
-| `pagination.totalBlocks` | number | 文档中的总块数 |
-| `pagination.returnedBlocks` | number | 本次返回的块数量 |
-| `pagination.hasMore` | boolean | 是否还有更多块未返回 |
-| `pagination.nextStartBlockId` | string | 下次请求的起始块ID（当 hasMore 为 true 时） |
+| 字段                          | 类型    | 说明                                        |
+| ----------------------------- | ------- | ------------------------------------------- |
+| `tree`                        | object  | 文档内容树（根块及其子块）                  |
+| `pagination.totalBlocks`      | number  | 文档中的总块数                              |
+| `pagination.returnedBlocks`   | number  | 本次返回的块数量                            |
+| `pagination.hasMore`          | boolean | 是否还有更多块未返回                        |
+| `pagination.nextStartBlockId` | string  | 下次请求的起始块ID（当 hasMore 为 true 时） |
 
 **分页使用说明：**
+
 - **按需加载**：对于超大型文档，建议使用 `maxDepth` 和 `limit` 参数控制返回的数据量
 - **层级加载**：使用 `maxDepth=0` 只获取根块，然后按需加载子块
 - **分页加载**：当 `hasMore=true` 时，使用 `nextStartBlockId` 作为 `startBlockId` 参数继续获取后续内容
 - **性能优化**：默认 `limit=1000`，可根据前端渲染能力调整（建议不超过5000）
 
 **使用示例：**
+
 ```typescript
 // 1. 首次加载：只加载前2层，最多100个块
 GET /api/v1/documents/doc_123/content?maxDepth=1&limit=100
@@ -343,12 +362,14 @@ GET /api/v1/documents/doc_123/content
 ```
 
 **说明：**
+
 - `tree` 包含根块及其子块的树形结构
 - 如果不指定 `version`，返回最新版本（`head`）的内容
 - 如果指定 `version`，返回该版本的内容（基于时间点计算）
 - **分页功能**：系统针对超大型文档优化，支持按层级和数量分页，避免一次性返回过多数据
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `404 Not Found` - 文档或版本不存在
 - `403 Forbidden` - 没有权限访问
@@ -360,6 +381,7 @@ GET /api/v1/documents/doc_123/content
 **说明：** 更新文档的标题、图标、标签等元数据。更新标签时会自动校验标签ID并更新使用统计。
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
@@ -367,11 +389,12 @@ Content-Type: application/json
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `docId` | string | 文档ID |
 
 **请求体：**
+
 ```json
 {
   "title": "更新后的标题",
@@ -383,19 +406,20 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `title` | string | ❌ | 文档标题，1-255个字符 |
-| `icon` | string | ❌ | 文档图标（emoji），最多10个字符 |
-| `cover` | string | ❌ | 文档封面URL，最多500个字符 |
-| `visibility` | string | ❌ | 可见性：`private`、`workspace`、`public` |
-| `tags` | string[] | ❌ | 标签ID列表（tagId数组），系统会自动校验标签是否存在并更新使用统计 |
-| `category` | string | ❌ | 分类，最多50个字符 |
-| `status` | string | ❌ | 文档状态：`draft`、`normal`、`archived` |
+| 字段         | 类型     | 必填 | 说明                                                              |
+| ------------ | -------- | ---- | ----------------------------------------------------------------- |
+| `title`      | string   | ❌   | 文档标题，1-255个字符                                             |
+| `icon`       | string   | ❌   | 文档图标（emoji），最多10个字符                                   |
+| `cover`      | string   | ❌   | 文档封面URL，最多500个字符                                        |
+| `visibility` | string   | ❌   | 可见性：`private`、`workspace`、`public`                          |
+| `tags`       | string[] | ❌   | 标签ID列表（tagId数组），系统会自动校验标签是否存在并更新使用统计 |
+| `category`   | string   | ❌   | 分类，最多50个字符                                                |
+| `status`     | string   | ❌   | 文档状态：`draft`、`normal`、`archived`                           |
 
 **权限要求：** owner、admin 或 editor
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -409,6 +433,7 @@ Content-Type: application/json
 ```
 
 **状态码：**
+
 - `200 OK` - 更新成功
 - `404 Not Found` - 文档不存在
 - `403 Forbidden` - 没有权限
@@ -420,19 +445,21 @@ Content-Type: application/json
 **说明：** 发布文档，将 `publishedHead` 设置为当前 `head`
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `docId` | string | 文档ID |
 
 **权限要求：** owner、admin 或 editor
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -446,11 +473,13 @@ Authorization: Bearer <your-access-token>
 ```
 
 **说明：**
+
 - 发布后，`publishedHead` 指向当前 `head`
 - 已发布的版本内容不会因后续编辑而改变
 - 可以通过 `GET /documents/:docId/content?version=<publishedHead>` 获取已发布版本
 
 **状态码：**
+
 - `201 Created` - 发布成功
 - `404 Not Found` - 文档不存在
 - `403 Forbidden` - 没有权限
@@ -462,6 +491,7 @@ Authorization: Bearer <your-access-token>
 **说明：** 移动文档到新的位置（改变父文档或排序）
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
@@ -469,11 +499,12 @@ Content-Type: application/json
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `docId` | string | 文档ID |
 
 **请求体：**
+
 ```json
 {
   "parentId": "doc_parent_123",
@@ -483,17 +514,19 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `parentId` | string | ❌ | 新的父文档ID（不传则移动到根目录） |
-| `sortOrder` | number | ❌ | 新的排序顺序 |
+| 字段        | 类型   | 必填 | 说明                               |
+| ----------- | ------ | ---- | ---------------------------------- |
+| `parentId`  | string | ❌   | 新的父文档ID（不传则移动到根目录） |
+| `sortOrder` | number | ❌   | 新的排序顺序                       |
 
 **权限要求：** owner、admin 或 editor
 
 **限制：**
+
 - 不能移动到自身或形成循环引用
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -507,6 +540,7 @@ Content-Type: application/json
 ```
 
 **状态码：**
+
 - `200 OK` - 移动成功
 - `404 Not Found` - 文档不存在
 - `403 Forbidden` - 没有权限
@@ -519,19 +553,21 @@ Content-Type: application/json
 **说明：** 删除文档（软删除）
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `docId` | string | 文档ID |
 
 **权限要求：** owner 或 admin
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -542,10 +578,12 @@ Authorization: Bearer <your-access-token>
 ```
 
 **说明：**
+
 - 删除是软删除，文档不会被物理删除
 - 删除文档会级联删除其所有子文档
 
 **状态码：**
+
 - `200 OK` - 删除成功
 - `404 Not Found` - 文档不存在
 - `403 Forbidden` - 没有权限
@@ -559,18 +597,20 @@ Authorization: Bearer <your-access-token>
 **说明：** 获取文档的版本修订历史
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **查询参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `page` | number | ❌ | 页码，默认 1 |
-| `pageSize` | number | ❌ | 每页数量，默认 20 |
+| 参数       | 类型   | 必填 | 说明              |
+| ---------- | ------ | ---- | ----------------- |
+| `page`     | number | ❌   | 页码，默认 1      |
+| `pageSize` | number | ❌   | 每页数量，默认 20 |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -598,16 +638,17 @@ Authorization: Bearer <your-access-token>
 **说明：** 对比两个版本之间的差异
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **查询参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `fromVer` | number | ✅ | 起始版本号 |
-| `toVer` | number | ✅ | 目标版本号 |
+| 参数      | 类型   | 必填 | 说明       |
+| --------- | ------ | ---- | ---------- |
+| `fromVer` | number | ✅   | 起始版本号 |
+| `toVer`   | number | ✅   | 目标版本号 |
 
 **响应示例：**
 
@@ -631,12 +672,14 @@ Authorization: Bearer <your-access-token>
 **说明：** 将文档回滚到指定版本
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
 ```
 
 **请求体：**
+
 ```json
 {
   "version": 3
@@ -645,17 +688,19 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `version` | number | ✅ | 要回滚到的版本号 |
+| 字段      | 类型   | 必填 | 说明             |
+| --------- | ------ | ---- | ---------------- |
+| `version` | number | ✅   | 要回滚到的版本号 |
 
 **权限要求：** owner、admin 或 editor
 
 **说明：**
+
 - 回滚会创建新版本（`head` 递增），不会覆盖历史版本
 - 回滚后可以再次回滚到更早的版本
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -674,6 +719,7 @@ Content-Type: application/json
 **说明：** 创建文档快照，保存当前版本的完整块版本映射
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
@@ -681,6 +727,7 @@ Authorization: Bearer <your-access-token>
 **权限要求：** owner、admin 或 editor
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -699,6 +746,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **说明：**
+
 - 快照是幂等的：如果已存在相同 `docVer` 的快照，直接返回
 - 快照保存的是当前 `head` 的完整状态，可用于快速恢复
 
@@ -709,12 +757,14 @@ Authorization: Bearer <your-access-token>
 **说明：** 手动触发创建文档版本，将所有待创建的操作合并为一个版本
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
 ```
 
 **请求体：**
+
 ```json
 {
   "message": "完成编辑"
@@ -723,13 +773,14 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `message` | string | ❌ | 版本消息，最多500个字符 |
+| 字段      | 类型   | 必填 | 说明                    |
+| --------- | ------ | ---- | ----------------------- |
+| `message` | string | ❌   | 版本消息，最多500个字符 |
 
 **权限要求：** owner、admin 或 editor
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -743,11 +794,13 @@ Content-Type: application/json
 ```
 
 **说明：**
+
 - 如果文档没有待创建的版本（`pendingCount = 0`），会返回 `400 Bad Request`
 - 创建的版本会包含所有待处理操作的数量信息
 - 创建版本后，待创建版本计数会被清除
 
 **状态码：**
+
 - `200 OK` - 版本创建成功
 - `400 Bad Request` - 没有待创建的版本
 - `404 Not Found` - 文档不存在
@@ -760,11 +813,13 @@ Content-Type: application/json
 **说明：** 查询文档当前有多少待创建的版本
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -778,13 +833,13 @@ Authorization: Bearer <your-access-token>
 
 **字段说明：**
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `pendingCount` | number | 待创建版本的数量 |
-| `hasPending` | boolean | 是否有待创建的版本 |
+| 字段           | 类型    | 说明               |
+| -------------- | ------- | ------------------ |
+| `pendingCount` | number  | 待创建版本的数量   |
+| `hasPending`   | boolean | 是否有待创建的版本 |
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `404 Not Found` - 文档不存在
 - `403 Forbidden` - 没有权限访问
-

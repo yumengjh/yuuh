@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateSettingsProfilesTable1760000000000
-  implements MigrationInterface
-{
+export class CreateSettingsProfilesTable1760000000000 implements MigrationInterface {
   name = 'CreateSettingsProfilesTable1760000000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -98,13 +96,8 @@ export class CreateSettingsProfilesTable1760000000000
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `DROP INDEX IF EXISTS "IDX_settings_profiles_scope_id"`,
-    );
-    await queryRunner.query(
-      `DROP INDEX IF EXISTS "IDX_settings_profiles_scope_type"`,
-    );
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_settings_profiles_scope_id"`);
+    await queryRunner.query(`DROP INDEX IF EXISTS "IDX_settings_profiles_scope_type"`);
     await queryRunner.dropTable('settings_profiles', true);
   }
 }
-

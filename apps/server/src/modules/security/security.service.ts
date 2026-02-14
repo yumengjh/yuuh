@@ -26,13 +26,8 @@ export class SecurityService {
   /**
    * 记录安全事件到 security_logs
    */
-  async logEvent(
-    eventType: string,
-    options: SecurityLogOptions,
-  ): Promise<SecurityLog> {
-    const severity =
-      options.severity ||
-      this.inferSeverity(eventType, options.threatLevel);
+  async logEvent(eventType: string, options: SecurityLogOptions): Promise<SecurityLog> {
+    const severity = options.severity || this.inferSeverity(eventType, options.threatLevel);
     const log = this.securityLogRepository.create({
       logId: generateLogId(),
       eventType,
@@ -120,7 +115,10 @@ export class SecurityService {
 
   private inferSeverity(eventType: string, threatLevel?: string): string {
     if (threatLevel === 'high' || threatLevel === 'critical') return SecuritySeverity.HIGH;
-    if (eventType === SecurityEventType.LOGIN_FAILED || eventType === SecurityEventType.UNAUTHORIZED_ACCESS)
+    if (
+      eventType === SecurityEventType.LOGIN_FAILED ||
+      eventType === SecurityEventType.UNAUTHORIZED_ACCESS
+    )
       return SecuritySeverity.MEDIUM;
     return SecuritySeverity.LOW;
   }

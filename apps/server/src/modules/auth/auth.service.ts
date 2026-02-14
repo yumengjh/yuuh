@@ -37,10 +37,7 @@ export class AuthService {
   async register(registerDto: RegisterDto) {
     // 检查用户名是否已存在
     const existingUser = await this.userRepository.findOne({
-      where: [
-        { username: registerDto.username },
-        { email: registerDto.email },
-      ],
+      where: [{ username: registerDto.username }, { email: registerDto.email }],
     });
 
     if (existingUser) {
@@ -82,10 +79,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto, ctx?: RequestContext) {
-    const user = await this.validateUser(
-      loginDto.emailOrUsername,
-      loginDto.password,
-    );
+    const user = await this.validateUser(loginDto.emailOrUsername, loginDto.password);
 
     if (!user) {
       this.securityService
@@ -132,10 +126,7 @@ export class AuthService {
 
   async validateUser(emailOrUsername: string, password: string): Promise<User | null> {
     const user = await this.userRepository.findOne({
-      where: [
-        { email: emailOrUsername },
-        { username: emailOrUsername },
-      ],
+      where: [{ email: emailOrUsername }, { username: emailOrUsername }],
     });
 
     if (!user) {
@@ -204,7 +195,7 @@ export class AuthService {
       await this.sessionRepository.save(session);
 
       return tokens;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('刷新令牌无效');
     }
   }
@@ -227,7 +218,16 @@ export class AuthService {
   async getCurrentUser(userId: string) {
     const user = await this.userRepository.findOne({
       where: { userId },
-      select: ['userId', 'username', 'email', 'displayName', 'avatar', 'bio', 'settings', 'createdAt'],
+      select: [
+        'userId',
+        'username',
+        'email',
+        'displayName',
+        'avatar',
+        'bio',
+        'settings',
+        'createdAt',
+      ],
     });
 
     if (!user) {
@@ -240,15 +240,7 @@ export class AuthService {
   async getUserProfileByUserId(userId: string) {
     const user = await this.userRepository.findOne({
       where: { userId },
-      select: [
-        'username',
-        'displayName',
-        'email',
-        'avatar',
-        'bio',
-        'status',
-        'updatedAt',
-      ],
+      select: ['username', 'displayName', 'email', 'avatar', 'bio', 'status', 'updatedAt'],
     });
 
     if (!user) {
@@ -277,10 +269,7 @@ export class AuthService {
 
     let changed = false;
 
-    if (
-      updateMeDto.displayName !== undefined &&
-      updateMeDto.displayName !== null
-    ) {
+    if (updateMeDto.displayName !== undefined && updateMeDto.displayName !== null) {
       user.displayName = updateMeDto.displayName;
       changed = true;
     }
@@ -339,7 +328,10 @@ export class AuthService {
     };
   }
 
-  private async createSession(userId: string, tokens: { accessToken: string; refreshToken: string }) {
+  private async createSession(
+    userId: string,
+    tokens: { accessToken: string; refreshToken: string },
+  ) {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7天后过期
 

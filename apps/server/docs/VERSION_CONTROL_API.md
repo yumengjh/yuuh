@@ -32,12 +32,13 @@
 **接口：** `POST /api/v1/blocks`
 
 **请求示例（延迟创建版本）：**
+
 ```json
 {
   "docId": "doc_1234567890_abc123",
   "type": "paragraph",
   "payload": { "text": "内容" },
-  "createVersion": false  // 不立即创建版本
+  "createVersion": false // 不立即创建版本
 }
 ```
 
@@ -46,10 +47,11 @@
 **接口：** `PATCH /api/v1/blocks/:blockId/content`
 
 **请求示例（延迟创建版本）：**
+
 ```json
 {
   "payload": { "text": "更新后的内容" },
-  "createVersion": false  // 不立即创建版本
+  "createVersion": false // 不立即创建版本
 }
 ```
 
@@ -58,11 +60,12 @@
 **接口：** `POST /api/v1/blocks/:blockId/move`
 
 **请求示例（延迟创建版本）：**
+
 ```json
 {
   "parentId": "b_root_123",
   "sortKey": "0.5",
-  "createVersion": false  // 不立即创建版本
+  "createVersion": false // 不立即创建版本
 }
 ```
 
@@ -71,6 +74,7 @@
 **接口：** `POST /api/v1/blocks/batch`
 
 **请求示例（延迟创建版本）：**
+
 ```json
 {
   "docId": "doc_1234567890_abc123",
@@ -90,6 +94,7 @@
 ```
 
 **注意：**
+
 - `createVersion` 默认为 `true`（立即创建版本）
 - 设置为 `false` 时，操作会记录到待创建版本计数中，但不立即创建版本
 - 删除操作（`DELETE /api/v1/blocks/:blockId`）**总是立即创建版本**（重要操作）
@@ -103,19 +108,22 @@
 **功能：** 手动触发创建文档版本，将所有待创建的操作合并为一个版本
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-token>
 Content-Type: application/json
 ```
 
 **请求体：**
+
 ```json
 {
-  "message": "完成编辑"  // 可选，版本消息
+  "message": "完成编辑" // 可选，版本消息
 }
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -129,6 +137,7 @@ Content-Type: application/json
 ```
 
 **说明：**
+
 - 如果文档没有待创建的版本（`pendingCount = 0`），会返回 `400 Bad Request`
 - 创建的版本会包含所有待处理操作的数量信息
 - 创建版本后，待创建版本计数会被清除
@@ -142,11 +151,13 @@ Content-Type: application/json
 **功能：** 查询文档当前有多少待创建的版本
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-token>
 ```
 
 **响应：**
+
 ```json
 {
   "success": true,
@@ -159,6 +170,7 @@ Authorization: Bearer <your-token>
 ```
 
 **说明：**
+
 - `pendingCount`：待创建版本的数量（即有多少个块操作设置了 `createVersion: false`）
 - `hasPending`：是否有待创建的版本（`pendingCount > 0`）
 
@@ -174,14 +186,14 @@ Authorization: Bearer <your-token>
 // 用户输入时，设置 createVersion: false
 async function updateBlockContent(blockId: string, content: string) {
   await fetch(`/api/v1/blocks/${blockId}/content`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       payload: { text: content },
-      createVersion: false,  // 延迟创建版本
+      createVersion: false, // 延迟创建版本
     }),
   });
 }
@@ -189,13 +201,13 @@ async function updateBlockContent(blockId: string, content: string) {
 // 用户停止输入 2 秒后，或点击保存按钮时，手动创建版本
 async function saveDocument(docId: string) {
   const response = await fetch(`/api/v1/documents/${docId}/commit`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      message: '保存编辑',
+      message: "保存编辑",
     }),
   });
   return response.json();
@@ -209,17 +221,17 @@ async function saveDocument(docId: string) {
 ```typescript
 // 批量创建块，不立即创建版本
 async function batchCreateBlocks(docId: string, blocks: any[]) {
-  await fetch('/api/v1/blocks/batch', {
-    method: 'POST',
+  await fetch("/api/v1/blocks/batch", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       docId,
-      createVersion: false,  // 延迟创建版本
-      operations: blocks.map(block => ({
-        type: 'create',
+      createVersion: false, // 延迟创建版本
+      operations: blocks.map((block) => ({
+        type: "create",
         data: block,
       })),
     }),
@@ -229,13 +241,13 @@ async function batchCreateBlocks(docId: string, blocks: any[]) {
 // 完成后手动创建版本
 async function commitChanges(docId: string) {
   await fetch(`/api/v1/documents/${docId}/commit`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      message: '批量创建完成',
+      message: "批量创建完成",
     }),
   });
 }
@@ -254,24 +266,24 @@ function startAutoSave(docId: string) {
     const pendingRes = await fetch(
       `/api/v1/documents/${docId}/pending-versions`,
       {
-        headers: { 'Authorization': `Bearer ${token}` },
-      }
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
     const pending = await pendingRes.json();
 
     if (pending.data.hasPending) {
       // 有待创建的版本，自动保存
       await fetch(`/api/v1/documents/${docId}/commit`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          message: '自动保存',
+          message: "自动保存",
         }),
       });
-      console.log('自动保存成功');
+      console.log("自动保存成功");
     }
   }, 30000); // 30 秒
 }
@@ -292,11 +304,13 @@ function stopAutoSave() {
 **重要：** 不同文档的版本控制状态完全隔离，互不影响。
 
 **实现方式：**
+
 - 使用 `Map<docId, { count, lastUpdate }>` 存储待创建版本计数
 - 每个文档的 `docId` 作为唯一键
 - 操作时只影响当前文档的计数
 
 **示例：**
+
 ```
 文档 A (doc_a): pendingCount = 3
 文档 B (doc_b): pendingCount = 5

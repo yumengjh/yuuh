@@ -51,4 +51,3 @@ export interface SettingsProfileLookup {
   scopeType: SettingsScopeType;
   scopeId: string;
 }
-

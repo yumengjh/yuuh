@@ -19,10 +19,7 @@ export class ActivitiesController {
   @Get()
   @ApiOperation({ summary: '获取活动日志' })
   @ApiResponse({ status: 200, description: '工作空间、用户、操作类型、时间范围、分页' })
-  async list(
-    @Query() dto: QueryActivitiesDto,
-    @CurrentUser() user: { userId: string },
-  ) {
+  async list(@Query() dto: QueryActivitiesDto, @CurrentUser() user: { userId: string }) {
     await this.workspacesService.checkAccess(dto.workspaceId, user.userId);
     return this.activitiesService.findFiltered(dto);
   }

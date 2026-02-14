@@ -15,23 +15,25 @@
 
 ```js
 fetch("http://localhost:5200/api/v1/blocks/b_1770797336694_9d03a42d/content", {
-  "headers": {
-    "accept": "application/json, text/plain, */*",
+  headers: {
+    accept: "application/json, text/plain, */*",
     "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,zh-HK;q=0.7",
-    "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1XzE3Njg3MjA5NDM1NjdfYjc0OTJmZGYiLCJpYXQiOjE3NzA3NzI5OTQsImV4cCI6MTc3MDg1OTM5NH0.42F9DjcVQQG8o95zwkiLYM841DGkBJD2Y81qAoU4mqM",
+    authorization:
+      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1XzE3Njg3MjA5NDM1NjdfYjc0OTJmZGYiLCJpYXQiOjE3NzA3NzI5OTQsImV4cCI6MTc3MDg1OTM5NH0.42F9DjcVQQG8o95zwkiLYM841DGkBJD2Y81qAoU4mqM",
     "cache-control": "no-cache",
     "content-type": "application/json",
-    "pragma": "no-cache",
-    "sec-ch-ua": "\"Not(A:Brand\";v=\"8\", \"Chromium\";v=\"144\", \"Google Chrome\";v=\"144\"",
+    pragma: "no-cache",
+    "sec-ch-ua":
+      '"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"',
     "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": "\"Windows\"",
+    "sec-ch-ua-platform": '"Windows"',
     "sec-fetch-dest": "empty",
     "sec-fetch-mode": "cors",
     "sec-fetch-site": "same-site",
-    "Referer": "http://localhost:5173/"
+    Referer: "http://localhost:5173/",
   },
-  "body": "{\"payload\":{\"text\":\"继续测试一下，感觉还行，复制大量的内容shiyix\"},\"plainText\":\"继续测试一下，感觉还行，复制大量的内容shiyix\",\"createVersion\":false}",
-  "method": "PATCH"
+  body: '{"payload":{"text":"继续测试一下，感觉还行，复制大量的内容shiyix"},"plainText":"继续测试一下，感觉还行，复制大量的内容shiyix","createVersion":false}',
+  method: "PATCH",
 });
 ```
 
@@ -97,4 +99,3 @@ fetch("http://localhost:5200/api/v1/blocks/b_1770797336694_9d03a42d/content", {
 
 - 这是**可识别的业务冲突类数据库错误**，不是“未知内部错误”。
 - 通过全局过滤器映射后，前端可根据 `409 + DUPLICATE_KEY` 做重试、串行化或提示“保存冲突”。
-

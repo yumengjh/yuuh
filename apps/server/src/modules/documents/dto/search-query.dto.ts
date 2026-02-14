@@ -8,7 +8,10 @@ export class SearchQueryDto {
   @MinLength(1, { message: '搜索关键词不能为空' })
   query: string;
 
-  @ApiPropertyOptional({ description: '工作空间ID（限制搜索范围）', example: 'ws_1234567890_abc123' })
+  @ApiPropertyOptional({
+    description: '工作空间ID（限制搜索范围）',
+    example: 'ws_1234567890_abc123',
+  })
   @IsOptional()
   @IsString()
   workspaceId?: string;
@@ -33,7 +36,13 @@ export class SearchQueryDto {
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ description: '每页数量', example: 20, default: 20, minimum: 1, maximum: 100 })
+  @ApiPropertyOptional({
+    description: '每页数量',
+    example: 20,
+    default: 20,
+    minimum: 1,
+    maximum: 100,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

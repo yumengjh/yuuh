@@ -51,7 +51,8 @@ export class SearchService {
     const params = { query, titleLike, workspaceIds, deleted: 'deleted' };
     const baseDocWhere = 'd.workspaceId IN (:...workspaceIds) AND d.status != :deleted';
     const docMatch = '(d.searchVector @@ plainto_tsquery(:query) OR d.title ILIKE :titleLike)';
-    const blockMatch = '(bv.searchVector @@ plainto_tsquery(:query) OR bv.plainText ILIKE :titleLike)';
+    const blockMatch =
+      '(bv.searchVector @@ plainto_tsquery(:query) OR bv.plainText ILIKE :titleLike)';
 
     const result: {
       documents: { items: any[]; total: number; page: number; pageSize: number };
@@ -171,7 +172,8 @@ export class SearchService {
 
     const baseDocWhere = 'd.workspaceId IN (:...workspaceIds) AND d.status != :deleted';
     const docMatch = '(d.searchVector @@ plainto_tsquery(:query) OR d.title ILIKE :titleLike)';
-    const blockMatch = '(bv.searchVector @@ plainto_tsquery(:query) OR bv.plainText ILIKE :titleLike)';
+    const blockMatch =
+      '(bv.searchVector @@ plainto_tsquery(:query) OR bv.plainText ILIKE :titleLike)';
 
     const result: {
       documents: { items: any[]; total: number; page: number; pageSize: number };
@@ -198,7 +200,14 @@ export class SearchService {
         .where(baseDocWhere)
         .andWhere(docMatch)
         .setParameters(params)
-        .select(['d.docId', 'd.title', 'd.workspaceId', 'd.updatedAt', 'd.createdAt', 'd.createdBy']);
+        .select([
+          'd.docId',
+          'd.title',
+          'd.workspaceId',
+          'd.updatedAt',
+          'd.createdAt',
+          'd.createdBy',
+        ]);
 
       if (tags?.length) qb.andWhere('d.tags && :tags');
       if (startDate) qb.andWhere('d.updatedAt >= :startDate');

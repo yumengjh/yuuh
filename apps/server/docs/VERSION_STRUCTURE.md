@@ -17,6 +17,7 @@
 6. **一个文档就是由多个块中的最新版本块的内容组成** - ⚠️ **部分正确，但有重要细节**
 
 **关键点：**
+
 - **获取最新版本（head）时**：确实是由所有块的 `latestVer` 组成
 - **获取历史版本时**：**不是**使用 `latestVer`，而是根据时间点计算该版本下每个块应该使用的版本号
 
@@ -63,12 +64,14 @@ GET /api/v1/documents/:docId/content
 ```
 
 **逻辑：**
+
 1. 获取文档的 `head`（如 `5`）
 2. 找到所有块的 `latestVer`
 3. 使用这些 `latestVer` 获取每个块的内容
 4. 组装成文档内容树
 
 **示例：**
+
 ```
 文档 head = 5
 ├── Block A: latestVer = 3 → 使用 BlockVersion ver=3
@@ -91,6 +94,7 @@ GET /api/v1/documents/:docId/content?version=3
 ```
 
 **逻辑：**
+
 1. 找到文档版本 3 对应的 `DocRevision`（记录创建时间 `createdAt`）
 2. 计算 `blockVersionMap`：查找在 `createdAt` 时间点之前，每个块的最新版本
 3. 使用 `blockVersionMap` 获取每个块在该版本下的内容
@@ -129,6 +133,7 @@ GET /api/v1/documents/:docId/content?version=3
 ```
 
 **当前状态（head=5）：**
+
 ```
 Block A: latestVer = 3
 Block B: latestVer = 2
@@ -136,6 +141,7 @@ Block C: latestVer = 1
 ```
 
 **获取版本 3 的内容：**
+
 1. 找到 `DocRevision`（docVer=3, createdAt=10:02:00）
 2. 计算 `blockVersionMap`：
    - Block A：在 10:02:00 之前的最新版本是 ver=2（不是 ver=3！）
@@ -169,6 +175,7 @@ Document: head=1
 ```
 
 **获取 head=1 的内容：**
+
 - 使用 Block A 的 ver=1（latestVer）
 - 使用 Block B 的 ver=1（latestVer）
 - ✅ 结果：由最新版本组成
@@ -187,11 +194,13 @@ Document: head=2
 ```
 
 **获取 head=2 的内容：**
+
 - 使用 Block A 的 ver=2（latestVer）
 - 使用 Block B 的 ver=1（latestVer）
 - ✅ 结果：由最新版本组成
 
 **获取 head=1 的内容（历史版本）：**
+
 - 找到 DocRevision（docVer=1, createdAt=10:00:00）
 - 计算 blockVersionMap：
   - Block A：在 10:00:00 之前的最新版本是 ver=1
@@ -214,6 +223,7 @@ Document: head=3  ← 回滚后创建新版本
 ```
 
 **获取 head=3 的内容：**
+
 - 使用 Block A 的 ver=1（latestVer，回滚后已更新）
 - 使用 Block B 的 ver=1（latestVer）
 - ✅ 结果：由最新版本组成（但 latestVer 已被回滚操作修改）
@@ -229,10 +239,12 @@ Document: head=3  ← 回滚后创建新版本
 > "一个文档就是由多个块中的最新版本块的内容组成"
 
 **正确场景：**
+
 - ✅ 获取最新版本（`head`）时：确实由所有块的 `latestVer` 组成
 - ✅ 回滚后的最新版本：`latestVer` 已被修改，指向回滚目标版本
 
 **不准确场景：**
+
 - ⚠️ 获取历史版本时：**不是**使用 `latestVer`，而是根据时间点计算 `blockVersionMap`
 
 ### 📝 更准确的表述
@@ -240,11 +252,13 @@ Document: head=3  ← 回滚后创建新版本
 **文档内容的组成方式：**
 
 1. **获取最新版本（head）**：
+
    ```
    文档内容 = 所有块的 latestVer 对应的 BlockVersion
    ```
 
 2. **获取历史版本（docVer < head）**：
+
    ```
    文档内容 = 根据 DocRevision.createdAt 计算 blockVersionMap
             = 每个块在该时间点之前的最新版本对应的 BlockVersion
@@ -283,13 +297,13 @@ Document: head=3  ← 回滚后创建新版本
 async getContent(docId, undefined, userId) {
   const doc = await findDocument(docId);
   const docVer = doc.head; // 使用最新版本
-  
+
   // 方式1：直接使用 latestVer（当前实现可能不完整）
   const blocks = await findBlocks(docId);
-  const content = blocks.map(block => 
+  const content = blocks.map(block =>
     getBlockVersion(block.blockId, block.latestVer)
   );
-  
+
   return buildTree(content);
 }
 ```
@@ -301,19 +315,19 @@ async getContent(docId, undefined, userId) {
 async getContent(docId, version, userId) {
   const doc = await findDocument(docId);
   const docVer = version; // 使用指定版本
-  
+
   // 方式2：计算 blockVersionMap
   const revision = await findDocRevision(docId, docVer);
   const blockVersionMap = await calculateBlockVersionMap(
-    docId, 
+    docId,
     revision.createdAt // 根据时间点计算
   );
-  
+
   // 使用 blockVersionMap，而不是 latestVer
   const content = Object.entries(blockVersionMap).map(([blockId, ver]) =>
     getBlockVersion(blockId, ver) // 使用计算出的版本号
   );
-  
+
   return buildTree(content);
 }
 ```
@@ -327,6 +341,7 @@ async getContent(docId, version, userId) {
 **A:** 因为 `latestVer` 可能已经被后续操作修改（如回滚），不能代表历史版本的状态。
 
 **示例：**
+
 - 版本3时：Block A 的 latestVer=2
 - 版本5时：回滚到版本1，Block A 的 latestVer=1
 - 获取版本3的内容：如果使用 latestVer=1，会得到错误的内容
@@ -336,6 +351,7 @@ async getContent(docId, version, userId) {
 **A:** 根据 `DocRevision.createdAt` 时间点，查找该时间点之前每个块的最新版本。
 
 **SQL 逻辑（简化）：**
+
 ```sql
 SELECT blockId, MAX(ver) as maxVer
 FROM block_versions
@@ -346,7 +362,8 @@ GROUP BY blockId
 
 ### Q3: 回滚操作会做什么？
 
-**A:** 
+**A:**
+
 1. 计算目标版本的 `blockVersionMap`
 2. 将所有块的 `latestVer` 修改为目标版本映射中的版本号
 3. 软删除目标版本中不存在的块

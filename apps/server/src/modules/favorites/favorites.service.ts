@@ -1,10 +1,6 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Favorite } from '../../entities/favorite.entity';
 import { Document } from '../../entities/document.entity';
 import { DocumentsService } from '../documents/documents.service';
@@ -43,7 +39,14 @@ export class FavoritesService {
     if (doc) {
       doc.favoriteCount = (doc.favoriteCount || 0) + 1;
       await this.documentRepository.save(doc);
-      await this.activitiesService.record(doc.workspaceId, FAVORITE_ACTIONS.CREATE, 'favorite', dto.docId, userId, { docId: dto.docId });
+      await this.activitiesService.record(
+        doc.workspaceId,
+        FAVORITE_ACTIONS.CREATE,
+        'favorite',
+        dto.docId,
+        userId,
+        { docId: dto.docId },
+      );
     }
 
     return favorite;
@@ -62,7 +65,14 @@ export class FavoritesService {
     if (doc) {
       doc.favoriteCount = Math.max(0, (doc.favoriteCount || 0) - 1);
       await this.documentRepository.save(doc);
-      await this.activitiesService.record(doc.workspaceId, FAVORITE_ACTIONS.REMOVE, 'favorite', docId, userId, { docId });
+      await this.activitiesService.record(
+        doc.workspaceId,
+        FAVORITE_ACTIONS.REMOVE,
+        'favorite',
+        docId,
+        userId,
+        { docId },
+      );
     }
 
     return { message: '已取消收藏', docId };

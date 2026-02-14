@@ -21,7 +21,11 @@ export class UpdateWorkspaceDto {
   @MaxLength(10, { message: '图标不能超过10个字符' })
   icon?: string;
 
-  @ApiPropertyOptional({ description: '工作空间状态', example: 'active', enum: ['active', 'archived'] })
+  @ApiPropertyOptional({
+    description: '工作空间状态',
+    example: 'active',
+    enum: ['active', 'archived'],
+  })
   @IsOptional()
   @IsString()
   status?: string;

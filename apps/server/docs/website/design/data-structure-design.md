@@ -35,6 +35,7 @@
 ```
 
 **重要说明：**
+
 - `payload.children` 是根块 payload 的内部结构，**不是实际的子块**
 - 实际的子块关系通过**外层的 `children` 数组**维护
 - 根块的 `payload.children` 通常为空数组，仅用于标识这是根块
@@ -67,16 +68,17 @@
 
 ### 字段说明
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `blockId` | string | 块的唯一标识符，格式如 `b_<timestamp>_<random>` |
-| `type` | string | 块类型，如 `root`、`paragraph`、`heading`、`list` 等 |
-| `payload` | object | 块的实际内容，JSON 格式，根据块类型不同而不同 |
-| `children` | array | **子块数组**，包含所有直接子块，形成树形结构 |
+| 字段       | 类型   | 说明                                                 |
+| ---------- | ------ | ---------------------------------------------------- |
+| `blockId`  | string | 块的唯一标识符，格式如 `b_<timestamp>_<random>`      |
+| `type`     | string | 块类型，如 `root`、`paragraph`、`heading`、`list` 等 |
+| `payload`  | object | 块的实际内容，JSON 格式，根据块类型不同而不同        |
+| `children` | array  | **子块数组**，包含所有直接子块，形成树形结构         |
 
 ### Payload 结构
 
 **根块的 payload：**
+
 ```json
 {
   "type": "root",
@@ -86,6 +88,7 @@
 ```
 
 **普通块的 payload：**
+
 ```json
 {
   "text": "块的实际内容"
@@ -93,6 +96,7 @@
 ```
 
 **重要区别：**
+
 - ✅ **根块**的 `payload` 包含 `type: "root"` 和 `children: []`
 - ❌ **普通块**的 `payload` **不包含** `children` 字段
 - ✅ 所有块的**子块关系**都通过**外层的 `children` 数组**维护
@@ -179,6 +183,7 @@
 ## 核心功能
 
 ### 块级编辑
+
 - 支持多种块类型
   - 段落块
   - 标题块
@@ -186,6 +191,7 @@
 - 支持嵌套结构
 
 ### 版本控制
+
 系统会自动记录每次修改，支持版本回滚。
 
 ## 技术栈
@@ -318,14 +324,14 @@
 
 ### 对应关系说明
 
-| Markdown 元素 | JSON 块类型 | 说明 |
-|--------------|------------|------|
-| `# 标题` | `heading` (level: 1) | 一级标题 |
-| `## 标题` | `heading` (level: 2) | 二级标题 |
-| `### 标题` | `heading` (level: 3) | 三级标题 |
-| 普通段落 | `paragraph` | 段落块 |
-| `- 列表项` | `list` (type: "unordered") | 无序列表 |
-| 缩进列表项 | 嵌套在父块的 `children` 中 | 通过 `indent` 和 `parentId` 实现 |
+| Markdown 元素 | JSON 块类型                | 说明                             |
+| ------------- | -------------------------- | -------------------------------- |
+| `# 标题`      | `heading` (level: 1)       | 一级标题                         |
+| `## 标题`     | `heading` (level: 2)       | 二级标题                         |
+| `### 标题`    | `heading` (level: 3)       | 三级标题                         |
+| 普通段落      | `paragraph`                | 段落块                           |
+| `- 列表项`    | `list` (type: "unordered") | 无序列表                         |
+| 缩进列表项    | 嵌套在父块的 `children` 中 | 通过 `indent` 和 `parentId` 实现 |
 
 ### 关键观察
 
@@ -353,7 +359,7 @@
   "docId": "doc_xxx",
   "type": "paragraph",
   "payload": { "text": "新内容" },
-  "parentId": "b_1768730672350_f3bc0fc4"  // 指定父块ID
+  "parentId": "b_1768730672350_f3bc0fc4" // 指定父块ID
 }
 ```
 
@@ -377,27 +383,28 @@
 ### 示例对比
 
 **插入前：**
+
 ```json
 {
   "type": "root",
-  "children": [
-    { "blockId": "b_1", "type": "paragraph", "children": [] }
-  ]
+  "children": [{ "blockId": "b_1", "type": "paragraph", "children": [] }]
 }
 ```
 
 **插入到根块（不指定 parentId）：**
+
 ```json
 {
   "type": "root",
   "children": [
     { "blockId": "b_1", "type": "paragraph", "children": [] },
-    { "blockId": "b_2", "type": "paragraph", "children": [] }  // 新插入
+    { "blockId": "b_2", "type": "paragraph", "children": [] } // 新插入
   ]
 }
 ```
 
 **插入到 b_1（指定 parentId: "b_1"）：**
+
 ```json
 {
   "type": "root",
@@ -406,7 +413,7 @@
       "blockId": "b_1",
       "type": "paragraph",
       "children": [
-        { "blockId": "b_2", "type": "paragraph", "children": [] }  // 新插入
+        { "blockId": "b_2", "type": "paragraph", "children": [] } // 新插入
       ]
     }
   ]
@@ -432,6 +439,7 @@ CREATE TABLE block_versions (
 ### 排序键（sortKey）机制
 
 **分数排序系统：**
+
 - `sortKey` 使用数字字符串（如 `"500000"`, `"600000"`）
 - 支持在任意位置插入新元素，无需重新排序所有块
 - 默认值：`"500000"`（中间值）
@@ -439,10 +447,12 @@ CREATE TABLE block_versions (
 - 插入到中间：计算前后两个 `sortKey` 的中间值
 
 **排序规则：**
+
 - 使用**数字比较**而非字符串比较
 - 确保 `"10" > "2"`（而不是字符串比较的 `"10" < "2"`）
 
 **更新块时的行为：**
+
 - ✅ 更新块内容时，`sortKey` **保持不变**
 - ✅ 只有移动块（`move`）操作才会改变 `sortKey`
 - ✅ 如果更新后块位置发生变化，可能是排序比较方式的问题
@@ -469,12 +479,14 @@ CREATE TABLE block_versions (
 ### Q3: payload.children 和 children 数组有什么区别？
 
 **A:**
+
 - `payload.children`：仅根块有，用于标识根块类型，不是实际的子块
 - `children` 数组：所有块都有，存储实际的子块，形成树形结构
 
 ### Q4: 如何判断一个块是根块？
 
-**A:** 
+**A:**
+
 - 检查 `type === "root"`
 - 或者检查 `blockId === Document.rootBlockId`
 

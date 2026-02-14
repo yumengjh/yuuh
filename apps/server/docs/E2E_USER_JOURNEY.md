@@ -12,9 +12,9 @@
 **流程概要：**
 
 ```
-注册 → 登录 → 工作空间(创建/列表/详情) → 文档(创建/列表/详情/内容/更新) 
-  → 块(创建/更新内容/移动/批量) → 标签(创建/列表/更新) → 收藏(添加/列表) 
-  → 评论(创建/列表) → 发布 → 搜索(全局/高级) → 活动日志 
+注册 → 登录 → 工作空间(创建/列表/详情) → 文档(创建/列表/详情/内容/更新)
+  → 块(创建/更新内容/移动/批量) → 标签(创建/列表/更新) → 收藏(添加/列表)
+  → 评论(创建/列表) → 发布 → 搜索(全局/高级) → 活动日志
   → 取消收藏、删除评论 → 登出
 ```
 
@@ -36,10 +36,10 @@ pnpm run test:e2e -- test/user-journey.e2e-spec.ts --runInBand --testTimeout=600
 
 ### 2.2 环境要求
 
-| 条件 | 说明 |
-|------|------|
-| **数据库** | PostgreSQL 需已启动，且 `src/config` 中配置的库可连（一般与 `pnpm run start` 相同） |
-| **无需先启服务** | 测试通过 Supertest 直连 Nest 内存 HTTP 适配器，不绑定端口，见下文 3.1 |
+| 条件             | 说明                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| **数据库**       | PostgreSQL 需已启动，且 `src/config` 中配置的库可连（一般与 `pnpm run start` 相同） |
+| **无需先启服务** | 测试通过 Supertest 直连 Nest 内存 HTTP 适配器，不绑定端口，见下文 3.1               |
 
 ---
 
@@ -79,7 +79,13 @@ pnpm run test:e2e -- test/user-journey.e2e-spec.ts --runInBand --testTimeout=600
 
 ```ts
 app.setGlobalPrefix(PREFIX);
-app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }));
+app.useGlobalPipes(
+  new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    forbidNonWhitelisted: true,
+  }),
+);
 app.useGlobalFilters(new HttpExceptionFilter());
 app.useGlobalInterceptors(new TransformInterceptor());
 await app.init();
@@ -95,37 +101,37 @@ await app.init();
 
 ## 4. 测试阶段与接口清单
 
-| 阶段 | 用例 | 方法 | 路径 | 说明 |
-|------|------|------|------|------|
-| **1. 认证** | 注册 | POST | `/auth/register` | 取 `accessToken`、`user` |
-| | 登录 | POST | `/auth/login` | 覆盖 `accessToken` |
-| | 当前用户 | GET | `/auth/me` | Bearer |
-| **2. 工作空间** | 创建 | POST | `/workspaces` | 取 `workspaceId` |
-| | 列表 | GET | `/workspaces` | `page`, `pageSize` |
-| | 详情 | GET | `/workspaces/:id` | |
-| **3. 文档** | 创建 | POST | `/documents` | 取 `docId`, `rootBlockId` |
-| | 列表 | GET | `/documents` | `workspaceId`, `page`, `pageSize` |
-| | 详情 | GET | `/documents/:id` | |
-| | 内容 | GET | `/documents/:id/content` | `tree` |
-| | 更新 | PATCH | `/documents/:id` | `title`, `tags` |
-| **4. 块** | 创建 | POST | `/blocks` | 取 `blockId`，`parentId=rootBlockId` |
-| | 更新内容 | PATCH | `/blocks/:id/content` | `payload` |
-| | 移动 | POST | `/blocks/:id/move` | `parentId`, `sortKey` |
-| | 批量 | POST | `/blocks/batch` | `operations: [{ type: 'create', data }]` |
-| **5. 标签** | 创建 | POST | `/tags` | 取 `tagId` |
-| | 列表 | GET | `/tags` | `workspaceId`, `page`, `pageSize` |
-| | 更新 | PATCH | `/tags/:id` | `color` |
-| **6. 收藏** | 添加 | POST | `/favorites` | `docId` |
-| | 列表 | GET | `/favorites` | `page`, `pageSize` |
-| **7. 评论** | 创建 | POST | `/comments` | 取 `commentId`，`docId`, `content` |
-| | 列表 | GET | `/comments` | `docId`, `page`, `pageSize` |
-| **8. 发布与搜索** | 发布 | POST | `/documents/:id/publish` | |
-| | 全局搜索 | GET | `/search` | `query`, `workspaceId`, `type`, `page`, `pageSize` |
-| | 高级搜索 | POST | `/search/advanced` | `query`, `workspaceId`, `page`, `pageSize` |
-| **9. 活动日志** | 列表 | GET | `/activities` | `workspaceId`, `page`, `pageSize` |
-| **10. 收尾与登出** | 取消收藏 | DELETE | `/favorites/:docId` | |
-| | 删除评论 | DELETE | `/comments/:id` | |
-| | 登出 | POST | `/auth/logout` | Body: `{ token: accessToken }`，204 |
+| 阶段               | 用例     | 方法   | 路径                     | 说明                                               |
+| ------------------ | -------- | ------ | ------------------------ | -------------------------------------------------- |
+| **1. 认证**        | 注册     | POST   | `/auth/register`         | 取 `accessToken`、`user`                           |
+|                    | 登录     | POST   | `/auth/login`            | 覆盖 `accessToken`                                 |
+|                    | 当前用户 | GET    | `/auth/me`               | Bearer                                             |
+| **2. 工作空间**    | 创建     | POST   | `/workspaces`            | 取 `workspaceId`                                   |
+|                    | 列表     | GET    | `/workspaces`            | `page`, `pageSize`                                 |
+|                    | 详情     | GET    | `/workspaces/:id`        |                                                    |
+| **3. 文档**        | 创建     | POST   | `/documents`             | 取 `docId`, `rootBlockId`                          |
+|                    | 列表     | GET    | `/documents`             | `workspaceId`, `page`, `pageSize`                  |
+|                    | 详情     | GET    | `/documents/:id`         |                                                    |
+|                    | 内容     | GET    | `/documents/:id/content` | `tree`                                             |
+|                    | 更新     | PATCH  | `/documents/:id`         | `title`, `tags`                                    |
+| **4. 块**          | 创建     | POST   | `/blocks`                | 取 `blockId`，`parentId=rootBlockId`               |
+|                    | 更新内容 | PATCH  | `/blocks/:id/content`    | `payload`                                          |
+|                    | 移动     | POST   | `/blocks/:id/move`       | `parentId`, `sortKey`                              |
+|                    | 批量     | POST   | `/blocks/batch`          | `operations: [{ type: 'create', data }]`           |
+| **5. 标签**        | 创建     | POST   | `/tags`                  | 取 `tagId`                                         |
+|                    | 列表     | GET    | `/tags`                  | `workspaceId`, `page`, `pageSize`                  |
+|                    | 更新     | PATCH  | `/tags/:id`              | `color`                                            |
+| **6. 收藏**        | 添加     | POST   | `/favorites`             | `docId`                                            |
+|                    | 列表     | GET    | `/favorites`             | `page`, `pageSize`                                 |
+| **7. 评论**        | 创建     | POST   | `/comments`              | 取 `commentId`，`docId`, `content`                 |
+|                    | 列表     | GET    | `/comments`              | `docId`, `page`, `pageSize`                        |
+| **8. 发布与搜索**  | 发布     | POST   | `/documents/:id/publish` |                                                    |
+|                    | 全局搜索 | GET    | `/search`                | `query`, `workspaceId`, `type`, `page`, `pageSize` |
+|                    | 高级搜索 | POST   | `/search/advanced`       | `query`, `workspaceId`, `page`, `pageSize`         |
+| **9. 活动日志**    | 列表     | GET    | `/activities`            | `workspaceId`, `page`, `pageSize`                  |
+| **10. 收尾与登出** | 取消收藏 | DELETE | `/favorites/:docId`      |                                                    |
+|                    | 删除评论 | DELETE | `/comments/:id`          |                                                    |
+|                    | 登出     | POST   | `/auth/logout`           | Body: `{ token: accessToken }`，204                |
 
 ---
 
@@ -157,10 +163,10 @@ await app.init();
 
 ## 8. 相关文件
 
-| 文件 | 说明 |
-|------|------|
-| `test/user-journey.e2e-spec.ts` | 本测试实现 |
-| `test/jest-e2e.json` | e2e 的 Jest 配置 |
-| `src/main.ts` | 生产/开发启动；e2e 中管道、过滤器、拦截器与其对齐 |
-| `src/common/interceptors/transform.interceptor.ts` | 统一 `{ success, data }` 格式 |
-| `src/common/filters/http-exception.filter.ts` | 4xx/5xx 时日志与返回结构 |
+| 文件                                               | 说明                                              |
+| -------------------------------------------------- | ------------------------------------------------- |
+| `test/user-journey.e2e-spec.ts`                    | 本测试实现                                        |
+| `test/jest-e2e.json`                               | e2e 的 Jest 配置                                  |
+| `src/main.ts`                                      | 生产/开发启动；e2e 中管道、过滤器、拦截器与其对齐 |
+| `src/common/interceptors/transform.interceptor.ts` | 统一 `{ success, data }` 格式                     |
+| `src/common/filters/http-exception.filter.ts`      | 4xx/5xx 时日志与返回结构                          |

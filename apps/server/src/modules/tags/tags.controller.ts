@@ -65,11 +65,7 @@ export class TagsController {
   @ApiResponse({ status: 200, description: '更新成功' })
   @ApiResponse({ status: 404, description: '标签不存在' })
   @ApiResponse({ status: 409, description: '同名标签已存在' })
-  async update(
-    @Param('tagId') tagId: string,
-    @Body() dto: UpdateTagDto,
-    @CurrentUser() user: any,
-  ) {
+  async update(@Param('tagId') tagId: string, @Body() dto: UpdateTagDto, @CurrentUser() user: any) {
     return this.tagsService.update(tagId, dto, user.userId);
   }
 

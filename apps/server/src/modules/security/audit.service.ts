@@ -60,7 +60,7 @@ export class AuditService {
    */
   async findUserActivities(userId: string, options: QueryAuditOptions = {}) {
     const { page = 1, pageSize = 20 } = options;
-    const skip = (options.offset ?? (page - 1) * pageSize);
+    const skip = options.offset ?? (page - 1) * pageSize;
     const take = options.limit ?? pageSize;
 
     const [items, total] = await this.auditLogRepository.findAndCount({
@@ -75,9 +75,13 @@ export class AuditService {
   /**
    * 查询某资源的操作历史
    */
-  async findResourceHistory(resourceType: string, resourceId: string, options: QueryAuditOptions = {}) {
+  async findResourceHistory(
+    resourceType: string,
+    resourceId: string,
+    options: QueryAuditOptions = {},
+  ) {
     const { page = 1, pageSize = 50 } = options;
-    const skip = (options.offset ?? (page - 1) * pageSize);
+    const skip = options.offset ?? (page - 1) * pageSize;
     const take = options.limit ?? pageSize;
 
     const [items, total] = await this.auditLogRepository.findAndCount({
@@ -95,7 +99,7 @@ export class AuditService {
   async findSensitiveActions(startDate: Date, endDate: Date, options: QueryAuditOptions = {}) {
     const sensitiveActions = ['DELETE', 'UPDATE_PERMISSION', 'REMOVE_MEMBER', 'PUBLISH'];
     const { page = 1, pageSize = 50 } = options;
-    const skip = (options.offset ?? (page - 1) * pageSize);
+    const skip = options.offset ?? (page - 1) * pageSize;
     const take = options.limit ?? pageSize;
 
     const [items, total] = await this.auditLogRepository.findAndCount({
@@ -123,7 +127,16 @@ export class AuditService {
     page?: number;
     pageSize?: number;
   }) {
-    const { userId, action, resourceType, resourceId, startDate, endDate, page = 1, pageSize = 20 } = filters;
+    const {
+      userId,
+      action,
+      resourceType,
+      resourceId,
+      startDate,
+      endDate,
+      page = 1,
+      pageSize = 20,
+    } = filters;
     const qb = this.auditLogRepository.createQueryBuilder('a');
     if (userId) qb.andWhere('a.userId = :userId', { userId });
     if (action) qb.andWhere('a.action = :action', { action });
@@ -143,7 +156,7 @@ export class AuditService {
    */
   async findAll(where: Partial<AuditLog>, options: QueryAuditOptions = {}) {
     const { page = 1, pageSize = 20 } = options;
-    const skip = (options.offset ?? (page - 1) * pageSize);
+    const skip = options.offset ?? (page - 1) * pageSize;
     const take = options.limit ?? pageSize;
 
     const [items, total] = await this.auditLogRepository.findAndCount({

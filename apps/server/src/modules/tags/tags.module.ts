@@ -8,11 +8,7 @@ import { WorkspacesModule } from '../workspaces/workspaces.module';
 import { ActivitiesModule } from '../activities/activities.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Tag, Document]),
-    WorkspacesModule,
-    ActivitiesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Tag, Document]), WorkspacesModule, ActivitiesModule],
   controllers: [TagsController],
   providers: [TagsService],
   exports: [TagsService],

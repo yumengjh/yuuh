@@ -6,10 +6,7 @@ import { ActivitiesService } from './activities.service';
 import { ActivitiesController } from './activities.controller';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Activity]),
-    forwardRef(() => WorkspacesModule),
-  ],
+  imports: [TypeOrmModule.forFeature([Activity]), forwardRef(() => WorkspacesModule)],
   controllers: [ActivitiesController],
   providers: [ActivitiesService],
   exports: [ActivitiesService],

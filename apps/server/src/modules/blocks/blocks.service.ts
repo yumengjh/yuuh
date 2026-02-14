@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  ForbiddenException,
   BadRequestException,
   Inject,
   forwardRef,
@@ -50,7 +49,7 @@ export class BlocksService {
    */
   async create(createBlockDto: CreateBlockDto, userId: string) {
     // 检查文档权限并获取文档信息（包含根块ID）
-    const document = await this.documentsService.findOne(createBlockDto.docId, userId);
+    await this.documentsService.findOne(createBlockDto.docId, userId);
 
     // 确定父块ID：如果未提供 parentId，则使用文档的根块ID
     let parentId = createBlockDto.parentId;
@@ -81,7 +80,9 @@ export class BlocksService {
     const result = await this.dataSource.transaction(async (manager) => {
       const now = Date.now();
       const blockId = generateBlockId();
-      const sortKey = createBlockDto.sortKey || await this.generateSortKey(createBlockDto.docId, parentId, manager);
+      const sortKey =
+        createBlockDto.sortKey ||
+        (await this.generateSortKey(createBlockDto.docId, parentId, manager));
 
       // 创建块
       const block = manager.create(Block, {
@@ -139,8 +140,19 @@ export class BlocksService {
     if (createBlockDto.createVersion === false) {
       this.versionControlService.recordPendingVersion(createBlockDto.docId);
     }
-    const doc = await this.documentRepository.findOne({ where: { docId: createBlockDto.docId }, select: ['workspaceId'] });
-    if (doc) await this.activitiesService.record(doc.workspaceId, BLOCK_ACTIONS.CREATE, 'block', result.blockId, userId, { docId: createBlockDto.docId, type: createBlockDto.type });
+    const doc = await this.documentRepository.findOne({
+      where: { docId: createBlockDto.docId },
+      select: ['workspaceId'],
+    });
+    if (doc)
+      await this.activitiesService.record(
+        doc.workspaceId,
+        BLOCK_ACTIONS.CREATE,
+        'block',
+        result.blockId,
+        userId,
+        { docId: createBlockDto.docId, type: createBlockDto.type },
+      );
     return result;
   }
 
@@ -157,7 +169,7 @@ export class BlocksService {
       const deletedBlock = await this.blockRepository.findOne({
         where: { blockId },
       });
-      
+
       if (deletedBlock) {
         throw new NotFoundException(`块已被删除 (blockId: ${blockId})`);
       }
@@ -232,8 +244,7 @@ export class BlocksService {
             collapsed: latestVersionInfo.collapsed,
             payload: updateBlockDto.payload,
             hash,
-            plainText:
-              updateBlockDto.plainText || this.extractPlainText(updateBlockDto.payload),
+            plainText: updateBlockDto.plainText || this.extractPlainText(updateBlockDto.payload),
             refs: [],
           });
 
@@ -262,8 +273,19 @@ export class BlocksService {
     if (updateBlockDto.createVersion === false) {
       this.versionControlService.recordPendingVersion(docId);
     }
-    const doc = await this.documentRepository.findOne({ where: { docId }, select: ['workspaceId'] });
-    if (doc) await this.activitiesService.record(doc.workspaceId, BLOCK_ACTIONS.UPDATE, 'block', blockId, userId, { docId });
+    const doc = await this.documentRepository.findOne({
+      where: { docId },
+      select: ['workspaceId'],
+    });
+    if (doc)
+      await this.activitiesService.record(
+        doc.workspaceId,
+        BLOCK_ACTIONS.UPDATE,
+        'block',
+        blockId,
+        userId,
+        { docId },
+      );
     return result;
   }
 
@@ -356,8 +378,8 @@ export class BlocksService {
 
     // 在 JavaScript 中按 sortKey 排序（数字比较）
     siblings.sort((a, b) => {
-      const sortKeyA = (a.sortKey && a.sortKey.trim() !== '') ? parseInt(a.sortKey, 10) || 0 : 0;
-      const sortKeyB = (b.sortKey && b.sortKey.trim() !== '') ? parseInt(b.sortKey, 10) || 0 : 0;
+      const sortKeyA = a.sortKey && a.sortKey.trim() !== '' ? parseInt(a.sortKey, 10) || 0 : 0;
+      const sortKeyB = b.sortKey && b.sortKey.trim() !== '' ? parseInt(b.sortKey, 10) || 0 : 0;
       if (sortKeyA !== sortKeyB) {
         return sortKeyA - sortKeyB;
       }
@@ -367,9 +389,8 @@ export class BlocksService {
 
     // 获取最后一个同级块的 sortKey
     const lastSibling = siblings[siblings.length - 1];
-    const lastSortKey = lastSibling.sortKey && lastSibling.sortKey.trim() !== '' 
-      ? lastSibling.sortKey 
-      : '500000';
+    const lastSortKey =
+      lastSibling.sortKey && lastSibling.sortKey.trim() !== '' ? lastSibling.sortKey : '500000';
 
     // 生成比最后一个更大的 sortKey
     return generateSortKeyUtil(lastSortKey);
@@ -378,11 +399,7 @@ export class BlocksService {
   /**
    * 增加文档版本号，并创建文档修订记录
    */
-  private async incrementDocumentHead(
-    docId: string,
-    userId: string,
-    manager: any,
-  ): Promise<void> {
+  private async incrementDocumentHead(docId: string, userId: string, manager: any): Promise<void> {
     const document = await manager.findOne(Document, { where: { docId } });
     if (document) {
       document.head += 1;
@@ -497,8 +514,19 @@ export class BlocksService {
     if (moveBlockDto.createVersion === false) {
       this.versionControlService.recordPendingVersion(block.docId);
     }
-    const doc = await this.documentRepository.findOne({ where: { docId: block.docId }, select: ['workspaceId'] });
-    if (doc) await this.activitiesService.record(doc.workspaceId, BLOCK_ACTIONS.MOVE, 'block', blockId, userId, { docId: block.docId, parentId: moveBlockDto.parentId });
+    const doc = await this.documentRepository.findOne({
+      where: { docId: block.docId },
+      select: ['workspaceId'],
+    });
+    if (doc)
+      await this.activitiesService.record(
+        doc.workspaceId,
+        BLOCK_ACTIONS.MOVE,
+        'block',
+        blockId,
+        userId,
+        { docId: block.docId, parentId: moveBlockDto.parentId },
+      );
     return result;
   }
 
@@ -532,8 +560,19 @@ export class BlocksService {
 
       return { message: '块已删除' };
     });
-    const doc = await this.documentRepository.findOne({ where: { docId: block.docId }, select: ['workspaceId'] });
-    if (doc) await this.activitiesService.record(doc.workspaceId, BLOCK_ACTIONS.DELETE, 'block', blockId, userId, { docId: block.docId });
+    const doc = await this.documentRepository.findOne({
+      where: { docId: block.docId },
+      select: ['workspaceId'],
+    });
+    if (doc)
+      await this.activitiesService.record(
+        doc.workspaceId,
+        BLOCK_ACTIONS.DELETE,
+        'block',
+        blockId,
+        userId,
+        { docId: block.docId },
+      );
     return result;
   }
 
@@ -631,7 +670,13 @@ export class BlocksService {
       for (const operation of batchBlockDto.operations) {
         try {
           if (operation.type === 'create') {
-            const result = await this.handleBatchCreate(operation, batchBlockDto.docId, userId, now, manager);
+            const result = await this.handleBatchCreate(
+              operation,
+              batchBlockDto.docId,
+              userId,
+              now,
+              manager,
+            );
             results.push({ success: true, operation: 'create', ...result });
           } else if (operation.type === 'update') {
             const result = await this.handleBatchUpdate(operation, userId, now, manager);
@@ -671,8 +716,19 @@ export class BlocksService {
     if (batchBlockDto.createVersion === false) {
       this.versionControlService.recordPendingVersion(batchBlockDto.docId);
     }
-    const doc = await this.documentRepository.findOne({ where: { docId: batchBlockDto.docId }, select: ['workspaceId'] });
-    if (doc) await this.activitiesService.record(doc.workspaceId, BLOCK_ACTIONS.BATCH, 'block', batchBlockDto.docId, userId, { count: batchBlockDto.operations.length });
+    const doc = await this.documentRepository.findOne({
+      where: { docId: batchBlockDto.docId },
+      select: ['workspaceId'],
+    });
+    if (doc)
+      await this.activitiesService.record(
+        doc.workspaceId,
+        BLOCK_ACTIONS.BATCH,
+        'block',
+        batchBlockDto.docId,
+        userId,
+        { count: batchBlockDto.operations.length },
+      );
     return result;
   }
 
@@ -701,7 +757,8 @@ export class BlocksService {
     }
 
     const blockId = generateBlockId();
-    const sortKey = operation.data.sortKey || await this.generateSortKey(docId, parentId, manager);
+    const sortKey =
+      operation.data.sortKey || (await this.generateSortKey(docId, parentId, manager));
 
     const block = manager.create(Block, {
       blockId,

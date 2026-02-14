@@ -6,10 +6,7 @@ import { Asset } from '../../entities/asset.entity';
 import { WorkspacesModule } from '../workspaces/workspaces.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Asset]),
-    WorkspacesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Asset]), WorkspacesModule],
   controllers: [AssetsController],
   providers: [AssetsService],
   exports: [AssetsService],

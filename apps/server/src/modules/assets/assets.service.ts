@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
@@ -39,11 +34,7 @@ export class AssetsService {
   /**
    * 上传资产
    */
-  async upload(
-    workspaceId: string,
-    file: Express.Multer.File,
-    userId: string,
-  ) {
+  async upload(workspaceId: string, file: Express.Multer.File, userId: string) {
     await this.workspacesService.checkAccess(workspaceId, userId);
 
     if (!file || !file.buffer) {

@@ -31,9 +31,9 @@ export class UpdateDocumentDto {
   @IsEnum(DocumentVisibility, { message: '可见性必须是 private、workspace 或 public' })
   visibility?: string;
 
-  @ApiPropertyOptional({ 
-    description: '标签ID列表（tagId数组），系统会自动校验标签是否存在并更新使用统计', 
-    example: ['tag_1234567890_abc123', 'tag_1234567890_def456'] 
+  @ApiPropertyOptional({
+    description: '标签ID列表（tagId数组），系统会自动校验标签是否存在并更新使用统计',
+    example: ['tag_1234567890_abc123', 'tag_1234567890_def456'],
   })
   @IsOptional()
   @IsArray()

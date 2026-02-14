@@ -2,7 +2,7 @@
 
 ## 前置要求
 
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL 15+
 - npm 或 pnpm
 
@@ -51,6 +51,7 @@ npm run start:dev
 ### 6. 访问 API 文档
 
 启动后访问 Swagger 文档：
+
 - http://localhost:5200/api/docs
 
 ## 已实现的功能
@@ -63,6 +64,7 @@ npm run start:dev
 ## 下一步
 
 根据 TODO.md 继续实现：
+
 - 用户模块
 - 工作空间模块
 - 文档模块

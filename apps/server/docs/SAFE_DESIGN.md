@@ -194,20 +194,20 @@ logs/
 
 ```typescript
 // src/config/logger.config.ts
-import { WinstonModuleOptions } from 'nest-winston';
-import * as winston from 'winston';
-import 'winston-daily-rotate-file';
+import { WinstonModuleOptions } from "nest-winston";
+import * as winston from "winston";
+import "winston-daily-rotate-file";
 
 export const loggerConfig: WinstonModuleOptions = {
   transports: [
     // 应用日志
     new winston.transports.DailyRotateFile({
-      dirname: 'logs/application',
-      filename: 'app-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '30d',
-      level: 'info',
+      dirname: "logs/application",
+      filename: "app-%DATE%.log",
+      datePattern: "YYYY-MM-DD",
+      maxSize: "20m",
+      maxFiles: "30d",
+      level: "info",
       format: winston.format.combine(
         winston.format.timestamp(),
         winston.format.json(),
@@ -216,24 +216,24 @@ export const loggerConfig: WinstonModuleOptions = {
 
     // 错误日志
     new winston.transports.DailyRotateFile({
-      dirname: 'logs/error',
-      filename: 'error-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '90d',
-      level: 'error',
+      dirname: "logs/error",
+      filename: "error-%DATE%.log",
+      datePattern: "YYYY-MM-DD",
+      maxSize: "20m",
+      maxFiles: "90d",
+      level: "error",
     }),
 
     // 控制台输出（开发环境）
     new winston.transports.Console({
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+      level: process.env.NODE_ENV === "production" ? "info" : "debug",
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         winston.format.printf(
           ({ timestamp, level, message, context, ...meta }) => {
             return `${timestamp} [${context}] ${level}: ${message} ${
-              Object.keys(meta).length ? JSON.stringify(meta, null, 2) : ''
+              Object.keys(meta).length ? JSON.stringify(meta, null, 2) : ""
             }`;
           },
         ),
@@ -288,9 +288,9 @@ CREATE INDEX idx_security_logs_severity ON security_logs(severity);
 
 ```typescript
 // src/common/logger/logger.service.ts
-import { Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
-import { createLogger, Logger as WinstonLogger, format } from 'winston';
-import * as DailyRotateFile from 'winston-daily-rotate-file';
+import { Injectable, LoggerService as NestLoggerService } from "@nestjs/common";
+import { createLogger, Logger as WinstonLogger, format } from "winston";
+import * as DailyRotateFile from "winston-daily-rotate-file";
 
 @Injectable()
 export class LoggerService implements NestLoggerService {
@@ -300,40 +300,40 @@ export class LoggerService implements NestLoggerService {
   constructor(context?: string) {
     this.context = context;
     this.logger = createLogger({
-      level: process.env.LOG_LEVEL || 'info',
+      level: process.env.LOG_LEVEL || "info",
       format: format.combine(
-        format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         format.errors({ stack: true }),
         format.json(),
       ),
-      defaultMeta: { service: 'knowledge-base-api' },
+      defaultMeta: { service: "knowledge-base-api" },
       transports: [
         // 应用日志
         new DailyRotateFile({
-          dirname: 'logs/application',
-          filename: 'app-%DATE%.log',
-          datePattern: 'YYYY-MM-DD',
-          maxSize: '20m',
-          maxFiles: '30d',
+          dirname: "logs/application",
+          filename: "app-%DATE%.log",
+          datePattern: "YYYY-MM-DD",
+          maxSize: "20m",
+          maxFiles: "30d",
         }),
         // 错误日志
         new DailyRotateFile({
-          dirname: 'logs/error',
-          filename: 'error-%DATE%.log',
-          datePattern: 'YYYY-MM-DD',
-          maxSize: '20m',
-          maxFiles: '90d',
-          level: 'error',
+          dirname: "logs/error",
+          filename: "error-%DATE%.log",
+          datePattern: "YYYY-MM-DD",
+          maxSize: "20m",
+          maxFiles: "90d",
+          level: "error",
         }),
         // 控制台
-        new (require('winston').transports.Console)({
+        new (require("winston").transports.Console)({
           format: format.combine(
             format.colorize(),
             format.printf(({ timestamp, level, message, context, ...meta }) => {
-              const ctx = context || this.context || 'Application';
+              const ctx = context || this.context || "Application";
               const metaStr = Object.keys(meta).length
                 ? JSON.stringify(meta)
-                : '';
+                : "";
               return `${timestamp} [${ctx}] ${level}: ${message} ${metaStr}`;
             }),
           ),
@@ -382,10 +382,10 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { LoggerService } from '../logger/logger.service';
+} from "@nestjs/common";
+import { Observable } from "rxjs";
+import { tap } from "rxjs/operators";
+import { LoggerService } from "../logger/logger.service";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -394,14 +394,14 @@ export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const { method, url, body, headers, ip } = request;
-    const userAgent = headers['user-agent'] || '';
-    const userId = request.user?.userId || 'anonymous';
+    const userAgent = headers["user-agent"] || "";
+    const userId = request.user?.userId || "anonymous";
 
     const now = Date.now();
     const requestId = this.generateRequestId();
 
     // 请求日志
-    this.logger.log(`Incoming Request: ${method} ${url}`, 'HTTP');
+    this.logger.log(`Incoming Request: ${method} ${url}`, "HTTP");
 
     return next.handle().pipe(
       tap({
@@ -411,7 +411,7 @@ export class LoggingInterceptor implements NestInterceptor {
           const responseTime = Date.now() - now;
 
           // 访问日志
-          this.logger.logWithMetadata('info', 'Request completed', {
+          this.logger.logWithMetadata("info", "Request completed", {
             requestId,
             method,
             url,
@@ -428,7 +428,7 @@ export class LoggingInterceptor implements NestInterceptor {
           if (responseTime > 1000) {
             this.logger.warn(
               `Slow request detected: ${method} ${url} took ${responseTime}ms`,
-              'Performance',
+              "Performance",
             );
           }
         },
@@ -437,7 +437,7 @@ export class LoggingInterceptor implements NestInterceptor {
           this.logger.error(
             `Request failed: ${method} ${url}`,
             error.stack,
-            'HTTP',
+            "HTTP",
           );
         },
       }),
@@ -452,11 +452,11 @@ export class LoggingInterceptor implements NestInterceptor {
     if (!body) return body;
 
     const sanitized = { ...body };
-    const sensitiveFields = ['password', 'token', 'refreshToken', 'secret'];
+    const sensitiveFields = ["password", "token", "refreshToken", "secret"];
 
     sensitiveFields.forEach((field) => {
       if (sanitized[field]) {
-        sanitized[field] = '***REDACTED***';
+        sanitized[field] = "***REDACTED***";
       }
     });
 
@@ -498,14 +498,14 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { AuditLog } from '../../entities/audit-log.entity';
-import { AUDIT_LOG_KEY } from '../decorators/audit-log.decorator';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { Observable } from "rxjs";
+import { tap } from "rxjs/operators";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { AuditLog } from "../../entities/audit-log.entity";
+import { AUDIT_LOG_KEY } from "../decorators/audit-log.decorator";
 
 @Injectable()
 export class AuditLogInterceptor implements NestInterceptor {
@@ -527,7 +527,7 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     const request = context.switchToHttp().getRequest();
     const { user, ip, headers, body } = request;
-    const userAgent = headers['user-agent'];
+    const userAgent = headers["user-agent"];
 
     return next.handle().pipe(
       tap({
@@ -546,7 +546,7 @@ export class AuditLogInterceptor implements NestInterceptor {
             },
             ipAddress: ip,
             userAgent,
-            status: 'success',
+            status: "success",
           });
 
           await this.auditLogRepository.save(auditLog);
@@ -561,7 +561,7 @@ export class AuditLogInterceptor implements NestInterceptor {
             resourceId: body?.id,
             ipAddress: ip,
             userAgent,
-            status: 'failed',
+            status: "failed",
             errorMessage: error.message,
           });
 
@@ -628,13 +628,13 @@ export class AuditLogInterceptor implements NestInterceptor {
 // src/main.ts
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: new LoggerService('Bootstrap'),
+    logger: new LoggerService("Bootstrap"),
   });
 
   const logger = app.get(LoggerService);
 
   // 应用配置
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix("api/v1");
   app.enableCors();
 
   // 启动应用
@@ -654,7 +654,7 @@ async function bootstrap() {
   ║   Database: ${process.env.DB_HOST}:${process.env.DB_PORT}
   ╚════════════════════════════════════════════════╝
   `,
-    'Bootstrap',
+    "Bootstrap",
   );
 }
 ```
@@ -702,7 +702,7 @@ REFRESH_TOKEN_EXPIRES_IN=7d
 
 ```typescript
 // src/common/utils/hash.util.ts
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from "bcrypt";
 
 export class HashUtil {
   private static readonly SALT_ROUNDS = 10;
@@ -722,8 +722,8 @@ export class HashUtil {
 
   // 内容哈希（用于块去重）
   static hashContent(content: string): string {
-    const crypto = require('crypto');
-    return crypto.createHash('sha256').update(content).digest('hex');
+    const crypto = require("crypto");
+    return crypto.createHash("sha256").update(content).digest("hex");
   }
 }
 ```
@@ -732,16 +732,16 @@ export class HashUtil {
 
 ```typescript
 // src/modules/auth/dto/register.dto.ts
-import { IsString, IsEmail, MinLength, Matches } from 'class-validator';
+import { IsString, IsEmail, MinLength, Matches } from "class-validator";
 
 export class RegisterDto {
   @IsEmail()
   email: string;
 
   @IsString()
-  @MinLength(8, { message: '密码至少需要 8 个字符' })
+  @MinLength(8, { message: "密码至少需要 8 个字符" })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/, {
-    message: '密码必须包含大小写字母和数字',
+    message: "密码必须包含大小写字母和数字",
   })
   password: string;
 
@@ -821,34 +821,34 @@ export class AuthService {
 ```typescript
 // src/common/enums/role.enum.ts
 export enum Role {
-  OWNER = 'owner', // 工作空间所有者
-  ADMIN = 'admin', // 管理员
-  EDITOR = 'editor', // 编辑者
-  VIEWER = 'viewer', // 查看者
+  OWNER = "owner", // 工作空间所有者
+  ADMIN = "admin", // 管理员
+  EDITOR = "editor", // 编辑者
+  VIEWER = "viewer", // 查看者
 }
 
 export const RolePermissions = {
   [Role.OWNER]: [
-    'workspace:delete',
-    'workspace:update',
-    'workspace:invite',
-    'workspace:remove_member',
-    'document:*',
-    'block:*',
+    "workspace:delete",
+    "workspace:update",
+    "workspace:invite",
+    "workspace:remove_member",
+    "document:*",
+    "block:*",
   ],
   [Role.ADMIN]: [
-    'workspace:update',
-    'workspace:invite',
-    'document:*',
-    'block:*',
+    "workspace:update",
+    "workspace:invite",
+    "document:*",
+    "block:*",
   ],
   [Role.EDITOR]: [
-    'document:create',
-    'document:update',
-    'document:delete',
-    'block:*',
+    "document:create",
+    "document:update",
+    "document:delete",
+    "block:*",
   ],
-  [Role.VIEWER]: ['document:read', 'block:read'],
+  [Role.VIEWER]: ["document:read", "block:read"],
 };
 ```
 
@@ -856,10 +856,10 @@ export const RolePermissions = {
 
 ```typescript
 // src/common/guards/roles.guard.ts
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../decorators/roles.decorator';
-import { Role } from '../enums/role.enum';
+import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { ROLES_KEY } from "../decorators/roles.decorator";
+import { Role } from "../enums/role.enum";
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -919,7 +919,7 @@ export class DocumentPermissionGuard implements CanActivate {
     // 获取文档
     const document = await this.documentsService.findOne(docId);
     if (!document) {
-      throw new NotFoundException('Document not found');
+      throw new NotFoundException("Document not found");
     }
 
     // 检查工作空间权限
@@ -934,7 +934,7 @@ export class DocumentPermissionGuard implements CanActivate {
 
     // 检查文档可见性
     if (
-      document.visibility === 'private' &&
+      document.visibility === "private" &&
       document.createdBy !== user.userId
     ) {
       return false;
@@ -942,12 +942,12 @@ export class DocumentPermissionGuard implements CanActivate {
 
     // 检查操作权限
     const method = request.method;
-    if (method === 'GET') {
+    if (method === "GET") {
       return true; // 有工作空间权限即可读取
     }
 
-    if (method === 'PATCH' || method === 'DELETE') {
-      return ['owner', 'admin', 'editor'].includes(member.role);
+    if (method === "PATCH" || method === "DELETE") {
+      return ["owner", "admin", "editor"].includes(member.role);
     }
 
     return true;
@@ -961,7 +961,7 @@ export class DocumentPermissionGuard implements CanActivate {
 
 ```typescript
 // app.module.ts
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from "@nestjs/throttler";
 
 @Module({
   imports: [
@@ -978,14 +978,14 @@ export class AppModule {}
 
 ```typescript
 // src/common/guards/custom-throttler.guard.ts
-import { ThrottlerGuard } from '@nestjs/throttler';
-import { Injectable } from '@nestjs/common';
+import { ThrottlerGuard } from "@nestjs/throttler";
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class CustomThrottlerGuard extends ThrottlerGuard {
   protected async getTracker(req: Record<string, any>): Promise<string> {
     // 使用用户ID + IP 作为限流标识
-    const userId = req.user?.userId || 'anonymous';
+    const userId = req.user?.userId || "anonymous";
     const ip = req.ip;
     return `${userId}-${ip}`;
   }
@@ -1000,13 +1000,13 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
 
     // 特殊接口限流
     const url = request.url;
-    if (url.includes('/auth/login')) {
+    if (url.includes("/auth/login")) {
       limit = 5; // 登录接口：5次/分钟
       ttl = 60;
-    } else if (url.includes('/auth/register')) {
+    } else if (url.includes("/auth/register")) {
       limit = 3; // 注册接口：3次/小时
       ttl = 3600;
-    } else if (url.includes('/assets/upload')) {
+    } else if (url.includes("/assets/upload")) {
       limit = 10; // 上传接口：10次/小时
       ttl = 3600;
     }
@@ -1049,7 +1049,7 @@ import {
   IsOptional,
   IsArray,
   ArrayMaxSize,
-} from 'class-validator';
+} from "class-validator";
 
 export class CreateDocumentDto {
   @IsString()
@@ -1084,7 +1084,7 @@ import {
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
-} from 'class-validator';
+} from "class-validator";
 
 @ValidatorConstraint({ async: false })
 export class IsValidIdConstraint implements ValidatorConstraintInterface {
@@ -1095,7 +1095,7 @@ export class IsValidIdConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage() {
-    return 'Invalid ID format';
+    return "Invalid ID format";
   }
 }
 
@@ -1131,8 +1131,8 @@ app.useGlobalPipes(
         errors: Object.values(error.constraints || {}),
       }));
       return new BadRequestException({
-        code: 'VALIDATION_ERROR',
-        message: 'Validation failed',
+        code: "VALIDATION_ERROR",
+        message: "Validation failed",
         details: messages,
       });
     },
@@ -1145,9 +1145,9 @@ app.useGlobalPipes(
 ```typescript
 // ✅ 正确：使用参数化查询
 const documents = await this.documentRepository
-  .createQueryBuilder('doc')
-  .where('doc.workspaceId = :workspaceId', { workspaceId })
-  .andWhere('doc.title LIKE :title', { title: `%${searchTerm}%` })
+  .createQueryBuilder("doc")
+  .where("doc.workspaceId = :workspaceId", { workspaceId })
+  .andWhere("doc.title LIKE :title", { title: `%${searchTerm}%` })
   .getMany();
 
 // ❌ 错误：字符串拼接
@@ -1160,20 +1160,20 @@ const documents = await this.documentRepository.query(
 
 ```typescript
 // src/common/pipes/sanitize.pipe.ts
-import { PipeTransform, Injectable } from '@nestjs/common';
-import * as sanitizeHtml from 'sanitize-html';
+import { PipeTransform, Injectable } from "@nestjs/common";
+import * as sanitizeHtml from "sanitize-html";
 
 @Injectable()
 export class SanitizePipe implements PipeTransform {
   transform(value: any) {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return sanitizeHtml(value, {
         allowedTags: [],
         allowedAttributes: {},
       });
     }
 
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       Object.keys(value).forEach((key) => {
         value[key] = this.transform(value[key]);
       });
@@ -1188,7 +1188,7 @@ export class SanitizePipe implements PipeTransform {
 
 ```typescript
 // app.module.ts
-import * as csurf from 'csurf';
+import * as csurf from "csurf";
 
 // main.ts
 app.use(csurf({ cookie: true }));
@@ -1199,11 +1199,11 @@ app.use(csurf({ cookie: true }));
 ```typescript
 // main.ts
 app.enableCors({
-  origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
+  origin: process.env.CORS_ORIGIN?.split(",") || ["http://localhost:3000"],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['X-Total-Count', 'X-Page-Size'],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["X-Total-Count", "X-Page-Size"],
   maxAge: 3600,
 });
 ```
@@ -1212,35 +1212,35 @@ app.enableCors({
 
 ```typescript
 // src/common/utils/encryption.util.ts
-import * as crypto from 'crypto';
+import * as crypto from "crypto";
 
 export class EncryptionUtil {
-  private static readonly ALGORITHM = 'aes-256-gcm';
-  private static readonly KEY = Buffer.from(process.env.ENCRYPTION_KEY, 'hex');
+  private static readonly ALGORITHM = "aes-256-gcm";
+  private static readonly KEY = Buffer.from(process.env.ENCRYPTION_KEY, "hex");
 
   static encrypt(text: string): string {
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(this.ALGORITHM, this.KEY, iv);
 
-    let encrypted = cipher.update(text, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+    let encrypted = cipher.update(text, "utf8", "hex");
+    encrypted += cipher.final("hex");
 
     const authTag = cipher.getAuthTag();
 
-    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
+    return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted}`;
   }
 
   static decrypt(encryptedData: string): string {
-    const [ivHex, authTagHex, encrypted] = encryptedData.split(':');
+    const [ivHex, authTagHex, encrypted] = encryptedData.split(":");
 
-    const iv = Buffer.from(ivHex, 'hex');
-    const authTag = Buffer.from(authTagHex, 'hex');
+    const iv = Buffer.from(ivHex, "hex");
+    const authTag = Buffer.from(authTagHex, "hex");
     const decipher = crypto.createDecipheriv(this.ALGORITHM, this.KEY, iv);
 
     decipher.setAuthTag(authTag);
 
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+    let decrypted = decipher.update(encrypted, "hex", "utf8");
+    decrypted += decipher.final("utf8");
 
     return decrypted;
   }
@@ -1251,7 +1251,7 @@ export class EncryptionUtil {
 
 ```typescript
 // main.ts
-import helmet from 'helmet';
+import helmet from "helmet";
 
 app.use(
   helmet({
@@ -1260,7 +1260,7 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
+        imgSrc: ["'self'", "data:", "https:"],
       },
     },
     hsts: {
@@ -1283,14 +1283,14 @@ app.use(
 
 ```typescript
 // src/health/health.controller.ts
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get } from "@nestjs/common";
 import {
   HealthCheck,
   HealthCheckService,
   TypeOrmHealthIndicator,
-} from '@nestjs/terminus';
+} from "@nestjs/terminus";
 
-@Controller('health')
+@Controller("health")
 export class HealthController {
   constructor(
     private health: HealthCheckService,
@@ -1300,14 +1300,14 @@ export class HealthController {
   @Get()
   @HealthCheck()
   check() {
-    return this.health.check([() => this.db.pingCheck('database')]);
+    return this.health.check([() => this.db.pingCheck("database")]);
   }
 
-  @Get('ready')
+  @Get("ready")
   @HealthCheck()
   ready() {
     return {
-      status: 'ok',
+      status: "ok",
       timestamp: new Date().toISOString(),
     };
   }
@@ -1335,7 +1335,7 @@ export class PerformanceInterceptor implements NestInterceptor {
         if (duration > 1000) {
           this.logger.warn(
             `Slow request: ${method} ${url} took ${duration}ms`,
-            'Performance',
+            "Performance",
           );
         }
 
@@ -1351,7 +1351,7 @@ export class PerformanceInterceptor implements NestInterceptor {
 
 ```typescript
 // src/common/filters/sentry.filter.ts
-import * as Sentry from '@sentry/node';
+import * as Sentry from "@sentry/node";
 
 @Catch()
 export class SentryFilter implements ExceptionFilter {
@@ -1367,7 +1367,7 @@ export class SentryFilter implements ExceptionFilter {
     response.status(status).json({
       success: false,
       error: {
-        code: exception.code || 'INTERNAL_ERROR',
+        code: exception.code || "INTERNAL_ERROR",
         message: exception.message,
       },
     });
@@ -1390,7 +1390,7 @@ export class AuditService {
   async findUserActivities(userId: string, options: QueryOptions) {
     return this.auditLogRepository.find({
       where: { userId },
-      order: { timestamp: 'DESC' },
+      order: { timestamp: "DESC" },
       skip: options.offset,
       take: options.limit,
     });
@@ -1400,20 +1400,20 @@ export class AuditService {
   async findResourceHistory(resourceType: string, resourceId: string) {
     return this.auditLogRepository.find({
       where: { resourceType, resourceId },
-      order: { timestamp: 'DESC' },
+      order: { timestamp: "DESC" },
     });
   }
 
   // 查询敏感操作
   async findSensitiveActions(startDate: Date, endDate: Date) {
-    const sensitiveActions = ['DELETE', 'UPDATE_PERMISSION', 'REMOVE_MEMBER'];
+    const sensitiveActions = ["DELETE", "UPDATE_PERMISSION", "REMOVE_MEMBER"];
 
     return this.auditLogRepository.find({
       where: {
         action: In(sensitiveActions),
         timestamp: Between(startDate, endDate),
       },
-      order: { timestamp: 'DESC' },
+      order: { timestamp: "DESC" },
     });
   }
 }
@@ -1429,40 +1429,40 @@ export class AuditService {
 // src/common/errors/error-codes.ts
 export enum ErrorCode {
   // 认证错误 (1000-1999)
-  AUTH_FAILED = 'AUTH_1001',
-  TOKEN_EXPIRED = 'AUTH_1002',
-  TOKEN_INVALID = 'AUTH_1003',
-  UNAUTHORIZED = 'AUTH_1004',
-  SESSION_EXPIRED = 'AUTH_1005',
+  AUTH_FAILED = "AUTH_1001",
+  TOKEN_EXPIRED = "AUTH_1002",
+  TOKEN_INVALID = "AUTH_1003",
+  UNAUTHORIZED = "AUTH_1004",
+  SESSION_EXPIRED = "AUTH_1005",
 
   // 权限错误 (2000-2999)
-  ACCESS_DENIED = 'PERM_2001',
-  PERMISSION_DENIED = 'PERM_2002',
-  ROLE_REQUIRED = 'PERM_2003',
+  ACCESS_DENIED = "PERM_2001",
+  PERMISSION_DENIED = "PERM_2002",
+  ROLE_REQUIRED = "PERM_2003",
 
   // 资源错误 (3000-3999)
-  NOT_FOUND = 'RES_3001',
-  ALREADY_EXISTS = 'RES_3002',
-  RESOURCE_LOCKED = 'RES_3003',
+  NOT_FOUND = "RES_3001",
+  ALREADY_EXISTS = "RES_3002",
+  RESOURCE_LOCKED = "RES_3003",
 
   // 验证错误 (4000-4999)
-  VALIDATION_ERROR = 'VAL_4001',
-  INVALID_PARAMETER = 'VAL_4002',
-  MISSING_PARAMETER = 'VAL_4003',
+  VALIDATION_ERROR = "VAL_4001",
+  INVALID_PARAMETER = "VAL_4002",
+  MISSING_PARAMETER = "VAL_4003",
 
   // 业务错误 (5000-5999)
-  VERSION_CONFLICT = 'BIZ_5001',
-  QUOTA_EXCEEDED = 'BIZ_5002',
-  OPERATION_FAILED = 'BIZ_5003',
+  VERSION_CONFLICT = "BIZ_5001",
+  QUOTA_EXCEEDED = "BIZ_5002",
+  OPERATION_FAILED = "BIZ_5003",
 
   // 限流错误 (6000-6999)
-  RATE_LIMIT_EXCEEDED = 'RATE_6001',
-  TOO_MANY_REQUESTS = 'RATE_6002',
+  RATE_LIMIT_EXCEEDED = "RATE_6001",
+  TOO_MANY_REQUESTS = "RATE_6002",
 
   // 服务器错误 (9000-9999)
-  INTERNAL_ERROR = 'SYS_9001',
-  DATABASE_ERROR = 'SYS_9002',
-  SERVICE_UNAVAILABLE = 'SYS_9003',
+  INTERNAL_ERROR = "SYS_9001",
+  DATABASE_ERROR = "SYS_9002",
+  SERVICE_UNAVAILABLE = "SYS_9003",
 }
 ```
 
@@ -1470,8 +1470,8 @@ export enum ErrorCode {
 
 ```typescript
 // src/common/exceptions/business.exception.ts
-import { HttpException, HttpStatus } from '@nestjs/common';
-import { ErrorCode } from '../errors/error-codes';
+import { HttpException, HttpStatus } from "@nestjs/common";
+import { ErrorCode } from "../errors/error-codes";
 
 export class BusinessException extends HttpException {
   constructor(
@@ -1497,7 +1497,7 @@ export class BusinessException extends HttpException {
 // 使用示例
 throw new BusinessException(
   ErrorCode.QUOTA_EXCEEDED,
-  'Workspace document limit exceeded',
+  "Workspace document limit exceeded",
   { limit: 1000, current: 1000 },
 );
 ```
@@ -1517,7 +1517,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let code = ErrorCode.INTERNAL_ERROR;
-    let message = 'Internal server error';
+    let message = "Internal server error";
     let details = null;
 
     if (exception instanceof HttpException) {
@@ -1532,7 +1532,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     this.logger.error(
       `${request.method} ${request.url}`,
       exception instanceof Error ? exception.stack : String(exception),
-      'ExceptionFilter',
+      "ExceptionFilter",
     );
 
     // 返回错误响应
@@ -1542,7 +1542,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code,
         message,
         ...(details && { details }),
-        ...(process.env.NODE_ENV === 'development' && {
+        ...(process.env.NODE_ENV === "development" && {
           stack: exception instanceof Error ? exception.stack : undefined,
         }),
       },

@@ -13,9 +13,7 @@ import { ActivitiesModule } from '../activities/activities.module';
 
 @Module({})
 export class SettingsModule {
-  static forRoot(
-    options: Partial<SettingsModuleOptions> = {},
-  ): DynamicModule {
+  static forRoot(options: Partial<SettingsModuleOptions> = {}): DynamicModule {
     const optionDefaults = options.defaults || {};
     const optionSchema = options.schema || {};
 
@@ -54,11 +52,7 @@ export class SettingsModule {
 
     return {
       module: SettingsModule,
-      imports: [
-        TypeOrmModule.forFeature([SettingsProfile]),
-        WorkspacesModule,
-        ActivitiesModule,
-      ],
+      imports: [TypeOrmModule.forFeature([SettingsProfile]), WorkspacesModule, ActivitiesModule],
       controllers: [SettingsController],
       providers: [
         SettingsService,

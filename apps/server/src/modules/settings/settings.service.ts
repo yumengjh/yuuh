@@ -1,20 +1,14 @@
 import { Inject, Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  SettingsProfile,
-  SettingsScopeType,
-} from '../../entities/settings-profile.entity';
+import { SettingsProfile, SettingsScopeType } from '../../entities/settings-profile.entity';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { ActivitiesService } from '../activities/activities.service';
 import {
   DEFAULT_SETTINGS_MODULE_OPTIONS,
   SETTINGS_MODULE_OPTIONS,
 } from './constants/default-settings';
-import {
-  SettingsPatchPayload,
-  SettingsPayload,
-} from './settings.types';
+import { SettingsPatchPayload, SettingsPayload } from './settings.types';
 import type { SettingsModuleOptions } from './settings.types';
 import {
   applySettingsPatch,
@@ -75,11 +69,7 @@ export class SettingsService {
     };
   }
 
-  async updateWorkspaceSettings(
-    workspaceId: string,
-    userId: string,
-    patch: SettingsPatchPayload,
-  ) {
+  async updateWorkspaceSettings(workspaceId: string, userId: string, patch: SettingsPatchPayload) {
     await this.workspacesService.checkAccess(workspaceId, userId);
     await this.workspacesService.checkAdminPermission(workspaceId, userId);
     this.assertPatchValid(patch);
@@ -180,10 +170,7 @@ export class SettingsService {
     scopeId: string,
     settings: SettingsPayload,
   ): Promise<SettingsPayload> {
-    const normalized = sanitizeSettingsBySchema(
-      deepClone(settings),
-      this.options.schema,
-    );
+    const normalized = sanitizeSettingsBySchema(deepClone(settings), this.options.schema);
     const existing = await this.settingsProfileRepository.findOne({
       where: { scopeType, scopeId },
     });

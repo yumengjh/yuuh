@@ -4,14 +4,14 @@
 
 ## 接口列表
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/blocks` | 创建块 | 是 |
-| PATCH | `/blocks/:blockId/content` | 更新块内容 | 是 |
-| POST | `/blocks/:blockId/move` | 移动块 | 是 |
-| DELETE | `/blocks/:blockId` | 删除块 | 是 |
-| GET | `/blocks/:blockId/versions` | 块版本历史 | 是 |
-| POST | `/blocks/batch` | 批量操作 | 是 |
+| 方法   | 路径                        | 说明       | 认证 |
+| ------ | --------------------------- | ---------- | ---- |
+| POST   | `/blocks`                   | 创建块     | 是   |
+| PATCH  | `/blocks/:blockId/content`  | 更新块内容 | 是   |
+| POST   | `/blocks/:blockId/move`     | 移动块     | 是   |
+| DELETE | `/blocks/:blockId`          | 删除块     | 是   |
+| GET    | `/blocks/:blockId/versions` | 块版本历史 | 是   |
+| POST   | `/blocks/batch`             | 批量操作   | 是   |
 
 ## 创建块
 
@@ -20,12 +20,14 @@
 **说明：** 创建新的块
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
 ```
 
 **请求体：**
+
 ```json
 {
   "docId": "doc_1705123456789_xyz456",
@@ -43,20 +45,21 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `docId` | string | ✅ | 文档ID |
-| `type` | string | ✅ | 块类型，如 `paragraph`、`heading`、`list` 等 |
-| `payload` | object | ✅ | 块的实际内容，JSON 格式，根据块类型不同而不同 |
-| `parentId` | string | ❌ | 父块ID，不传或为空字符串时，块会挂到根块下 |
-| `sortKey` | string | ❌ | 排序键，用于块的位置排序（详见下方说明） |
-| `indent` | number | ❌ | 缩进级别，默认 0 |
-| `collapsed` | boolean | ❌ | 是否折叠，默认 false |
-| `createVersion` | boolean | ❌ | 是否立即创建文档版本，默认 `true` |
+| 字段            | 类型    | 必填 | 说明                                          |
+| --------------- | ------- | ---- | --------------------------------------------- |
+| `docId`         | string  | ✅   | 文档ID                                        |
+| `type`          | string  | ✅   | 块类型，如 `paragraph`、`heading`、`list` 等  |
+| `payload`       | object  | ✅   | 块的实际内容，JSON 格式，根据块类型不同而不同 |
+| `parentId`      | string  | ❌   | 父块ID，不传或为空字符串时，块会挂到根块下    |
+| `sortKey`       | string  | ❌   | 排序键，用于块的位置排序（详见下方说明）      |
+| `indent`        | number  | ❌   | 缩进级别，默认 0                              |
+| `collapsed`     | boolean | ❌   | 是否折叠，默认 false                          |
+| `createVersion` | boolean | ❌   | 是否立即创建文档版本，默认 `true`             |
 
 ### sortKey 字段详解
 
 `sortKey` 是一个**数字字符串**，用于确定块在同级块中的显示顺序。系统通过数字比较来确定块的顺序：
+
 - 数字越小，位置越靠前
 - 数字越大，位置越靠后
 
@@ -65,6 +68,7 @@ Content-Type: application/json
 **强烈建议：创建块时不要手动传入 `sortKey`！**
 
 **原因：**
+
 1. **自动生成更可靠**：系统会根据同级块的位置自动生成合适的 `sortKey`，确保新块出现在最后
 2. **避免冲突**：手动传入小的值（如 `"0"`, `"1"`, `"2"`）容易导致多个块使用相同的 `sortKey`
 3. **空间不足**：小的 `sortKey` 值之间没有足够的空间，后续插入新块时会遇到问题
@@ -79,11 +83,13 @@ Content-Type: application/json
 #### 自动生成规则
 
 如果不传 `sortKey`，系统会：
+
 1. 查询同级块（相同 `parentId`）的最新版本
 2. 按 `sortKey` 排序，获取最后一个同级块的 `sortKey`
 3. 生成比最后一个更大的 `sortKey`（增加 `100000`），确保新块出现在最后
 
 **示例：**
+
 ```javascript
 // ✅ 推荐：不传 sortKey，让系统自动生成
 {
@@ -123,14 +129,15 @@ Content-Type: application/json
    - ❌ **不要多个块使用相同的 `sortKey`**
 
 2. **批量创建块时**：
+
    ```javascript
    // ✅ 好的做法：不传 sortKey，让系统自动生成
    const blocks = [
      { type: "paragraph", payload: { text: "段落1" } },
      { type: "paragraph", payload: { text: "段落2" } },
-     { type: "paragraph", payload: { text: "段落3" } }
+     { type: "paragraph", payload: { text: "段落3" } },
    ];
-   
+
    // 每个块都会自动获得合适的 sortKey
    ```
 
@@ -140,6 +147,7 @@ Content-Type: application/json
    - 或者使用移动接口（`POST /api/v1/blocks/:blockId/move`）来调整位置
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -156,11 +164,13 @@ Content-Type: application/json
 ```
 
 **重要说明：**
+
 - 如果 `parentId` 不传或为空字符串，块会挂到根块（`rootBlockId`）下
 - **强烈建议不传 `sortKey`**，让系统自动生成，避免排序问题
 - `createVersion` 默认为 `true`，设置为 `false` 时不会立即创建文档版本（用于批量操作或快速输入场景）
 
 **状态码：**
+
 - `201 Created` - 创建成功
 - `400 Bad Request` - 请求参数错误
 - `403 Forbidden` - 没有权限访问文档
@@ -173,6 +183,7 @@ Content-Type: application/json
 **说明：** 更新块的内容
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
@@ -180,11 +191,12 @@ Content-Type: application/json
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数      | 类型   | 说明 |
+| --------- | ------ | ---- |
 | `blockId` | string | 块ID |
 
 **请求体：**
+
 ```json
 {
   "payload": {
@@ -197,13 +209,14 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `payload` | object | ✅ | 新的块内容，JSON 格式 |
-| `plainText` | string | ❌ | 纯文本内容，如果不提供，系统会自动从 `payload` 中提取 |
-| `createVersion` | boolean | ❌ | 是否立即创建文档版本，默认 `true` |
+| 字段            | 类型    | 必填 | 说明                                                  |
+| --------------- | ------- | ---- | ----------------------------------------------------- |
+| `payload`       | object  | ✅   | 新的块内容，JSON 格式                                 |
+| `plainText`     | string  | ❌   | 纯文本内容，如果不提供，系统会自动从 `payload` 中提取 |
+| `createVersion` | boolean | ❌   | 是否立即创建文档版本，默认 `true`                     |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -218,11 +231,13 @@ Content-Type: application/json
 ```
 
 **说明：**
+
 - 更新操作会创建新的块版本（`BlockVersion`），版本号自动递增
 - 如果新内容的 hash 与当前版本相同，不会创建新版本（避免重复版本）
 - `createVersion` 默认为 `true`，设置为 `false` 时不会立即创建文档版本
 
 **状态码：**
+
 - `200 OK` - 更新成功
 - `404 Not Found` - 块不存在
 - `403 Forbidden` - 没有权限
@@ -234,6 +249,7 @@ Content-Type: application/json
 **说明：** 移动块到新的位置（改变父块或排序）
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
@@ -241,11 +257,12 @@ Content-Type: application/json
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数      | 类型   | 说明 |
+| --------- | ------ | ---- |
 | `blockId` | string | 块ID |
 
 **请求体：**
+
 ```json
 {
   "parentId": "b_root_123",
@@ -257,14 +274,15 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `parentId` | string | ✅ | 目标父块ID，必须属于同一文档 |
-| `sortKey` | string | ✅ | 新的排序键，用于在新位置排序 |
-| `indent` | number | ❌ | 新的缩进级别，默认保持原值 |
-| `createVersion` | boolean | ❌ | 是否立即创建文档版本，默认 `true` |
+| 字段            | 类型    | 必填 | 说明                              |
+| --------------- | ------- | ---- | --------------------------------- |
+| `parentId`      | string  | ✅   | 目标父块ID，必须属于同一文档      |
+| `sortKey`       | string  | ✅   | 新的排序键，用于在新位置排序      |
+| `indent`        | number  | ❌   | 新的缩进级别，默认保持原值        |
+| `createVersion` | boolean | ❌   | 是否立即创建文档版本，默认 `true` |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -278,11 +296,13 @@ Content-Type: application/json
 ```
 
 **说明：**
+
 - 移动操作会创建新的块版本，记录新的位置信息
 - 不能移动到自身或形成循环引用（如 A 是 B 的父，B 不能成为 A 的父）
 - `parentId` 必须属于同一文档
 
 **状态码：**
+
 - `200 OK` - 移动成功
 - `404 Not Found` - 块不存在
 - `403 Forbidden` - 没有权限
@@ -295,19 +315,21 @@ Content-Type: application/json
 **说明：** 删除块（软删除），**总是立即创建文档版本**（重要操作）
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数      | 类型   | 说明 |
+| --------- | ------ | ---- |
 | `blockId` | string | 块ID |
 
 **权限要求：** owner、admin 或 editor
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -318,11 +340,13 @@ Authorization: Bearer <your-access-token>
 ```
 
 **说明：**
+
 - 删除是软删除，块不会被物理删除，只是标记为 `isDeleted = true`
 - 删除块会级联删除其所有子块（递归软删除）
 - 删除操作**总是立即创建文档版本**，不支持延迟创建
 
 **状态码：**
+
 - `200 OK` - 删除成功
 - `404 Not Found` - 块不存在
 - `403 Forbidden` - 没有权限
@@ -334,24 +358,26 @@ Authorization: Bearer <your-access-token>
 **说明：** 获取块的所有版本历史
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数      | 类型   | 说明 |
+| --------- | ------ | ---- |
 | `blockId` | string | 块ID |
 
 **查询参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `page` | number | ❌ | 页码，默认 1 |
-| `pageSize` | number | ❌ | 每页数量，默认 20 |
+| 参数       | 类型   | 必填 | 说明              |
+| ---------- | ------ | ---- | ----------------- |
+| `page`     | number | ❌   | 页码，默认 1      |
+| `pageSize` | number | ❌   | 每页数量，默认 20 |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -386,6 +412,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `404 Not Found` - 块不存在
 - `403 Forbidden` - 没有权限
@@ -397,12 +424,14 @@ Authorization: Bearer <your-access-token>
 **说明：** 在一个事务中执行多个块操作（创建、更新、删除、移动），只创建一次文档版本
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
 ```
 
 **请求体：**
+
 ```json
 {
   "docId": "doc_1705123456789_xyz456",
@@ -441,15 +470,16 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `docId` | string | ✅ | 文档ID |
-| `createVersion` | boolean | ❌ | 是否立即创建文档版本，默认 `true` |
-| `operations` | Array | ✅ | 操作列表，至少包含一个操作 |
+| 字段            | 类型    | 必填 | 说明                              |
+| --------------- | ------- | ---- | --------------------------------- |
+| `docId`         | string  | ✅   | 文档ID                            |
+| `createVersion` | boolean | ❌   | 是否立即创建文档版本，默认 `true` |
+| `operations`    | Array   | ✅   | 操作列表，至少包含一个操作        |
 
 **操作类型：**
 
 1. **create** - 创建块
+
    ```json
    {
      "type": "create",
@@ -463,6 +493,7 @@ Content-Type: application/json
    ```
 
 2. **update** - 更新块
+
    ```json
    {
      "type": "update",
@@ -474,6 +505,7 @@ Content-Type: application/json
    ```
 
 3. **delete** - 删除块
+
    ```json
    {
      "type": "delete",
@@ -493,6 +525,7 @@ Content-Type: application/json
    ```
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -529,12 +562,14 @@ Content-Type: application/json
 ```
 
 **核心特性：**
+
 - 所有操作在一个事务中执行，保证数据一致性
 - 无论包含多少个操作，只创建一次文档版本（如果 `createVersion` 为 `true`）
 - 操作按数组顺序执行
 - 单个操作失败不会影响其他操作，但会在结果中标记失败
 
 **状态码：**
+
 - `200 OK` - 批量操作完成
 - `400 Bad Request` - 请求参数错误
 - `403 Forbidden` - 没有权限访问文档
@@ -550,20 +585,22 @@ Content-Type: application/json
 - **手动触发：** 使用 `POST /api/v1/documents/:docId/commit` 手动创建版本
 
 **使用场景：**
+
 - 快速输入时，避免每次操作都创建版本
 - 批量编辑时，多个操作完成后统一创建版本
 - 前端实现"保存"功能，用户点击保存时才创建版本
 
 **示例：**
+
 ```typescript
 // 快速输入，不立即创建版本
 await updateBlock(blockId, {
-  payload: { text: '新内容' },
-  createVersion: false  // 延迟创建版本
+  payload: { text: "新内容" },
+  createVersion: false, // 延迟创建版本
 });
 
 // 用户点击保存时，手动创建版本
-await commitVersion(docId, { message: '保存编辑' });
+await commitVersion(docId, { message: "保存编辑" });
 ```
 
 ## 代码示例
@@ -573,16 +610,16 @@ await commitVersion(docId, { message: '保存编辑' });
 ```typescript
 // 创建块
 async function createBlock(docId: string) {
-  const response = await fetch('http://localhost:5200/api/v1/blocks', {
-    method: 'POST',
+  const response = await fetch("http://localhost:5200/api/v1/blocks", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       docId,
-      type: 'paragraph',
-      payload: { text: '新段落' },
+      type: "paragraph",
+      payload: { text: "新段落" },
       // 不传 parentId，块会自动挂到根块下
       // 不传 sortKey，系统会自动生成合适的值
     }),
@@ -595,35 +632,34 @@ async function updateBlock(blockId: string, content: string) {
   const response = await fetch(
     `http://localhost:5200/api/v1/blocks/${blockId}/content`,
     {
-      method: 'PATCH',
+      method: "PATCH",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         payload: { text: content },
-        createVersion: false,  // 延迟创建版本
+        createVersion: false, // 延迟创建版本
       }),
-    }
+    },
   );
   return await response.json();
 }
 
 // 批量操作
 async function batchUpdateBlocks(docId: string, operations: any[]) {
-  const response = await fetch('http://localhost:5200/api/v1/blocks/batch', {
-    method: 'POST',
+  const response = await fetch("http://localhost:5200/api/v1/blocks/batch", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       docId,
-      createVersion: false,  // 延迟创建版本
+      createVersion: false, // 延迟创建版本
       operations,
     }),
   });
   return await response.json();
 }
 ```
-

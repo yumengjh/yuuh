@@ -15,6 +15,7 @@
 5. **自动统计**：标签的 `usageCount` 字段会自动维护，记录有多少文档使用了该标签
 
 **示例：**
+
 ```json
 // 标签表（tags）
 {
@@ -60,14 +61,14 @@
 
 ## 接口列表
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/tags` | 创建标签 | 是 |
-| GET | `/tags` | 标签列表 | 是 |
-| GET | `/tags/:tagId` | 标签详情 | 是 |
-| GET | `/tags/:tagId/usage` | 标签使用统计 | 是 |
-| PATCH | `/tags/:tagId` | 更新标签 | 是 |
-| DELETE | `/tags/:tagId` | 删除标签 | 是 |
+| 方法   | 路径                 | 说明         | 认证 |
+| ------ | -------------------- | ------------ | ---- |
+| POST   | `/tags`              | 创建标签     | 是   |
+| GET    | `/tags`              | 标签列表     | 是   |
+| GET    | `/tags/:tagId`       | 标签详情     | 是   |
+| GET    | `/tags/:tagId/usage` | 标签使用统计 | 是   |
+| PATCH  | `/tags/:tagId`       | 更新标签     | 是   |
+| DELETE | `/tags/:tagId`       | 删除标签     | 是   |
 
 ## 创建标签
 
@@ -76,12 +77,14 @@
 **说明：** 在工作空间中创建新标签
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
 ```
 
 **请求体：**
+
 ```json
 {
   "workspaceId": "ws_1705123456789_abc123",
@@ -92,13 +95,14 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `workspaceId` | string | ✅ | 工作空间ID |
-| `name` | string | ✅ | 标签名称，1-50个字符 |
-| `color` | string | ❌ | 标签颜色（十六进制），默认随机生成 |
+| 字段          | 类型   | 必填 | 说明                               |
+| ------------- | ------ | ---- | ---------------------------------- |
+| `workspaceId` | string | ✅   | 工作空间ID                         |
+| `name`        | string | ✅   | 标签名称，1-50个字符               |
+| `color`       | string | ❌   | 标签颜色（十六进制），默认随机生成 |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -113,6 +117,7 @@ Content-Type: application/json
 ```
 
 **状态码：**
+
 - `201 Created` - 创建成功
 - `400 Bad Request` - 请求参数错误
 - `403 Forbidden` - 没有权限访问工作空间
@@ -125,19 +130,21 @@ Content-Type: application/json
 **说明：** 获取工作空间的标签列表
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **查询参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `workspaceId` | string | ✅ | 工作空间ID |
-| `page` | number | ❌ | 页码，默认 1 |
-| `pageSize` | number | ❌ | 每页数量，默认 20 |
+| 参数          | 类型   | 必填 | 说明              |
+| ------------- | ------ | ---- | ----------------- |
+| `workspaceId` | string | ✅   | 工作空间ID        |
+| `page`        | number | ❌   | 页码，默认 1      |
+| `pageSize`    | number | ❌   | 每页数量，默认 20 |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -159,6 +166,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `400 Bad Request` - 缺少 workspaceId 参数
 
@@ -169,17 +177,19 @@ Authorization: Bearer <your-access-token>
 **说明：** 获取标签的详细信息
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `tagId` | string | 标签ID |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -194,6 +204,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `404 Not Found` - 标签不存在
 - `403 Forbidden` - 没有权限访问
@@ -205,17 +216,19 @@ Authorization: Bearer <your-access-token>
 **说明：** 获取标签的使用统计信息（使用该标签的文档数量）
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `tagId` | string | 标签ID |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -228,9 +241,11 @@ Authorization: Bearer <your-access-token>
 ```
 
 **字段说明：**
+
 - `usage`：使用该标签的文档数量（实时计算，不包括已删除的文档）
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `404 Not Found` - 标签不存在
 - `403 Forbidden` - 没有权限访问
@@ -242,6 +257,7 @@ Authorization: Bearer <your-access-token>
 **说明：** 更新标签的名称和颜色，更新名称时会同步更新所有使用该标签的文档
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: application/json
@@ -249,11 +265,12 @@ Content-Type: application/json
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `tagId` | string | 标签ID |
 
 **请求体：**
+
 ```json
 {
   "name": "更新后的标签名",
@@ -263,14 +280,15 @@ Content-Type: application/json
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `name` | string | ❌ | 标签名称，1-50个字符 |
-| `color` | string | ❌ | 标签颜色（十六进制） |
+| 字段    | 类型   | 必填 | 说明                 |
+| ------- | ------ | ---- | -------------------- |
+| `name`  | string | ❌   | 标签名称，1-50个字符 |
+| `color` | string | ❌   | 标签颜色（十六进制） |
 
 **权限要求：** owner、admin 或 editor
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -284,12 +302,14 @@ Content-Type: application/json
 ```
 
 **说明：**
+
 - **更新标签名称**：只更新标签表中的名称，**不影响文档**（文档中存储的是 tagId，不是标签名称）
 - **更新标签颜色**：只更新标签表中的颜色，不影响文档（文档中不存储颜色信息）
 - **标签信息获取**：前端在显示文档时，需要通过标签ID查询标签表获取名称和颜色
 - **使用统计**：标签的 `usageCount` 字段会自动维护，无需手动更新
 
 **状态码：**
+
 - `200 OK` - 更新成功
 - `404 Not Found` - 标签不存在
 - `403 Forbidden` - 没有权限
@@ -302,19 +322,21 @@ Content-Type: application/json
 **说明：** 软删除标签（标记为已删除），并从所有使用该标签的文档中移除该标签ID
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数    | 类型   | 说明   |
+| ------- | ------ | ------ |
 | `tagId` | string | 标签ID |
 
 **权限要求：** owner、admin 或 editor
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -327,12 +349,13 @@ Authorization: Bearer <your-access-token>
 
 **字段说明：**
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `message` | string | 操作结果消息 |
+| 字段                   | 类型   | 说明                       |
+| ---------------------- | ------ | -------------------------- |
+| `message`              | string | 操作结果消息               |
 | `removedFromDocuments` | number | 从多少个文档中移除了该标签 |
 
 **说明：**
+
 - **软删除机制**：删除标签时，系统使用软删除方式，只更新标签的 `isDeleted` 和 `deletedAt` 字段，不会真正删除标签记录
 - **自动移除文档中的标签**：删除标签时，系统会**自动从所有使用该标签的文档的 `tags` 数组中移除该标签ID**
 - **高效实现**：系统优先使用标签表中的 `documentIds` 字段直接定位需要更新的文档，避免了全表查询，大幅提高删除效率
@@ -342,12 +365,14 @@ Authorization: Bearer <your-access-token>
 - **数据保留**：软删除后，标签的所有数据（包括 `usageCount`、`documentIds` 等）都会保留，便于后续恢复或数据分析
 
 **软删除的优势：**
+
 - ✅ **数据安全**：避免误删导致的数据丢失
 - ✅ **可恢复性**：可以通过恢复功能重新启用标签
 - ✅ **历史追溯**：保留标签的使用历史和数据统计
 - ✅ **事务保证**：删除操作在事务中执行，确保数据一致性
 
 **状态码：**
+
 - `200 OK` - 删除成功
 - `404 Not Found` - 标签不存在
 - `403 Forbidden` - 没有权限
@@ -361,16 +386,16 @@ Authorization: Bearer <your-access-token>
 ```typescript
 // 在工作空间中创建标签
 async function createTag(workspaceId: string) {
-  const response = await fetch('http://localhost:5200/api/v1/tags', {
-    method: 'POST',
+  const response = await fetch("http://localhost:5200/api/v1/tags", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       workspaceId,
-      name: '重要',
-      color: '#ff4d4f',
+      name: "重要",
+      color: "#ff4d4f",
     }),
   });
   return await response.json();
@@ -386,9 +411,9 @@ async function getTags(workspaceId: string) {
     `http://localhost:5200/api/v1/tags?workspaceId=${workspaceId}&page=1&pageSize=100`,
     {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
-    }
+    },
   );
   return await response.json();
 }
@@ -399,16 +424,16 @@ async function getTags(workspaceId: string) {
 ```typescript
 // 创建文档时，传入标签ID（tagId），不是标签名称
 async function createDocument(workspaceId: string, tagIds: string[]) {
-  const response = await fetch('http://localhost:5200/api/v1/documents', {
-    method: 'POST',
+  const response = await fetch("http://localhost:5200/api/v1/documents", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({
       workspaceId,
-      title: '我的文档',
-      tags: tagIds,  // 使用标签ID（tagId），例如：['tag_123', 'tag_456']
+      title: "我的文档",
+      tags: tagIds, // 使用标签ID（tagId），例如：['tag_123', 'tag_456']
     }),
   });
   return await response.json();
@@ -428,16 +453,19 @@ async function createDocument(workspaceId: string, tagIds: string[]) {
 ```typescript
 // 更新文档的标签（使用标签ID）
 async function updateDocumentTags(docId: string, tagIds: string[]) {
-  const response = await fetch(`http://localhost:5200/api/v1/documents/${docId}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+  const response = await fetch(
+    `http://localhost:5200/api/v1/documents/${docId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        tags: tagIds, // 标签ID数组，例如：['tag_123', 'tag_456']
+      }),
     },
-    body: JSON.stringify({
-      tags: tagIds,  // 标签ID数组，例如：['tag_123', 'tag_456']
-    }),
-  });
+  );
   return await response.json();
   // 注意：系统会自动更新相关标签的 usageCount
   // - 新增的标签：usageCount +1
@@ -451,28 +479,31 @@ async function updateDocumentTags(docId: string, tagIds: string[]) {
 // 文档返回的 tags 是标签ID数组，需要查询标签表获取名称和颜色
 async function getDocumentWithTagInfo(docId: string) {
   // 1. 获取文档
-  const docResponse = await fetch(`http://localhost:5200/api/v1/documents/${docId}`, {
-    headers: { 'Authorization': `Bearer ${accessToken}` },
-  });
+  const docResponse = await fetch(
+    `http://localhost:5200/api/v1/documents/${docId}`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
   const doc = await docResponse.json();
-  
+
   // 2. 获取工作空间的所有标签（包含名称和颜色信息）
   const tagsResponse = await fetch(
     `http://localhost:5200/api/v1/tags?workspaceId=${doc.data.workspaceId}`,
     {
-      headers: { 'Authorization': `Bearer ${accessToken}` },
-    }
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
   );
   const tagsData = await tagsResponse.json();
-  
+
   // 3. 构建标签ID到标签信息的映射
   const tagInfoMap = new Map(
     tagsData.data.items.map((tag: any) => [
       tag.tagId,
-      { name: tag.name, color: tag.color || '#999999' }
-    ])
+      { name: tag.name, color: tag.color || "#999999" },
+    ]),
   );
-  
+
   // 4. 为文档的标签添加名称和颜色信息
   const tagsWithInfo = doc.data.tags
     .map((tagId: string) => {
@@ -480,7 +511,7 @@ async function getDocumentWithTagInfo(docId: string) {
       return tagInfo ? { tagId, ...tagInfo } : null;
     })
     .filter(Boolean);
-  
+
   return {
     ...doc.data,
     tagsWithInfo,
@@ -494,10 +525,10 @@ async function getDocumentWithTagInfo(docId: string) {
 // 更新标签名称或颜色（不影响文档，因为文档中存储的是 tagId）
 async function updateTag(tagId: string, name?: string, color?: string) {
   const response = await fetch(`http://localhost:5200/api/v1/tags/${tagId}`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ name, color }),
   });
@@ -512,13 +543,16 @@ async function updateTag(tagId: string, name?: string, color?: string) {
 ```typescript
 // 查询有多少文档使用了该标签（返回标签的 usageCount）
 async function getTagUsage(tagId: string) {
-  const response = await fetch(`http://localhost:5200/api/v1/tags/${tagId}/usage`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
+  const response = await fetch(
+    `http://localhost:5200/api/v1/tags/${tagId}/usage`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     },
-  });
+  );
   return await response.json();
-  // 返回: { tagId, name, usage: 5 }  
+  // 返回: { tagId, name, usage: 5 }
   // usage 是标签的 usageCount 字段，自动维护，表示使用该标签的文档数量
 }
 ```
@@ -544,21 +578,22 @@ async function getTagUsage(tagId: string) {
    - 使用 `GET /api/v1/tags/:tagId/usage` 查询标签使用情况
 
 5. **标签选择器实现**：
+
    ```typescript
    // 前端实现标签选择器
    // 1. 获取标签列表
    const tags = await getTags(workspaceId);
-   
+
    // 2. 用户选择标签（显示标签名称和颜色）
    // 3. 创建/更新文档时，传入选中的标签ID数组
-   const selectedTagIds = selectedTags.map(tag => tag.tagId);
+   const selectedTagIds = selectedTags.map((tag) => tag.tagId);
    await createDocument({ ...docData, tags: selectedTagIds });
-   
+
    // 4. 如果用户输入新标签名称，先创建标签再使用
    async function createTagIfNotExists(workspaceId: string, tagName: string) {
      // 先查询是否已存在同名标签
      const tags = await getTags(workspaceId);
-     const existing = tags.data.items.find(t => t.name === tagName);
+     const existing = tags.data.items.find((t) => t.name === tagName);
      if (existing) {
        return existing.tagId;
      }
@@ -567,4 +602,3 @@ async function getTagUsage(tagId: string) {
      return newTag.data.tagId;
    }
    ```
-

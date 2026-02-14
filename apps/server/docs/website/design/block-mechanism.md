@@ -11,6 +11,7 @@
 ### 1. 创建块
 
 #### API 端点
+
 ```
 POST /api/v1/blocks
 ```
@@ -66,6 +67,7 @@ POST /api/v1/blocks
 ### 2. 更新块内容
 
 #### API 端点
+
 ```
 POST /api/v1/blocks/:blockId/content
 ```
@@ -107,6 +109,7 @@ POST /api/v1/blocks/:blockId/content
 ### 3. 移动块
 
 #### API 端点
+
 ```
 PATCH /api/v1/blocks/:blockId/move
 ```
@@ -141,6 +144,7 @@ PATCH /api/v1/blocks/:blockId/move
 ### 4. 删除块
 
 #### API 端点
+
 ```
 DELETE /api/v1/blocks/:blockId
 ```
@@ -164,6 +168,7 @@ DELETE /api/v1/blocks/:blockId
 ### 5. 批量操作
 
 #### API 端点
+
 ```
 POST /api/v1/blocks/batch
 ```
@@ -203,6 +208,7 @@ POST /api/v1/blocks/batch
 ### 排序键比较
 
 使用 `compareSortKey(a, b)` 函数进行数字比较：
+
 - 将字符串转换为数字进行比较
 - 返回负数表示 `a < b`
 - 返回 0 表示 `a === b`
@@ -217,6 +223,7 @@ POST /api/v1/blocks/batch
 ### 块版本（BlockVersion）
 
 每个块可以有多个版本，版本号从 1 开始递增。每个版本包含：
+
 - `ver`：版本号
 - `payload`：块内容
 - `parentId`：父块ID（可能在不同版本中改变）
@@ -231,6 +238,7 @@ POST /api/v1/blocks/batch
 ### 文档版本（DocRevision）
 
 文档版本记录了文档在某个时间点的完整状态：
+
 - `docVer`：文档版本号
 - `rootBlockId`：根块ID（用于快速定位）
 - `createdAt`：创建时间
@@ -258,6 +266,7 @@ POST /api/v1/blocks/batch
 ### 父子关系的存储
 
 父子关系存储在 `BlockVersion.parentId` 字段中：
+
 - 根块的子块：`parentId = 根块的 blockId`
 - 嵌套块：`parentId = 父块的 blockId`
 - 根块本身：`parentId` 通常为空字符串（但根块不应该有父块）
@@ -284,6 +293,7 @@ POST /api/v1/blocks/batch
 ## 块类型（type）
 
 块类型用于标识块的内容类型，常见类型包括：
+
 - `root`：根块（特殊类型，每个文档只有一个）
 - `paragraph`：段落
 - `heading`：标题
@@ -344,6 +354,7 @@ POST /api/v1/blocks/batch
 ### Q: 为什么更新块后，块的位置会改变？
 
 A: 更新块内容时，系统会保留 `sortKey` 和 `parentId`，位置不应该改变。如果位置改变了，可能是：
+
 1. 使用了错误的排序逻辑（已修复）
 2. `sortKey` 为空或无效（系统会使用默认值 `"500000"`）
 

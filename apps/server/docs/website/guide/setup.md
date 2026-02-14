@@ -92,6 +92,7 @@ app/
 ### VS Code
 
 推荐安装以下扩展：
+
 - ESLint
 - Prettier
 - TypeScript Vue Plugin (Volar)

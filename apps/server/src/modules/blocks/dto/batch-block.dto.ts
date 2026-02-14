@@ -1,4 +1,12 @@
-import { IsArray, IsEnum, ValidateNested, IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  ValidateNested,
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsBoolean,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CreateBlockDto } from './create-block.dto';

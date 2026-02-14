@@ -4,9 +4,9 @@
 
 ## 接口列表
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| GET | `/activities` | 活动日志列表 | 是 |
+| 方法 | 路径          | 说明         | 认证 |
+| ---- | ------------- | ------------ | ---- |
+| GET  | `/activities` | 活动日志列表 | 是   |
 
 ## 获取活动日志列表
 
@@ -15,24 +15,26 @@
 **说明：** 获取工作空间的活动日志，支持多种过滤条件
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **查询参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `workspaceId` | string | ✅ | 工作空间ID |
-| `userId` | string | ❌ | 用户ID（过滤特定用户的活动） |
-| `action` | string | ❌ | 操作类型（如 `doc.create`、`block.update` 等） |
-| `entityType` | string | ❌ | 实体类型（如 `document`、`block`、`workspace` 等） |
-| `startDate` | string | ❌ | 开始日期（ISO 8601 格式） |
-| `endDate` | string | ❌ | 结束日期（ISO 8601 格式） |
-| `page` | number | ❌ | 页码，默认 1 |
-| `pageSize` | number | ❌ | 每页数量，默认 20 |
+| 参数          | 类型   | 必填 | 说明                                               |
+| ------------- | ------ | ---- | -------------------------------------------------- |
+| `workspaceId` | string | ✅   | 工作空间ID                                         |
+| `userId`      | string | ❌   | 用户ID（过滤特定用户的活动）                       |
+| `action`      | string | ❌   | 操作类型（如 `doc.create`、`block.update` 等）     |
+| `entityType`  | string | ❌   | 实体类型（如 `document`、`block`、`workspace` 等） |
+| `startDate`   | string | ❌   | 开始日期（ISO 8601 格式）                          |
+| `endDate`     | string | ❌   | 结束日期（ISO 8601 格式）                          |
+| `page`        | number | ❌   | 页码，默认 1                                       |
+| `pageSize`    | number | ❌   | 每页数量，默认 20                                  |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -81,6 +83,7 @@ Authorization: Bearer <your-access-token>
 - `tag` - 标签
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `400 Bad Request` - 缺少 workspaceId 参数
 
@@ -91,29 +94,29 @@ Authorization: Bearer <your-access-token>
 ```typescript
 // 获取活动日志
 async function getActivities(workspaceId: string, filters?: any) {
-  const url = new URL('http://localhost:5200/api/v1/activities');
-  url.searchParams.set('workspaceId', workspaceId);
+  const url = new URL("http://localhost:5200/api/v1/activities");
+  url.searchParams.set("workspaceId", workspaceId);
   if (filters?.userId) {
-    url.searchParams.set('userId', filters.userId);
+    url.searchParams.set("userId", filters.userId);
   }
   if (filters?.action) {
-    url.searchParams.set('action', filters.action);
+    url.searchParams.set("action", filters.action);
   }
   if (filters?.entityType) {
-    url.searchParams.set('entityType', filters.entityType);
+    url.searchParams.set("entityType", filters.entityType);
   }
   if (filters?.startDate) {
-    url.searchParams.set('startDate', filters.startDate);
+    url.searchParams.set("startDate", filters.startDate);
   }
   if (filters?.endDate) {
-    url.searchParams.set('endDate', filters.endDate);
+    url.searchParams.set("endDate", filters.endDate);
   }
-  url.searchParams.set('page', String(filters?.page || 1));
-  url.searchParams.set('pageSize', String(filters?.pageSize || 20));
+  url.searchParams.set("page", String(filters?.page || 1));
+  url.searchParams.set("pageSize", String(filters?.pageSize || 20));
 
   const response = await fetch(url.toString(), {
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
   return await response.json();
@@ -126,7 +129,6 @@ async function getUserActivities(workspaceId: string, userId: string) {
 
 // 获取特定操作类型的活动
 async function getDocumentActivities(workspaceId: string) {
-  return getActivities(workspaceId, { entityType: 'document' });
+  return getActivities(workspaceId, { entityType: "document" });
 }
 ```
-

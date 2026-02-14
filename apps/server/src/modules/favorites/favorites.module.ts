@@ -8,11 +8,7 @@ import { DocumentsModule } from '../documents/documents.module';
 import { ActivitiesModule } from '../activities/activities.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Favorite, Document]),
-    DocumentsModule,
-    ActivitiesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Favorite, Document]), DocumentsModule, ActivitiesModule],
   controllers: [FavoritesController],
   providers: [FavoritesService],
   exports: [FavoritesService],

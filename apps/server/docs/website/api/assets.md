@@ -4,12 +4,12 @@
 
 ## 接口列表
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/assets/upload` | 上传资产 | 是 |
-| GET | `/assets` | 资产列表 | 是 |
-| GET | `/assets/:assetId/file` | 获取资产文件 | 是 |
-| DELETE | `/assets/:assetId` | 删除资产 | 是 |
+| 方法   | 路径                    | 说明         | 认证 |
+| ------ | ----------------------- | ------------ | ---- |
+| POST   | `/assets/upload`        | 上传资产     | 是   |
+| GET    | `/assets`               | 资产列表     | 是   |
+| GET    | `/assets/:assetId/file` | 获取资产文件 | 是   |
+| DELETE | `/assets/:assetId`      | 删除资产     | 是   |
 
 ## 上传资产
 
@@ -18,6 +18,7 @@
 **说明：** 上传文件到工作空间
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 Content-Type: multipart/form-data
@@ -25,16 +26,18 @@ Content-Type: multipart/form-data
 
 **请求体（FormData）：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `file` | File | ✅ | 要上传的文件 |
-| `workspaceId` | string | ✅ | 工作空间ID |
+| 字段          | 类型   | 必填 | 说明         |
+| ------------- | ------ | ---- | ------------ |
+| `file`        | File   | ✅   | 要上传的文件 |
+| `workspaceId` | string | ✅   | 工作空间ID   |
 
 **文件限制：**
+
 - 默认最大文件大小：10MB
 - 支持所有文件类型
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -51,6 +54,7 @@ Content-Type: multipart/form-data
 ```
 
 **存储说明：**
+
 - **文件存储位置**：文件存储在项目根目录下的 `uploads` 文件夹中
 - **完整路径格式**：`{项目根目录}/uploads/workspaces/{workspaceId}/{assetId}_{原文件名}`
 - **示例**：如果项目在 `f:\doc-back\app`，文件会保存在：
@@ -68,6 +72,7 @@ Content-Type: multipart/form-data
   - 确保应用有写入权限
 
 **状态码：**
+
 - `201 Created` - 上传成功
 - `400 Bad Request` - 请求参数错误（如文件过大）
 - `403 Forbidden` - 没有权限访问工作空间
@@ -79,19 +84,21 @@ Content-Type: multipart/form-data
 **说明：** 获取工作空间的资产列表
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **查询参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `workspaceId` | string | ✅ | 工作空间ID |
-| `page` | number | ❌ | 页码，默认 1 |
-| `pageSize` | number | ❌ | 每页数量，默认 20 |
+| 参数          | 类型   | 必填 | 说明              |
+| ------------- | ------ | ---- | ----------------- |
+| `workspaceId` | string | ✅   | 工作空间ID        |
+| `page`        | number | ❌   | 页码，默认 1      |
+| `pageSize`    | number | ❌   | 每页数量，默认 20 |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -115,6 +122,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `400 Bad Request` - 缺少 workspaceId 参数
 
@@ -125,21 +133,24 @@ Authorization: Bearer <your-access-token>
 **说明：** 下载或预览资产文件
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数      | 类型   | 说明   |
+| --------- | ------ | ------ |
 | `assetId` | string | 资产ID |
 
 **响应：**
+
 - 返回文件流
 - Content-Type 根据文件的 mimeType 设置
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `404 Not Found` - 资产不存在
 - `403 Forbidden` - 没有权限访问
@@ -151,19 +162,21 @@ Authorization: Bearer <your-access-token>
 **说明：** 删除资产（软删除并删除磁盘文件）
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
+| 参数      | 类型   | 说明   |
+| --------- | ------ | ------ |
 | `assetId` | string | 资产ID |
 
 **权限要求：** owner、admin 或 editor
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -174,10 +187,12 @@ Authorization: Bearer <your-access-token>
 ```
 
 **说明：**
+
 - 删除是软删除，资产记录不会被物理删除
 - 磁盘上的文件会被物理删除
 
 **状态码：**
+
 - `200 OK` - 删除成功
 - `404 Not Found` - 资产不存在
 - `403 Forbidden` - 没有权限
@@ -190,13 +205,13 @@ Authorization: Bearer <your-access-token>
 // 上传文件
 async function uploadAsset(workspaceId: string, file: File) {
   const formData = new FormData();
-  formData.append('file', file);
-  formData.append('workspaceId', workspaceId);
+  formData.append("file", file);
+  formData.append("workspaceId", workspaceId);
 
-  const response = await fetch('http://localhost:5200/api/v1/assets/upload', {
-    method: 'POST',
+  const response = await fetch("http://localhost:5200/api/v1/assets/upload", {
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
       // 不要设置 Content-Type，让浏览器自动设置（包含 boundary）
     },
     body: formData,
@@ -210,9 +225,9 @@ async function getAssets(workspaceId: string) {
     `http://localhost:5200/api/v1/assets?workspaceId=${workspaceId}&page=1&pageSize=20`,
     {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
-    }
+    },
   );
   return await response.json();
 }
@@ -222,4 +237,3 @@ function getAssetUrl(assetId: string): string {
   return `http://localhost:5200/api/v1/assets/${assetId}/file?token=${accessToken}`;
 }
 ```
-

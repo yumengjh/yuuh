@@ -8,14 +8,14 @@
 
 ## 接口列表
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| GET | `/settings/me` | 获取当前用户设置（含默认值） | 是 |
-| PATCH | `/settings/me` | 更新当前用户设置（部分更新） | 是 |
-| GET | `/settings/effective` | 获取生效设置（可选 workspaceId） | 是 |
-| GET | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置（原始覆盖） | 是 |
-| PATCH | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置（owner/admin） | 是 |
-| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置（owner/admin） | 是 |
+| 方法   | 路径                                | 说明                                | 认证 |
+| ------ | ----------------------------------- | ----------------------------------- | ---- |
+| GET    | `/settings/me`                      | 获取当前用户设置（含默认值）        | 是   |
+| PATCH  | `/settings/me`                      | 更新当前用户设置（部分更新）        | 是   |
+| GET    | `/settings/effective`               | 获取生效设置（可选 workspaceId）    | 是   |
+| GET    | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置（原始覆盖）    | 是   |
+| PATCH  | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置（owner/admin） | 是   |
+| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置（owner/admin） | 是   |
 
 ---
 
@@ -56,6 +56,7 @@
 **说明：** 返回用户设置并补齐默认值。
 
 **状态码：**
+
 - `200 OK`
 - `401 Unauthorized`
 
@@ -77,10 +78,12 @@
 ```
 
 **说明：**
+
 - `codeFontFamily: null` 表示删除该字段
 - 更新后会返回补齐默认值后的用户设置
 
 **状态码：**
+
 - `200 OK`
 - `400 Bad Request`
 - `401 Unauthorized`
@@ -92,10 +95,12 @@
 **接口：** `GET /api/v1/workspaces/:workspaceId/settings`
 
 **说明：**
+
 - 返回 workspace 原始覆盖设置
 - 不与用户设置合并
 
 **状态码：**
+
 - `200 OK`
 - `401 Unauthorized`
 - `403 Forbidden`
@@ -121,6 +126,7 @@
 **权限：** 仅 `owner` / `admin`
 
 **状态码：**
+
 - `200 OK`
 - `400 Bad Request`
 - `401 Unauthorized`
@@ -147,6 +153,7 @@
 ```
 
 **状态码：**
+
 - `200 OK`
 - `401 Unauthorized`
 - `403 Forbidden`
@@ -159,6 +166,7 @@
 **接口：** `GET /api/v1/settings/effective?workspaceId=ws_xxx`
 
 **说明：**
+
 - 不传 `workspaceId`：只计算用户维度生效值
 - 传 `workspaceId`：按 `workspace > user > default` 计算生效值
 - 返回三段数据：`userSettings` / `workspaceSettings` / `effectiveSettings`
@@ -202,6 +210,7 @@
 ```
 
 **状态码：**
+
 - `200 OK`
 - `401 Unauthorized`
 - `403 Forbidden`（传 workspaceId 且无权限）
@@ -219,4 +228,3 @@
   - `settings.workspace.clear`
 
 > 当前用户设置更新（`PATCH /settings/me`）不写入 `audit_logs`，仅作为普通配置更新处理。
-

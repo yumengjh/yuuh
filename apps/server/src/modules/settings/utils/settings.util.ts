@@ -125,14 +125,10 @@ export function validateSettingsPatch(
           continue;
         }
         if (fieldRule.min !== undefined && fieldValue < fieldRule.min) {
-          errors.push(
-            `${sectionKey}.${fieldKey} 超出允许范围(${fieldRule.min}~${fieldRule.max})`,
-          );
+          errors.push(`${sectionKey}.${fieldKey} 超出允许范围(${fieldRule.min}~${fieldRule.max})`);
         }
         if (fieldRule.max !== undefined && fieldValue > fieldRule.max) {
-          errors.push(
-            `${sectionKey}.${fieldKey} 超出允许范围(${fieldRule.min}~${fieldRule.max})`,
-          );
+          errors.push(`${sectionKey}.${fieldKey} 超出允许范围(${fieldRule.min}~${fieldRule.max})`);
         }
         continue;
       }
@@ -149,21 +145,11 @@ export function validateSettingsPatch(
           errors.push(`${sectionKey}.${fieldKey} 必须是字符串`);
           continue;
         }
-        if (
-          fieldRule.minLength !== undefined &&
-          fieldValue.length < fieldRule.minLength
-        ) {
-          errors.push(
-            `${sectionKey}.${fieldKey} 长度不能小于 ${fieldRule.minLength} 个字符`,
-          );
+        if (fieldRule.minLength !== undefined && fieldValue.length < fieldRule.minLength) {
+          errors.push(`${sectionKey}.${fieldKey} 长度不能小于 ${fieldRule.minLength} 个字符`);
         }
-        if (
-          fieldRule.maxLength !== undefined &&
-          fieldValue.length > fieldRule.maxLength
-        ) {
-          errors.push(
-            `${sectionKey}.${fieldKey} 长度不能超过 ${fieldRule.maxLength} 个字符`,
-          );
+        if (fieldRule.maxLength !== undefined && fieldValue.length > fieldRule.maxLength) {
+          errors.push(`${sectionKey}.${fieldKey} 长度不能超过 ${fieldRule.maxLength} 个字符`);
         }
       }
     }
@@ -172,10 +158,7 @@ export function validateSettingsPatch(
   return errors;
 }
 
-export function sanitizeSettingsBySchema(
-  value: unknown,
-  schema: SettingsSchema,
-): SettingsPayload {
+export function sanitizeSettingsBySchema(value: unknown, schema: SettingsSchema): SettingsPayload {
   if (!isPlainObject(value)) return {};
   const input = value as Record<string, any>;
   const out: Record<string, any> = {};
@@ -228,11 +211,7 @@ export function sanitizeSettingsBySchema(
   return out;
 }
 
-function hasOwnLeafValue(
-  settings: SettingsPayload,
-  section: string,
-  field: string,
-): boolean {
+function hasOwnLeafValue(settings: SettingsPayload, section: string, field: string): boolean {
   const sectionValue = (settings as Record<string, any>)[section];
   if (!isPlainObject(sectionValue)) return false;
   return (

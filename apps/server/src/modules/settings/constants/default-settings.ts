@@ -1,8 +1,4 @@
-import {
-  SettingsModuleOptions,
-  SettingsPayload,
-  SettingsSchema,
-} from '../settings.types';
+import { SettingsModuleOptions, SettingsPayload, SettingsSchema } from '../settings.types';
 
 export const SETTINGS_MODULE_OPTIONS = Symbol('SETTINGS_MODULE_OPTIONS');
 
@@ -17,8 +13,7 @@ export const DEFAULT_SETTINGS: SettingsPayload = {
   },
   advanced: {
     compactList: true,
-    codeFontFamily:
-      'SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace',
+    codeFontFamily: 'SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace',
   },
 };
 
@@ -43,4 +38,3 @@ export const DEFAULT_SETTINGS_MODULE_OPTIONS: SettingsModuleOptions = {
   allowUnknownKeys: false,
   nullMeansUnset: true,
 };
-

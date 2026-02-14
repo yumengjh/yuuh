@@ -32,6 +32,7 @@
 **路径：** `src/modules/auth/`
 
 **已实现的接口：**
+
 - ✅ `POST /api/v1/auth/register` - 用户注册
 - ✅ `POST /api/v1/auth/login` - 用户登录
 - ✅ `POST /api/v1/auth/refresh` - 刷新令牌
@@ -39,6 +40,7 @@
 - ✅ `GET /api/v1/auth/me` - 获取当前用户信息
 
 **功能特性：**
+
 - JWT Token 认证
 - Refresh Token 机制
 - 密码加密（bcryptjs）
@@ -46,6 +48,7 @@
 - 用户状态管理
 
 **相关文件：**
+
 - `auth.controller.ts` - 控制器
 - `auth.service.ts` - 业务逻辑
 - `auth.module.ts` - 模块定义
@@ -58,6 +61,7 @@
 ### 2. 基础设施
 
 #### 配置模块 (`src/config/`)
+
 - ✅ `database.config.ts` - 数据库配置
 - ✅ `jwt.config.ts` - JWT 配置
 - ✅ `app.config.ts` - 应用配置
@@ -66,29 +70,36 @@
 #### 公共模块 (`src/common/`)
 
 **装饰器 (decorators/)**
+
 - ✅ `current-user.decorator.ts` - 获取当前用户
 - ✅ `public.decorator.ts` - 公开接口标记
 - ✅ `audit-log.decorator.ts` - 审计日志（@AuditLog）
 - ⏳ `roles.decorator.ts` - 角色权限（待使用）
 
 **守卫 (guards/)**
+
 - ✅ `jwt-auth.guard.ts` - JWT 认证守卫
 - ⏳ `roles.guard.ts` - 角色权限守卫（待使用）
 
 **拦截器 (interceptors/)**
+
 - ✅ `transform.interceptor.ts` - 响应格式化拦截器（全局）
 
 **过滤器 (filters/)**
+
 - ✅ `http-exception.filter.ts` - 全局异常过滤器
 
 **管道 (pipes/)**
+
 - ⏳ `validation.pipe.ts` - 自定义验证管道（目前使用 NestJS 内置）
 
 **DTO (dto/)**
+
 - ✅ `response.dto.ts` - 统一响应格式
 - ✅ `pagination.dto.ts` - 分页 DTO（已使用）
 
 **工具类 (utils/)**
+
 - ✅ `hash.util.ts` - 密码加密/验证工具
 - ✅ `id-generator.util.ts` - ID 生成工具
 - ⏳ `sort-key.util.ts` - 排序键工具（待使用）
@@ -98,6 +109,7 @@
 **路径：** `src/entities/`
 
 **已定义的实体（16个）：**
+
 - ✅ `user.entity.ts` - 用户
 - ✅ `workspace.entity.ts` - 工作空间
 - ✅ `workspace-member.entity.ts` - 工作空间成员
@@ -116,6 +128,7 @@
 - ✅ `session.entity.ts` - 会话
 
 **数据库配置：**
+
 - ✅ TypeORM 配置完成
 - ✅ 开发环境自动同步（synchronize: true）
 - ✅ 开发环境 SQL 日志（logging: true）
@@ -123,6 +136,7 @@
 ### 4. 应用配置
 
 **主文件：** `src/main.ts`
+
 - ✅ Swagger API 文档集成
 - ✅ 全局验证管道
 - ✅ 全局异常过滤器
@@ -131,6 +145,7 @@
 - ✅ 全局 API 前缀（`/api/v1`）
 
 **模块配置：** `src/app.module.ts`
+
 - ✅ 配置模块集成
 - ✅ 数据库模块集成
 - ✅ 认证模块集成
@@ -155,6 +170,7 @@
 **路径：** `src/modules/workspaces/`
 
 **已实现的接口：**
+
 - ✅ `POST /api/v1/workspaces` - 创建工作空间
 - ✅ `GET /api/v1/workspaces` - 获取工作空间列表
 - ✅ `GET /api/v1/workspaces/:workspaceId` - 获取工作空间详情
@@ -166,6 +182,7 @@
 - ✅ `DELETE /api/v1/workspaces/:workspaceId/members/:userId` - 移除成员
 
 **功能特性：**
+
 - 工作空间 CRUD 操作
 - 成员管理（邀请、更新角色、移除）
 - 权限控制（owner、admin、editor、viewer）
@@ -173,6 +190,7 @@
 - 工作空间状态管理（active、archived）
 
 **相关文件：**
+
 - `workspaces.module.ts` - 模块定义
 - `workspaces.controller.ts` - 控制器
 - `workspaces.service.ts` - 业务逻辑
@@ -186,6 +204,7 @@
 **路径：** `src/modules/documents/`
 
 **已实现的接口：**
+
 - ✅ `POST /api/v1/documents` - 创建文档
 - ✅ `GET /api/v1/documents` - 获取文档列表
 - ✅ `GET /api/v1/documents/:docId` - 获取文档详情
@@ -197,6 +216,7 @@
 - ✅ `GET /api/v1/documents/search` - 搜索文档
 
 **功能特性：**
+
 - 文档 CRUD 操作
 - 文档树结构管理（父子关系）
 - 文档版本控制（head、publishedHead）
@@ -208,6 +228,7 @@
 - 循环引用检测
 
 **相关文件：**
+
 - `documents.module.ts` - 模块定义
 - `documents.controller.ts` - 控制器
 - `documents.service.ts` - 业务逻辑
@@ -222,6 +243,7 @@
 **路径：** `src/modules/blocks/`
 
 **已实现的接口：**
+
 - ✅ `POST /api/v1/blocks` - 创建块
 - ✅ `PATCH /api/v1/blocks/:blockId/content` - 更新块内容
 - ✅ `POST /api/v1/blocks/:blockId/move` - 移动块
@@ -230,6 +252,7 @@
 - ✅ `POST /api/v1/blocks/batch` - 批量操作块
 
 **功能特性：**
+
 - 块 CRUD 操作
 - 块版本控制（每次更新创建新版本）
 - 块树结构管理（父子关系）
@@ -241,6 +264,7 @@
 - 纯文本提取（用于搜索）
 
 **相关文件：**
+
 - `blocks.module.ts` - 模块定义
 - `blocks.controller.ts` - 控制器
 - `blocks.service.ts` - 业务逻辑
@@ -254,12 +278,14 @@
 **路径：** 集成在 `src/modules/documents/`
 
 **已实现的接口：**
+
 - ✅ `GET /api/v1/documents/:docId/revisions` - 获取修订历史
 - ✅ `GET /api/v1/documents/:docId/diff` - 版本对比
 - ✅ `POST /api/v1/documents/:docId/revert` - 版本回滚
 - ✅ `POST /api/v1/documents/:docId/snapshots` - 创建快照
 
 **功能特性：**
+
 - 文档创建时自动创建初始 DocRevision (head=1)
 - 块变更时（创建/更新/删除/移动、批量）自动创建 DocRevision
 - 基于 DocRevision.createdAt 计算任意版本的块版本映射 (block_version_map)
@@ -268,6 +294,7 @@
 - 快照：保存当前 head 的 blockVersionMap，已存在则幂等返回
 
 **相关文件：**
+
 - `documents.controller.ts` - 新增 getRevisions、getDiff、revert、createSnapshot 路由
 - `documents.service.ts` - 新增 getRevisions、getDiff、revert、createSnapshot、getBlockVersionMapForVersion、buildContentTreeFromVersionMap
 - `blocks.service.ts` - incrementDocumentHead 中创建 DocRevision
@@ -280,17 +307,20 @@
 **路径：** `src/modules/assets/`
 
 **已实现的接口：**
+
 - ✅ `POST /api/v1/assets/upload` - 上传资产（multipart/form-data: file + workspaceId）
 - ✅ `GET /api/v1/assets` - 获取资产列表（query: workspaceId, page, pageSize）
 - ✅ `GET /api/v1/assets/:assetId/file` - 获取资产文件流（预览/下载）
 - ✅ `DELETE /api/v1/assets/:assetId` - 删除资产（软删除并删除磁盘文件）
 
 **功能特性：**
+
 - 本地存储（storageProvider: local），目录：uploads/workspaces/{workspaceId}/
 - 配置文件：app.uploadDir、app.maxFileSize（默认 10MB）
 - 软删除 + 物理删除文件，url 为 /api/v1/assets/:assetId/file
 
 **相关文件：**
+
 - `assets.module.ts`、`assets.controller.ts`、`assets.service.ts`
 - `dto/upload-asset.dto.ts`、`dto/query-assets.dto.ts`
 
@@ -299,6 +329,7 @@
 **路径：** `src/modules/security/`，参考 [SAFE_DESIGN.md](./SAFE_DESIGN.md)
 
 **已实现：**
+
 - ✅ **安全日志 (security_logs)**：SecurityService.logEvent / logLoginSuccess / logLoginFailed / logLogout / logUnauthorizedAccess / logPermissionDenied / logRateLimitExceeded
 - ✅ **审计日志 (audit_logs)**：AuditService.record、findFiltered、findUserActivities、findResourceHistory、findSensitiveActions
 - ✅ **@AuditLog 装饰器** + **AuditLogInterceptor**（全局）：对带 @AuditLog 的接口自动写入 audit_logs，敏感字段脱敏
@@ -306,14 +337,17 @@
 - ✅ **全局限流**：ThrottlerModule（60s/100 次）+ ThrottlerGuard
 
 **已实现接口：**
+
 - ✅ `GET /api/v1/security/events` - 查询安全日志（eventType、userId、ip、startDate、endDate、分页）
 - ✅ `GET /api/v1/security/audit` - 查询审计日志（action、resourceType、resourceId、userId、日期、分页）
 
 **集成：**
+
 - Auth：登录成功/失败、登出时写入 security_logs（ip、userAgent）
 - Documents：创建、删除时通过 @AuditLog 写入 audit_logs
 
 **相关文件：**
+
 - `security.module.ts`、`security.service.ts`、`audit.service.ts`、`security.controller.ts`
 - `interceptors/audit-log.interceptor.ts`、`constants/security-events.ts`
 - `dto/query-security-logs.dto.ts`、`dto/query-audit-logs.dto.ts`
@@ -325,6 +359,7 @@
 **路径：** `src/modules/tags/`
 
 **已实现的接口：**
+
 - ✅ `POST /api/v1/tags` - 创建标签（workspaceId、name、color）
 - ✅ `GET /api/v1/tags` - 获取标签列表（workspaceId、分页）
 - ✅ `GET /api/v1/tags/:tagId` - 获取标签详情
@@ -339,6 +374,7 @@
 **路径：** `src/modules/favorites/`
 
 **已实现的接口：**
+
 - ✅ `POST /api/v1/favorites` - 收藏文档（body: docId）
 - ✅ `GET /api/v1/favorites` - 获取收藏列表（分页，含 document）
 - ✅ `DELETE /api/v1/favorites/:docId` - 取消收藏
@@ -352,6 +388,7 @@
 **路径：** `src/modules/comments/`
 
 **已实现的接口：**
+
 - ✅ `POST /api/v1/comments` - 创建评论/回复（docId、blockId?、content、mentions?、parentCommentId?）
 - ✅ `GET /api/v1/comments` - 获取评论列表（docId、blockId?、分页）
 - ✅ `GET /api/v1/comments/:commentId` - 获取评论详情
@@ -365,10 +402,12 @@
 **路径：** `src/modules/search/`
 
 **已实现的接口：**
+
 - ✅ `GET /api/v1/search` - 全局搜索（query、workspaceId?、type?=doc|block|all、page、pageSize）
 - ✅ `POST /api/v1/search/advanced` - 高级搜索（标签、时间范围、createdBy、sortBy、sortOrder）
 
 **功能：**
+
 - 文档标题：searchVector @@ plainto_tsquery 或 title ILIKE
 - 块内容：BlockVersion.searchVector / plainText，仅最新版本（b.latestVer = bv.ver），权限过滤
 - 高级：tags &&、updatedAt 范围、createdBy、排序（rank/updatedAt/createdAt）
@@ -380,9 +419,11 @@
 **路径：** `src/modules/activities/`
 
 **已实现的接口：**
+
 - ✅ `GET /api/v1/activities` - 获取活动日志（workspaceId 必填，userId、action、entityType、startDate、endDate、分页）
 
 **记录埋点（Service 层）：**
+
 - 工作空间：create、update、delete；成员：invite、role、remove
 - 文档：create、update、publish、move、delete
 - 块：create、updateContent、move、remove、batch
@@ -440,6 +481,7 @@ app/
 ## 🔧 技术栈
 
 ### 已使用
+
 - ✅ NestJS 11.x
 - ✅ TypeORM 0.3.x
 - ✅ PostgreSQL
@@ -450,13 +492,16 @@ app/
 - ✅ bcryptjs
 
 ### 待使用
+
 - ⏳ Redis（缓存，可选）
 - ⏳ Bull（队列，可选）
 
 ### 已使用（资产模块）
+
 - ✅ Multer（文件上传，@nestjs/platform-express + multer）
 
 ### 已使用（安全模块）
+
 - ✅ @nestjs/throttler（全局限流）
 
 ---
@@ -464,21 +509,25 @@ app/
 ## 📝 下一步计划
 
 ### 优先级 P0（必须）
+
 1. ✅ **工作空间模块** - 文档功能的基础依赖（已完成）
 2. ✅ **文档模块** - 核心业务功能（已完成）
 3. ✅ **块模块** - 文档内容的基础单元（已完成）
 
 ### 优先级 P1（重要）
+
 4. ✅ **版本控制模块** - 文档历史管理（已完成）
 5. ✅ **资产模块** - 文件上传和管理（已完成）
 
 ### 优先级 P2（增强）
+
 6. ✅ **标签模块** - 文档分类（已完成）
 7. ✅ **收藏模块** - 用户功能（已完成）
 8. ✅ **评论模块** - 协作功能（已完成）
 9. ✅ **搜索模块** - 全文搜索（已完成）
 
 ### 优先级 P3（优化）
+
 10. ✅ **活动日志模块** - 审计功能（已完成）
 11. **性能优化** - 缓存、限流等
 12. **测试** - 单元测试、集成测试

@@ -7,7 +7,7 @@ hero:
   text: "后端系统"
   tagline: 基于 NestJS 构建的现代化知识库管理系统后端 API
   image:
-    # src: 
+    # src:
     alt: 个人知识库后端
   actions:
     - theme: brand
@@ -43,4 +43,3 @@ features:
     title: API 文档
     details: 集成 Swagger/OpenAPI 自动生成 API 文档
 ---
-

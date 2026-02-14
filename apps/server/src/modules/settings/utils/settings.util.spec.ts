@@ -1,7 +1,4 @@
-import {
-  DEFAULT_SETTINGS,
-  DEFAULT_SETTINGS_SCHEMA,
-} from '../constants/default-settings';
+import { DEFAULT_SETTINGS, DEFAULT_SETTINGS_SCHEMA } from '../constants/default-settings';
 import {
   applySettingsPatch,
   buildSettingsSources,
@@ -72,15 +69,10 @@ describe('settings.util', () => {
     expect(effective.reader?.contentWidth).toBe(860);
     expect(effective.advanced?.compactList).toBe(false);
 
-    const sources = buildSettingsSources(
-      DEFAULT_SETTINGS_SCHEMA,
-      userRaw,
-      workspaceRaw,
-    );
+    const sources = buildSettingsSources(DEFAULT_SETTINGS_SCHEMA, userRaw, workspaceRaw);
 
     expect(sources['reader.contentWidth']).toBe('workspace');
     expect(sources['advanced.compactList']).toBe('user');
     expect(sources['editor.fontSize']).toBe('default');
   });
 });
-

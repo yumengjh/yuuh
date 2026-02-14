@@ -11,13 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiResponse,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -49,10 +43,12 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '登录成功' })
   @ApiResponse({ status: 401, description: '用户名或密码错误' })
   async login(@Body() loginDto: LoginDto, @Req() req: Request) {
-    const ctx = { ip: req.ip || (req.socket?.remoteAddress as string), userAgent: req.headers?.['user-agent'] };
+    const ctx = {
+      ip: req.ip || (req.socket?.remoteAddress as string),
+      userAgent: req.headers?.['user-agent'],
+    };
     return this.authService.login(loginDto, ctx);
   }
-
 
   @Post('refresh')
   @Public()
@@ -69,12 +65,11 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiBearerAuth()
   @ApiOperation({ summary: '用户登出' })
-  async logout(
-    @CurrentUser() user: any,
-    @Body('token') token: string,
-    @Req() req: Request,
-  ) {
-    const ctx = { ip: req.ip || (req.socket?.remoteAddress as string), userAgent: req.headers?.['user-agent'] };
+  async logout(@CurrentUser() user: any, @Body('token') token: string, @Req() req: Request) {
+    const ctx = {
+      ip: req.ip || (req.socket?.remoteAddress as string),
+      userAgent: req.headers?.['user-agent'],
+    };
     return this.authService.logout(user.userId, token, ctx);
   }
 
@@ -94,10 +89,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: '更新成功' })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @ApiResponse({ status: 401, description: '未认证或令牌无效' })
-  async updateCurrentUser(
-    @CurrentUser() user: any,
-    @Body() updateMeDto: UpdateMeDto,
-  ) {
+  async updateCurrentUser(@CurrentUser() user: any, @Body() updateMeDto: UpdateMeDto) {
     return this.authService.updateCurrentUser(user.userId, updateMeDto);
   }
 

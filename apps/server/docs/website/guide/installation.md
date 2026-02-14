@@ -72,6 +72,7 @@ pnpm run start:prod
 ## 验证安装
 
 启动成功后：
+
 - API 服务：http://localhost:5200
 - Swagger 文档：http://localhost:5200/api/v1/docs
 
@@ -86,6 +87,7 @@ pnpm run start:prod
 ### 数据库连接失败
 
 检查：
+
 1. PostgreSQL 服务是否运行
 2. 数据库配置是否正确
 3. 数据库用户是否有足够权限

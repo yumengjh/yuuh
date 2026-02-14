@@ -3,13 +3,30 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 const ACTIONS = [
-  'doc.create', 'doc.update', 'doc.delete', 'doc.move', 'doc.publish',
-  'block.create', 'block.update', 'block.delete', 'block.move', 'block.batch',
-  'workspace.create', 'workspace.update', 'workspace.delete',
-  'member.invite', 'member.role', 'member.remove',
-  'favorite.create', 'favorite.remove',
-  'comment.create', 'comment.update', 'comment.delete',
-  'tag.create', 'tag.update', 'tag.delete',
+  'doc.create',
+  'doc.update',
+  'doc.delete',
+  'doc.move',
+  'doc.publish',
+  'block.create',
+  'block.update',
+  'block.delete',
+  'block.move',
+  'block.batch',
+  'workspace.create',
+  'workspace.update',
+  'workspace.delete',
+  'member.invite',
+  'member.role',
+  'member.remove',
+  'favorite.create',
+  'favorite.remove',
+  'comment.create',
+  'comment.update',
+  'comment.delete',
+  'tag.create',
+  'tag.update',
+  'tag.delete',
 ];
 const ENTITY_TYPES = ['document', 'block', 'workspace', 'member', 'favorite', 'comment', 'tag'];
 

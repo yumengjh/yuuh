@@ -11,13 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiResponse,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
@@ -47,30 +41,21 @@ export class DocumentsController {
   @ApiResponse({ status: 201, description: '创建成功' })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @ApiResponse({ status: 403, description: '没有权限' })
-  async create(
-    @Body() createDocumentDto: CreateDocumentDto,
-    @CurrentUser() user: any,
-  ) {
+  async create(@Body() createDocumentDto: CreateDocumentDto, @CurrentUser() user: any) {
     return this.documentsService.create(createDocumentDto, user.userId);
   }
 
   @Get()
   @ApiOperation({ summary: '获取文档列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
-  async findAll(
-    @Query() queryDto: QueryDocumentsDto,
-    @CurrentUser() user: any,
-  ) {
+  async findAll(@Query() queryDto: QueryDocumentsDto, @CurrentUser() user: any) {
     return this.documentsService.findAll(queryDto, user.userId);
   }
 
   @Get('search')
   @ApiOperation({ summary: '搜索文档' })
   @ApiResponse({ status: 200, description: '搜索成功' })
-  async search(
-    @Query() searchQueryDto: SearchQueryDto,
-    @CurrentUser() user: any,
-  ) {
+  async search(@Query() searchQueryDto: SearchQueryDto, @CurrentUser() user: any) {
     return this.documentsService.search(searchQueryDto, user.userId);
   }
 
@@ -80,10 +65,7 @@ export class DocumentsController {
   @ApiResponse({ status: 200, description: '获取成功' })
   @ApiResponse({ status: 404, description: '文档不存在' })
   @ApiResponse({ status: 403, description: '没有权限访问' })
-  async findOne(
-    @Param('docId') docId: string,
-    @CurrentUser() user: any,
-  ) {
+  async findOne(@Param('docId') docId: string, @CurrentUser() user: any) {
     return this.documentsService.findOne(docId, user.userId);
   }
 
@@ -127,10 +109,7 @@ export class DocumentsController {
   @ApiResponse({ status: 200, description: '发布成功' })
   @ApiResponse({ status: 404, description: '文档不存在' })
   @ApiResponse({ status: 403, description: '没有权限' })
-  async publish(
-    @Param('docId') docId: string,
-    @CurrentUser() user: any,
-  ) {
+  async publish(@Param('docId') docId: string, @CurrentUser() user: any) {
     return this.documentsService.publish(docId, user.userId);
   }
 
@@ -157,10 +136,7 @@ export class DocumentsController {
   @ApiResponse({ status: 200, description: '删除成功' })
   @ApiResponse({ status: 404, description: '文档不存在' })
   @ApiResponse({ status: 403, description: '没有权限' })
-  async remove(
-    @Param('docId') docId: string,
-    @CurrentUser() user: any,
-  ) {
+  async remove(@Param('docId') docId: string, @CurrentUser() user: any) {
     return this.documentsService.remove(docId, user.userId);
   }
 
@@ -189,12 +165,7 @@ export class DocumentsController {
     @Query() queryDto: DiffVersionsDto,
     @CurrentUser() user: any,
   ) {
-    return this.documentsService.getDiff(
-      docId,
-      queryDto.fromVer,
-      queryDto.toVer,
-      user.userId,
-    );
+    return this.documentsService.getDiff(docId, queryDto.fromVer, queryDto.toVer, user.userId);
   }
 
   @Post(':docId/revert')
@@ -219,10 +190,7 @@ export class DocumentsController {
   @ApiResponse({ status: 201, description: '创建成功' })
   @ApiResponse({ status: 404, description: '文档不存在' })
   @ApiResponse({ status: 403, description: '没有权限' })
-  async createSnapshot(
-    @Param('docId') docId: string,
-    @CurrentUser() user: any,
-  ) {
+  async createSnapshot(@Param('docId') docId: string, @CurrentUser() user: any) {
     return this.documentsService.createSnapshot(docId, user.userId);
   }
 
@@ -248,10 +216,7 @@ export class DocumentsController {
   @ApiResponse({ status: 200, description: '获取成功' })
   @ApiResponse({ status: 404, description: '文档不存在' })
   @ApiResponse({ status: 403, description: '没有权限' })
-  async getPendingVersions(
-    @Param('docId') docId: string,
-    @CurrentUser() user: any,
-  ) {
+  async getPendingVersions(@Param('docId') docId: string, @CurrentUser() user: any) {
     return this.documentsService.getPendingVersions(docId, user.userId);
   }
 }

@@ -54,15 +54,15 @@ effective = deepMerge(userSettingsWithDefaults, workspaceSettings)
 
 建议结构：
 
-| 字段 | 类型 | 说明 |
-|---|---|---|
-| `id` | bigint PK | 自增主键 |
-| `profile_id` | varchar(64) unique | 业务ID（如 `sp_xxx`） |
-| `scope_type` | varchar(20) | 作用域：`user` / `workspace` |
-| `scope_id` | varchar(64) | 作用域实体ID（userId 或 workspaceId） |
-| `settings` | jsonb | 设置内容，默认 `{}` |
-| `created_at` | timestamptz | 创建时间 |
-| `updated_at` | timestamptz | 更新时间 |
+| 字段         | 类型               | 说明                                  |
+| ------------ | ------------------ | ------------------------------------- |
+| `id`         | bigint PK          | 自增主键                              |
+| `profile_id` | varchar(64) unique | 业务ID（如 `sp_xxx`）                 |
+| `scope_type` | varchar(20)        | 作用域：`user` / `workspace`          |
+| `scope_id`   | varchar(64)        | 作用域实体ID（userId 或 workspaceId） |
+| `settings`   | jsonb              | 设置内容，默认 `{}`                   |
+| `created_at` | timestamptz        | 创建时间                              |
+| `updated_at` | timestamptz        | 更新时间                              |
 
 建议约束与索引：
 
@@ -128,14 +128,14 @@ effective = deepMerge(userSettingsWithDefaults, workspaceSettings)
 
 ## 6. 接口列表
 
-| 方法 | 路径 | 说明 | 权限 |
-|---|---|---|---|
-| GET | `/settings/me` | 获取当前用户设置 | 登录用户 |
-| PATCH | `/settings/me` | 更新当前用户设置（部分更新） | 登录用户 |
-| GET | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置 | 工作空间成员 |
-| PATCH | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置（部分更新） | owner/admin |
-| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置 | owner/admin |
-| GET | `/settings/effective` | 获取生效设置（可带 workspaceId） | 登录用户 |
+| 方法   | 路径                                | 说明                             | 权限         |
+| ------ | ----------------------------------- | -------------------------------- | ------------ |
+| GET    | `/settings/me`                      | 获取当前用户设置                 | 登录用户     |
+| PATCH  | `/settings/me`                      | 更新当前用户设置（部分更新）     | 登录用户     |
+| GET    | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置             | 工作空间成员 |
+| PATCH  | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置（部分更新） | owner/admin  |
+| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置             | owner/admin  |
+| GET    | `/settings/effective`               | 获取生效设置（可带 workspaceId） | 登录用户     |
 
 ---
 
@@ -332,14 +332,14 @@ effective = deepMerge(userSettingsWithDefaults, workspaceSettings)
 
 ## 12. 与 Swagger 注释对齐清单（逐条）
 
-| 接口 | 文档状态码 | Swagger 状态码 | 对齐结果 |
-|---|---|---|---|
-| `GET /settings/me` | `200/401` | `200/401` | ✅ |
-| `PATCH /settings/me` | `200/400/401` | `200/400/401` | ✅ |
-| `GET /workspaces/:workspaceId/settings` | `200/401/403/404` | `200/401/403/404` | ✅ |
-| `PATCH /workspaces/:workspaceId/settings` | `200/400/401/403/404` | `200/400/401/403/404` | ✅ |
-| `DELETE /workspaces/:workspaceId/settings` | `200/401/403/404` | `200/401/403/404` | ✅ |
-| `GET /settings/effective` | `200/401/403/404` | `200/401/403/404` | ✅ |
+| 接口                                       | 文档状态码            | Swagger 状态码        | 对齐结果 |
+| ------------------------------------------ | --------------------- | --------------------- | -------- |
+| `GET /settings/me`                         | `200/401`             | `200/401`             | ✅       |
+| `PATCH /settings/me`                       | `200/400/401`         | `200/400/401`         | ✅       |
+| `GET /workspaces/:workspaceId/settings`    | `200/401/403/404`     | `200/401/403/404`     | ✅       |
+| `PATCH /workspaces/:workspaceId/settings`  | `200/400/401/403/404` | `200/400/401/403/404` | ✅       |
+| `DELETE /workspaces/:workspaceId/settings` | `200/401/403/404`     | `200/401/403/404`     | ✅       |
+| `GET /settings/effective`                  | `200/401/403/404`     | `200/401/403/404`     | ✅       |
 
 补充对齐点：
 

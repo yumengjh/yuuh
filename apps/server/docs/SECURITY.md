@@ -22,15 +22,15 @@
 
 项目采用 **NestJS + PostgreSQL**，在以下方面已落实安全机制：
 
-| 领域         | 机制概要                                                                 |
-|--------------|--------------------------------------------------------------------------|
-| 认证         | JWT Access/Refresh、bcrypt 密码、会话表、`@Public` 放行登录/注册/刷新   |
-| 授权         | JwtAuthGuard 默认、RolesGuard、工作空间/文档/资产级 checkAccess 等     |
-| 限流         | Throttler 全局限流（60s/100 次）                                        |
-| 输入验证     | 全局 ValidationPipe（whitelist、forbidNonWhitelisted、transform）      |
-| 安全 / 审计  | security_logs、audit_logs、@AuditLog、请求/响应脱敏                     |
-| 错误与规范   | 全局 HttpExceptionFilter、ErrorCode、BusinessException                  |
-| 网络与请求   | CORS 可配置、统一 `/api/v1` 前缀                                        |
+| 领域        | 机制概要                                                              |
+| ----------- | --------------------------------------------------------------------- |
+| 认证        | JWT Access/Refresh、bcrypt 密码、会话表、`@Public` 放行登录/注册/刷新 |
+| 授权        | JwtAuthGuard 默认、RolesGuard、工作空间/文档/资产级 checkAccess 等    |
+| 限流        | Throttler 全局限流（60s/100 次）                                      |
+| 输入验证    | 全局 ValidationPipe（whitelist、forbidNonWhitelisted、transform）     |
+| 安全 / 审计 | security_logs、audit_logs、@AuditLog、请求/响应脱敏                   |
+| 错误与规范  | 全局 HttpExceptionFilter、ErrorCode、BusinessException                |
+| 网络与请求  | CORS 可配置、统一 `/api/v1` 前缀                                      |
 
 ---
 
@@ -207,38 +207,38 @@
 
 ### 9.1 已实现
 
-- [x] JWT 双 Token、会话表、登出删会话  
-- [x] bcrypt 密码、salt 轮数 10  
-- [x] @Public、JwtAuthGuard、RolesGuard 框架  
-- [x] 工作空间 checkAccess / checkEdit / checkAdmin，文档 visibility，资产依 workspace 鉴权  
-- [x] 全局限流（Throttler 60s/100 次）  
-- [x] 全局 ValidationPipe（whitelist、forbidNonWhitelisted、transform）  
-- [x] security_logs、audit_logs 实体与表  
-- [x] SecurityService 安全事件、AuditService 审计与查询  
-- [x] @AuditLog + AuditLogInterceptor、敏感字段脱敏  
-- [x] Auth 登录成功/失败/登出写 security_logs（含 ip、userAgent）  
-- [x] GET /security/events、GET /security/audit 查询接口（需 JWT）  
-- [x] ErrorCode、BusinessException  
-- [x] 全局 HttpExceptionFilter、CORS、API 前缀  
+- [x] JWT 双 Token、会话表、登出删会话
+- [x] bcrypt 密码、salt 轮数 10
+- [x] @Public、JwtAuthGuard、RolesGuard 框架
+- [x] 工作空间 checkAccess / checkEdit / checkAdmin，文档 visibility，资产依 workspace 鉴权
+- [x] 全局限流（Throttler 60s/100 次）
+- [x] 全局 ValidationPipe（whitelist、forbidNonWhitelisted、transform）
+- [x] security_logs、audit_logs 实体与表
+- [x] SecurityService 安全事件、AuditService 审计与查询
+- [x] @AuditLog + AuditLogInterceptor、敏感字段脱敏
+- [x] Auth 登录成功/失败/登出写 security_logs（含 ip、userAgent）
+- [x] GET /security/events、GET /security/audit 查询接口（需 JWT）
+- [x] ErrorCode、BusinessException
+- [x] 全局 HttpExceptionFilter、CORS、API 前缀
 
 ### 9.2 待加强（参考 SAFE_DESIGN）
 
-- [ ] **JWT**：生产环境强 secret、Token 黑名单（如 Redis）  
-- [ ] **密码**：更强策略（长度、大小写+数字+符号）、密码重置与过期  
-- [ ] **RolesGuard**：与 `WorkspaceMember.role` 打通，按路由细粒度控制  
-- [ ] **限流**：登录/注册/上传等按路径单独收紧（如 5 次/分钟、3 次/小时）  
-- [ ] **审计**：为更多敏感操作（移除成员、改权限、发布等）挂 @AuditLog  
-- [ ] **安全日志**：UNAUTHORIZED_ACCESS、PERMISSION_DENIED、RATE_LIMIT_EXCEEDED 在守卫/拦截器中自动写入  
-- [ ] **日志系统**：Winston + 按天滚动、访问/错误/安全分文件，生产 JSON 输出  
-- [ ] **XSS/CSRF**：内容清洗管道、CSRF 中间件（若采用 Cookie 方案）  
-- [ ] **安全响应头**：Helmet（CSP、HSTS、XSS 等）  
-- [ ] **敏感数据**：对部分字段加密存储与解密  
-- [ ] **安全/审计查询**：按角色或工作空间限制可见范围，避免普通用户看全量  
+- [ ] **JWT**：生产环境强 secret、Token 黑名单（如 Redis）
+- [ ] **密码**：更强策略（长度、大小写+数字+符号）、密码重置与过期
+- [ ] **RolesGuard**：与 `WorkspaceMember.role` 打通，按路由细粒度控制
+- [ ] **限流**：登录/注册/上传等按路径单独收紧（如 5 次/分钟、3 次/小时）
+- [ ] **审计**：为更多敏感操作（移除成员、改权限、发布等）挂 @AuditLog
+- [ ] **安全日志**：UNAUTHORIZED_ACCESS、PERMISSION_DENIED、RATE_LIMIT_EXCEEDED 在守卫/拦截器中自动写入
+- [ ] **日志系统**：Winston + 按天滚动、访问/错误/安全分文件，生产 JSON 输出
+- [ ] **XSS/CSRF**：内容清洗管道、CSRF 中间件（若采用 Cookie 方案）
+- [ ] **安全响应头**：Helmet（CSP、HSTS、XSS 等）
+- [ ] **敏感数据**：对部分字段加密存储与解密
+- [ ] **安全/审计查询**：按角色或工作空间限制可见范围，避免普通用户看全量
 
 ---
 
 ## 相关文档
 
-- [SAFE_DESIGN.md](./SAFE_DESIGN.md) — 安全与日志的详细设计与 TODO  
-- [API_DESIGN.md](./API_DESIGN.md) — 接口与数据模型  
-- [CURRENT_PROGRESS.md](./CURRENT_PROGRESS.md) — 功能与模块完成度  
+- [SAFE_DESIGN.md](./SAFE_DESIGN.md) — 安全与日志的详细设计与 TODO
+- [API_DESIGN.md](./API_DESIGN.md) — 接口与数据模型
+- [CURRENT_PROGRESS.md](./CURRENT_PROGRESS.md) — 功能与模块完成度

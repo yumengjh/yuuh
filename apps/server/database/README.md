@@ -123,13 +123,13 @@ docker-compose down -v
 
 ```yaml
 # docker-compose-db.yml
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
     image: postgres:15-alpine
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

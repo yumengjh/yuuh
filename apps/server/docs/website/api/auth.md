@@ -4,15 +4,15 @@
 
 ## 接口列表
 
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/auth/register` | 用户注册 | 否 |
-| POST | `/auth/login` | 用户登录 | 否 |
-| POST | `/auth/refresh` | 刷新令牌 | 否 |
-| POST | `/auth/logout` | 用户登出 | 是 |
-| GET | `/auth/me` | 获取当前用户 | 是 |
-| PATCH | `/auth/me` | 更新当前用户信息 | 是 |
-| GET | `/auth/users/:userId` | 根据 userId 获取用户信息 | 是 |
+| 方法  | 路径                  | 说明                     | 认证 |
+| ----- | --------------------- | ------------------------ | ---- |
+| POST  | `/auth/register`      | 用户注册                 | 否   |
+| POST  | `/auth/login`         | 用户登录                 | 否   |
+| POST  | `/auth/refresh`       | 刷新令牌                 | 否   |
+| POST  | `/auth/logout`        | 用户登出                 | 是   |
+| GET   | `/auth/me`            | 获取当前用户             | 是   |
+| PATCH | `/auth/me`            | 更新当前用户信息         | 是   |
+| GET   | `/auth/users/:userId` | 根据 userId 获取用户信息 | 是   |
 
 ## 用户注册
 
@@ -21,6 +21,7 @@
 **说明：** 创建新用户账户
 
 **请求体：**
+
 ```json
 {
   "username": "john_doe",
@@ -32,14 +33,15 @@
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `username` | string | ✅ | 用户名，3-50个字符，只能包含字母、数字和下划线 |
-| `email` | string | ✅ | 邮箱地址，必须符合邮箱格式 |
-| `password` | string | ✅ | 密码，至少8位，必须包含大小写字母和数字 |
-| `displayName` | string | ❌ | 显示名称（可选），最多100个字符 |
+| 字段          | 类型   | 必填 | 说明                                           |
+| ------------- | ------ | ---- | ---------------------------------------------- |
+| `username`    | string | ✅   | 用户名，3-50个字符，只能包含字母、数字和下划线 |
+| `email`       | string | ✅   | 邮箱地址，必须符合邮箱格式                     |
+| `password`    | string | ✅   | 密码，至少8位，必须包含大小写字母和数字        |
+| `displayName` | string | ❌   | 显示名称（可选），最多100个字符                |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -58,6 +60,7 @@
 ```
 
 **状态码：**
+
 - `201 Created` - 注册成功
 - `400 Bad Request` - 请求参数错误（如用户名已存在、邮箱格式错误等）
 - `409 Conflict` - 用户名或邮箱已存在
@@ -69,6 +72,7 @@
 **说明：** 用户登录，获取访问令牌
 
 **请求体：**
+
 ```json
 {
   "emailOrUsername": "john@example.com",
@@ -78,12 +82,13 @@
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `emailOrUsername` | string | ✅ | 邮箱或用户名 |
-| `password` | string | ✅ | 密码 |
+| 字段              | 类型   | 必填 | 说明         |
+| ----------------- | ------ | ---- | ------------ |
+| `emailOrUsername` | string | ✅   | 邮箱或用户名 |
+| `password`        | string | ✅   | 密码         |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -102,6 +107,7 @@
 ```
 
 **状态码：**
+
 - `200 OK` - 登录成功
 - `401 Unauthorized` - 用户名/密码错误
 
@@ -112,6 +118,7 @@
 **说明：** 当 Access Token 过期时，使用 Refresh Token 获取新的 Access Token
 
 **请求体：**
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -120,11 +127,12 @@
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `refreshToken` | string | ✅ | 刷新令牌 |
+| 字段           | 类型   | 必填 | 说明     |
+| -------------- | ------ | ---- | -------- |
+| `refreshToken` | string | ✅   | 刷新令牌 |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -136,6 +144,7 @@
 ```
 
 **状态码：**
+
 - `200 OK` - 刷新成功
 - `401 Unauthorized` - Refresh Token 无效或已过期
 
@@ -146,11 +155,13 @@
 **说明：** 获取当前登录用户的详细信息
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -168,6 +179,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `401 Unauthorized` - Token 无效或已过期
 
@@ -182,11 +194,13 @@ Authorization: Bearer <your-access-token>
 **返回体说明：** 返回当前用户信息，但不包含 `settings` 字段，包含 `updatedAt`。
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **请求体（可选字段）：**
+
 ```json
 {
   "displayName": "John Doe",
@@ -198,6 +212,7 @@ Authorization: Bearer <your-access-token>
 > 说明：传 `null` 会被忽略，不会清空字段。
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -215,6 +230,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **状态码：**
+
 - `200 OK` - 更新成功
 - `400 Bad Request` - 请求参数错误
 - `401 Unauthorized` - Token 无效或已过期
@@ -228,17 +244,19 @@ Authorization: Bearer <your-access-token>
 **返回字段：** `username`、`displayName`、`email`、`avatar`、`bio`、`status`、`updatedAt`
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **路径参数：**
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `userId` | string | ✅ | 用户 ID |
+| 参数     | 类型   | 必填 | 说明    |
+| -------- | ------ | ---- | ------- |
+| `userId` | string | ✅   | 用户 ID |
 
 **响应示例：**
+
 ```json
 {
   "success": true,
@@ -255,6 +273,7 @@ Authorization: Bearer <your-access-token>
 ```
 
 **状态码：**
+
 - `200 OK` - 获取成功
 - `401 Unauthorized` - Token 无效或已过期
 - `404 Not Found` - 用户不存在
@@ -266,11 +285,13 @@ Authorization: Bearer <your-access-token>
 **说明：** 用户登出，使令牌失效
 
 **请求头：**
+
 ```
 Authorization: Bearer <your-access-token>
 ```
 
 **请求体：**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -279,15 +300,17 @@ Authorization: Bearer <your-access-token>
 
 **字段说明：**
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `token` | string | ✅ | 要失效的令牌（通常是 refreshToken） |
+| 字段    | 类型   | 必填 | 说明                                |
+| ------- | ------ | ---- | ----------------------------------- |
+| `token` | string | ✅   | 要失效的令牌（通常是 refreshToken） |
 
 **响应：**
+
 - 状态码：`204 No Content`
 - 无响应体
 
 **状态码：**
+
 - `204 No Content` - 登出成功
 - `401 Unauthorized` - Token 无效
 
@@ -312,11 +335,11 @@ Authorization: Bearer <your-access-token>
 ```typescript
 // 检查 Token 是否即将过期
 function shouldRefreshToken(token: string): boolean {
-  const payload = JSON.parse(atob(token.split('.')[1]));
+  const payload = JSON.parse(atob(token.split(".")[1]));
   const exp = payload.exp * 1000; // 转换为毫秒
   const now = Date.now();
   const timeLeft = exp - now;
-  
+
   // 如果剩余时间少于 1 小时，需要刷新
   return timeLeft < 60 * 60 * 1000;
 }
@@ -329,47 +352,47 @@ function shouldRefreshToken(token: string): boolean {
 ```typescript
 // 注册用户
 async function register() {
-  const response = await fetch('http://localhost:5200/api/v1/auth/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const response = await fetch("http://localhost:5200/api/v1/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      username: 'john_doe',
-      email: 'john@example.com',
-      password: 'SecurePass123!',
-      displayName: 'John Doe',
+      username: "john_doe",
+      email: "john@example.com",
+      password: "SecurePass123!",
+      displayName: "John Doe",
     }),
   });
   const data = await response.json();
   if (data.success) {
     // 保存 Token
-    localStorage.setItem('accessToken', data.data.accessToken);
-    localStorage.setItem('refreshToken', data.data.refreshToken);
+    localStorage.setItem("accessToken", data.data.accessToken);
+    localStorage.setItem("refreshToken", data.data.refreshToken);
   }
 }
 
 // 用户登录
 async function login() {
-  const response = await fetch('http://localhost:5200/api/v1/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const response = await fetch("http://localhost:5200/api/v1/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      emailOrUsername: 'john@example.com',
-      password: 'SecurePass123!',
+      emailOrUsername: "john@example.com",
+      password: "SecurePass123!",
     }),
   });
   const data = await response.json();
   if (data.success) {
-    localStorage.setItem('accessToken', data.data.accessToken);
-    localStorage.setItem('refreshToken', data.data.refreshToken);
+    localStorage.setItem("accessToken", data.data.accessToken);
+    localStorage.setItem("refreshToken", data.data.refreshToken);
   }
 }
 
 // 获取当前用户
 async function getCurrentUser() {
-  const token = localStorage.getItem('accessToken');
-  const response = await fetch('http://localhost:5200/api/v1/auth/me', {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch("http://localhost:5200/api/v1/auth/me", {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
   return await response.json();

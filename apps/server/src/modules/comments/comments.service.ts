@@ -68,8 +68,19 @@ export class CommentsService {
       isDeleted: false,
     } as Partial<Comment>);
     const saved = await this.commentRepository.save(comment);
-    const doc = await this.documentRepository.findOne({ where: { docId: dto.docId }, select: ['workspaceId'] });
-    if (doc) await this.activitiesService.record(doc.workspaceId, COMMENT_ACTIONS.CREATE, 'comment', saved.commentId, userId, { docId: dto.docId, blockId: dto.blockId });
+    const doc = await this.documentRepository.findOne({
+      where: { docId: dto.docId },
+      select: ['workspaceId'],
+    });
+    if (doc)
+      await this.activitiesService.record(
+        doc.workspaceId,
+        COMMENT_ACTIONS.CREATE,
+        'comment',
+        saved.commentId,
+        userId,
+        { docId: dto.docId, blockId: dto.blockId },
+      );
     return saved;
   }
 
@@ -86,7 +97,9 @@ export class CommentsService {
 
     if (blockId) qb.andWhere('c.blockId = :blockId', { blockId });
 
-    qb.orderBy('c.createdAt', 'ASC').skip((page - 1) * pageSize).take(pageSize);
+    qb.orderBy('c.createdAt', 'ASC')
+      .skip((page - 1) * pageSize)
+      .take(pageSize);
 
     const [items, total] = await qb.getManyAndCount();
     return { items, total, page, pageSize };
@@ -115,8 +128,19 @@ export class CommentsService {
 
     c.isDeleted = true;
     await this.commentRepository.save(c);
-    const doc = await this.documentRepository.findOne({ where: { docId: c.docId }, select: ['workspaceId'] });
-    if (doc) await this.activitiesService.record(doc.workspaceId, COMMENT_ACTIONS.DELETE, 'comment', commentId, userId, { docId: c.docId });
+    const doc = await this.documentRepository.findOne({
+      where: { docId: c.docId },
+      select: ['workspaceId'],
+    });
+    if (doc)
+      await this.activitiesService.record(
+        doc.workspaceId,
+        COMMENT_ACTIONS.DELETE,
+        'comment',
+        commentId,
+        userId,
+        { docId: c.docId },
+      );
     return { message: '评论已删除' };
   }
 }

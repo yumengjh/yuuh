@@ -79,4 +79,3 @@ export class SettingsPatchDto {
   @Type(() => AdvancedSettingsPatchDto)
   advanced?: AdvancedSettingsPatchDto | null;
 }
-

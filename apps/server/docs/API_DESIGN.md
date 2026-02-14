@@ -1,6 +1,7 @@
 # 个人知识库系统 - 后端 API 设计文档
 
 ## 目录
+
 - [系统架构概述](#系统架构概述)
 - [技术栈](#技术栈)
 - [数据库设计](#数据库设计)
@@ -13,9 +14,10 @@
 
 ---
 
-- ​	
+- ​
 
 ### 架构层次
+
 ```
 ┌─────────────────────────────────────┐
 │         前端 (React + Zustand)       │
@@ -35,6 +37,7 @@
 ## 技术栈
 
 ### 核心技术
+
 ```typescript
 // 后端框架
 - NestJS 10.x (企业级 Node.js 框架)
@@ -75,6 +78,7 @@
 ### 为什么选择 NestJS + PostgreSQL？
 
 **NestJS 优势：**
+
 - 📦 模块化架构，易于维护和扩展
 - 🎯 内置依赖注入，代码解耦
 - 🔧 与 TypeScript 完美集成
@@ -83,6 +87,7 @@
 - 🧪 易于测试
 
 **PostgreSQL 优势：**
+
 - 💪 强大的 JSONB 支持，适合存储块结构
 - 🔒 ACID 事务保证数据一致性
 - 🔍 全文搜索能力（tsvector/tsquery）
@@ -97,6 +102,7 @@
 ### PostgreSQL 表结构设计
 
 #### 1. users (用户表)
+
 ```sql
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -107,14 +113,14 @@ CREATE TABLE users (
   avatar VARCHAR(500),
   display_name VARCHAR(100),
   bio TEXT,
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   last_login_at TIMESTAMP WITH TIME ZONE,
-  
+
   status VARCHAR(20) DEFAULT 'active',           -- active, suspended, deleted
   settings JSONB DEFAULT '{}',                   -- 用户设置
-  
+
   CONSTRAINT check_status CHECK (status IN ('active', 'suspended', 'deleted'))
 );
 
@@ -176,6 +182,7 @@ export class User {
 ```
 
 #### 2. workspaces (工作空间表)
+
 ```sql
 CREATE TABLE workspaces (
   id SERIAL PRIMARY KEY,
@@ -184,13 +191,13 @@ CREATE TABLE workspaces (
   description TEXT,
   icon VARCHAR(10),                              -- emoji 图标
   owner_id VARCHAR(50) NOT NULL,
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  
+
   status VARCHAR(20) DEFAULT 'active',           -- active, archived
   settings JSONB DEFAULT '{}',
-  
+
   FOREIGN KEY (owner_id) REFERENCES users(user_id) ON DELETE CASCADE,
   CONSTRAINT check_workspace_status CHECK (status IN ('active', 'archived'))
 );
@@ -247,20 +254,21 @@ export class Workspace {
 ```
 
 #### 3. workspace_members (工作空间成员表)
+
 ```sql
 CREATE TABLE workspace_members (
   id SERIAL PRIMARY KEY,
   workspace_id VARCHAR(50) NOT NULL,
   user_id VARCHAR(50) NOT NULL,
   role VARCHAR(20) NOT NULL,                     -- owner, admin, editor, viewer
-  
+
   joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   invited_by VARCHAR(50),
-  
+
   FOREIGN KEY (workspace_id) REFERENCES workspaces(workspace_id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
   FOREIGN KEY (invited_by) REFERENCES users(user_id) ON DELETE SET NULL,
-  
+
   UNIQUE(workspace_id, user_id),
   CONSTRAINT check_role CHECK (role IN ('owner', 'admin', 'editor', 'viewer'))
 );
@@ -301,6 +309,7 @@ export class WorkspaceMember {
 ```
 
 #### 4. documents (文档表)
+
 ```sql
 CREATE TABLE documents (
   id SERIAL PRIMARY KEY,
@@ -309,42 +318,42 @@ CREATE TABLE documents (
   title VARCHAR(255) NOT NULL,
   icon VARCHAR(10),
   cover VARCHAR(500),
-  
+
   -- 版本信息
   head INTEGER DEFAULT 1,                        -- 当前版本号
   published_head INTEGER DEFAULT 0,              -- 已发布版本号
   root_block_id VARCHAR(50) NOT NULL,
-  
+
   -- 元数据
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   created_by VARCHAR(50) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_by VARCHAR(50) NOT NULL,
-  
+
   -- 状态
   status VARCHAR(20) DEFAULT 'draft',            -- draft, normal, archived, deleted
   visibility VARCHAR(20) DEFAULT 'private',      -- private, workspace, public
-  
+
   -- 文档树结构
   parent_id VARCHAR(50),                         -- 父文档ID
   sort_order INTEGER DEFAULT 0,
-  
+
   -- 统计
   view_count INTEGER DEFAULT 0,
   favorite_count INTEGER DEFAULT 0,
-  
+
   -- 标签与分类
   tags TEXT[],                                   -- 使用 PostgreSQL 数组类型
   category VARCHAR(50),
-  
+
   -- 全文搜索字段 (tsvector)
   search_vector tsvector,
-  
+
   FOREIGN KEY (workspace_id) REFERENCES workspaces(workspace_id) ON DELETE CASCADE,
   FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL,
   FOREIGN KEY (updated_by) REFERENCES users(user_id) ON DELETE SET NULL,
   FOREIGN KEY (parent_id) REFERENCES documents(doc_id) ON DELETE CASCADE,
-  
+
   CONSTRAINT check_status CHECK (status IN ('draft', 'normal', 'archived', 'deleted')),
   CONSTRAINT check_visibility CHECK (visibility IN ('private', 'workspace', 'public'))
 );
@@ -362,14 +371,14 @@ CREATE INDEX idx_documents_search_vector ON documents USING GIN(search_vector); 
 -- 自动更新 search_vector 的触发器
 CREATE OR REPLACE FUNCTION documents_search_trigger() RETURNS trigger AS $$
 BEGIN
-  NEW.search_vector := 
+  NEW.search_vector :=
     setweight(to_tsvector('english', coalesce(NEW.title, '')), 'A') ||
     setweight(to_tsvector('english', coalesce(NEW.category, '')), 'B');
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER documents_search_update 
+CREATE TRIGGER documents_search_update
 BEFORE INSERT OR UPDATE ON documents
 FOR EACH ROW EXECUTE FUNCTION documents_search_trigger();
 
@@ -453,24 +462,25 @@ export class Document {
 ```
 
 #### 5. blocks (块身份表)
+
 ```sql
 CREATE TABLE blocks (
   id SERIAL PRIMARY KEY,
   block_id VARCHAR(50) UNIQUE NOT NULL,          -- 如 "b_xyz001"
   doc_id VARCHAR(50) NOT NULL,
   type VARCHAR(50) NOT NULL,                     -- root, paragraph, heading, listItem, code, quote, image
-  
+
   created_at BIGINT NOT NULL,                    -- Unix 时间戳（毫秒）
   created_by VARCHAR(50) NOT NULL,
-  
+
   latest_ver INTEGER NOT NULL,
   latest_at BIGINT NOT NULL,
   latest_by VARCHAR(50) NOT NULL,
-  
+
   is_deleted BOOLEAN DEFAULT FALSE,
   deleted_at BIGINT,
   deleted_by VARCHAR(50),
-  
+
   FOREIGN KEY (doc_id) REFERENCES documents(doc_id) ON DELETE CASCADE,
   FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL,
   FOREIGN KEY (latest_by) REFERENCES users(user_id) ON DELETE SET NULL,
@@ -533,6 +543,7 @@ export class Block {
 ```
 
 #### 6. block_versions (块版本表)
+
 ```sql
 CREATE TABLE block_versions (
   id SERIAL PRIMARY KEY,
@@ -540,31 +551,31 @@ CREATE TABLE block_versions (
   doc_id VARCHAR(50) NOT NULL,
   block_id VARCHAR(50) NOT NULL,
   ver INTEGER NOT NULL,
-  
+
   created_at BIGINT NOT NULL,
   created_by VARCHAR(50) NOT NULL,
-  
+
   -- 结构定位
   parent_id VARCHAR(50) NOT NULL,
   sort_key VARCHAR(50) NOT NULL,                 -- 分数排序键
   indent INTEGER DEFAULT 0,
   collapsed BOOLEAN DEFAULT FALSE,
-  
+
   -- 内容载荷 (使用 JSONB)
   payload JSONB NOT NULL,
-  
+
   -- 元数据
   hash VARCHAR(64) NOT NULL,                     -- SHA256 哈希
   plain_text TEXT,                               -- 提取的纯文本
   refs JSONB DEFAULT '[]',                       -- 引用关系数组
-  
+
   -- 全文搜索
   search_vector tsvector,
-  
+
   FOREIGN KEY (doc_id) REFERENCES documents(doc_id) ON DELETE CASCADE,
   FOREIGN KEY (block_id) REFERENCES blocks(block_id) ON DELETE CASCADE,
   FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL,
-  
+
   UNIQUE(block_id, ver)
 );
 
@@ -584,7 +595,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER block_versions_search_update 
+CREATE TRIGGER block_versions_search_update
 BEFORE INSERT OR UPDATE ON block_versions
 FOR EACH ROW EXECUTE FUNCTION block_versions_search_trigger();
 
@@ -643,27 +654,28 @@ export class BlockVersion {
 ```
 
 #### 7. doc_revisions (文档修订表)
+
 ```sql
 CREATE TABLE doc_revisions (
   id SERIAL PRIMARY KEY,
   revision_id VARCHAR(100) UNIQUE NOT NULL,      -- "${docId}@${docVer}"
   doc_id VARCHAR(50) NOT NULL,
   doc_ver INTEGER NOT NULL,
-  
+
   created_at BIGINT NOT NULL,
   created_by VARCHAR(50) NOT NULL,
   message TEXT NOT NULL,                         -- 提交信息
   branch VARCHAR(20) DEFAULT 'draft',            -- draft, published
-  
+
   patches JSONB NOT NULL,                        -- 变更集数组
   root_block_id VARCHAR(50) NOT NULL,
-  
+
   source VARCHAR(20) DEFAULT 'editor',           -- editor, api, import
   op_summary JSONB DEFAULT '{}',                 -- 操作摘要
-  
+
   FOREIGN KEY (doc_id) REFERENCES documents(doc_id) ON DELETE CASCADE,
   FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL,
-  
+
   UNIQUE(doc_id, doc_ver)
 );
 
@@ -718,6 +730,7 @@ export class DocRevision {
 ```
 
 #### 8. doc_snapshots (文档快照表)
+
 ```sql
 CREATE TABLE doc_snapshots (
   id SERIAL PRIMARY KEY,
@@ -726,10 +739,10 @@ CREATE TABLE doc_snapshots (
   doc_ver INTEGER NOT NULL,
   created_at BIGINT NOT NULL,
   root_block_id VARCHAR(50) NOT NULL,
-  
+
   -- 快照数据 (JSONB 存储完整的块版本映射)
   block_version_map JSONB NOT NULL,
-  
+
   FOREIGN KEY (doc_id) REFERENCES documents(doc_id) ON DELETE CASCADE
 );
 
@@ -764,36 +777,37 @@ export class DocSnapshot {
 ```
 
 #### 9. assets (资产表)
+
 ```sql
 CREATE TABLE assets (
   id SERIAL PRIMARY KEY,
   asset_id VARCHAR(50) UNIQUE NOT NULL,
   workspace_id VARCHAR(50) NOT NULL,
   uploaded_by VARCHAR(50) NOT NULL,
-  
+
   filename VARCHAR(255) NOT NULL,
   mime_type VARCHAR(100) NOT NULL,
   size BIGINT NOT NULL,
-  
+
   -- 存储信息
   storage_provider VARCHAR(20) NOT NULL,         -- local, s3, oss, cos
   storage_path VARCHAR(500) NOT NULL,
   url VARCHAR(500) NOT NULL,
-  
+
   -- 图片特定字段
   width INTEGER,
   height INTEGER,
   thumbnail VARCHAR(500),
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   status VARCHAR(20) DEFAULT 'active',
-  
+
   ref_count INTEGER DEFAULT 0,
   refs JSONB DEFAULT '[]',
-  
+
   FOREIGN KEY (workspace_id) REFERENCES workspaces(workspace_id) ON DELETE CASCADE,
   FOREIGN KEY (uploaded_by) REFERENCES users(user_id) ON DELETE SET NULL,
-  
+
   CONSTRAINT check_asset_status CHECK (status IN ('active', 'deleted'))
 );
 
@@ -860,6 +874,7 @@ export class Asset {
 ```
 
 #### 10. tags (标签表)
+
 ```sql
 CREATE TABLE tags (
   id SERIAL PRIMARY KEY,
@@ -867,15 +882,15 @@ CREATE TABLE tags (
   workspace_id VARCHAR(50) NOT NULL,
   name VARCHAR(50) NOT NULL,
   color VARCHAR(20),
-  
+
   created_by VARCHAR(50) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  
+
   usage_count INTEGER DEFAULT 0,
-  
+
   FOREIGN KEY (workspace_id) REFERENCES workspaces(workspace_id) ON DELETE CASCADE,
   FOREIGN KEY (created_by) REFERENCES users(user_id) ON DELETE SET NULL,
-  
+
   UNIQUE(workspace_id, name)
 );
 
@@ -913,16 +928,17 @@ export class Tag {
 ```
 
 #### 11. favorites (收藏表)
+
 ```sql
 CREATE TABLE favorites (
   id SERIAL PRIMARY KEY,
   user_id VARCHAR(50) NOT NULL,
   doc_id VARCHAR(50) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  
+
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
   FOREIGN KEY (doc_id) REFERENCES documents(doc_id) ON DELETE CASCADE,
-  
+
   UNIQUE(user_id, doc_id)
 );
 
@@ -948,23 +964,24 @@ export class Favorite {
 ```
 
 #### 12. comments (评论表)
+
 ```sql
 CREATE TABLE comments (
   id SERIAL PRIMARY KEY,
   comment_id VARCHAR(50) UNIQUE NOT NULL,
   doc_id VARCHAR(50) NOT NULL,
   block_id VARCHAR(50),
-  
+
   user_id VARCHAR(50) NOT NULL,
   content TEXT NOT NULL,
   mentions TEXT[],                               -- @提到的用户ID数组
-  
+
   parent_comment_id VARCHAR(50),                 -- 回复的评论ID
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   is_deleted BOOLEAN DEFAULT FALSE,
-  
+
   FOREIGN KEY (doc_id) REFERENCES documents(doc_id) ON DELETE CASCADE,
   FOREIGN KEY (block_id) REFERENCES blocks(block_id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
@@ -1016,26 +1033,27 @@ export class Comment {
 ```
 
 #### 13. activities (活动日志表)
+
 ```sql
 CREATE TABLE activities (
   id SERIAL PRIMARY KEY,
   activity_id VARCHAR(50) UNIQUE NOT NULL,
   workspace_id VARCHAR(50) NOT NULL,
-  
+
   action VARCHAR(50) NOT NULL,                   -- create, update, delete, move, share, comment
   entity_type VARCHAR(50) NOT NULL,              -- document, block, workspace
   entity_id VARCHAR(50) NOT NULL,
-  
+
   user_id VARCHAR(50) NOT NULL,
-  
+
   details JSONB DEFAULT '{}',
   metadata JSONB DEFAULT '{}',
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  
+
   ip_address VARCHAR(45),
   user_agent TEXT,
-  
+
   FOREIGN KEY (workspace_id) REFERENCES workspaces(workspace_id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
@@ -1088,6 +1106,7 @@ export class Activity {
 ```
 
 #### 14. sessions (会话表)
+
 ```sql
 CREATE TABLE sessions (
   id SERIAL PRIMARY KEY,
@@ -1095,13 +1114,13 @@ CREATE TABLE sessions (
   user_id VARCHAR(50) NOT NULL,
   token TEXT NOT NULL,
   refresh_token TEXT NOT NULL,
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
   last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  
+
   device_info JSONB DEFAULT '{}',
-  
+
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
@@ -1354,23 +1373,24 @@ src/
 ### 核心模块示例代码
 
 #### main.ts
+
 ```typescript
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { NestFactory } from "@nestjs/core";
+import { ValidationPipe } from "@nestjs/common";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import { AppModule } from "./app.module";
+import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { TransformInterceptor } from "./common/interceptors/transform.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // 全局前缀
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix("api/v1");
 
   // 跨域
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
     credentials: true,
   });
 
@@ -1391,13 +1411,13 @@ async function bootstrap() {
 
   // Swagger 文档
   const config = new DocumentBuilder()
-    .setTitle('知识库 API')
-    .setDescription('个人知识库系统 API 文档')
-    .setVersion('1.0')
+    .setTitle("知识库 API")
+    .setDescription("个人知识库系统 API 文档")
+    .setVersion("1.0")
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup("api/docs", app, document);
 
   await app.listen(process.env.PORT || 3000);
   console.log(`Application is running on: ${await app.getUrl()}`);
@@ -1407,50 +1427,51 @@ bootstrap();
 ```
 
 #### app.module.ts
-```typescript
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { CacheModule } from '@nestjs/cache-manager';
-import { BullModule } from '@nestjs/bull';
-import * as redisStore from 'cache-manager-redis-store';
 
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
-import { WorkspacesModule } from './modules/workspaces/workspaces.module';
-import { DocumentsModule } from './modules/documents/documents.module';
-import { BlocksModule } from './modules/blocks/blocks.module';
-import { VersionsModule } from './modules/versions/versions.module';
-import { AssetsModule } from './modules/assets/assets.module';
-import { TagsModule } from './modules/tags/tags.module';
-import { FavoritesModule } from './modules/favorites/favorites.module';
-import { CommentsModule } from './modules/comments/comments.module';
-import { ActivitiesModule } from './modules/activities/activities.module';
-import { SearchModule } from './modules/search/search.module';
-import { ExportModule } from './modules/export/export.module';
-import { ImportModule } from './modules/import/import.module';
-import { RealtimeModule } from './modules/realtime/realtime.module';
+```typescript
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { CacheModule } from "@nestjs/cache-manager";
+import { BullModule } from "@nestjs/bull";
+import * as redisStore from "cache-manager-redis-store";
+
+import { AuthModule } from "./modules/auth/auth.module";
+import { UsersModule } from "./modules/users/users.module";
+import { WorkspacesModule } from "./modules/workspaces/workspaces.module";
+import { DocumentsModule } from "./modules/documents/documents.module";
+import { BlocksModule } from "./modules/blocks/blocks.module";
+import { VersionsModule } from "./modules/versions/versions.module";
+import { AssetsModule } from "./modules/assets/assets.module";
+import { TagsModule } from "./modules/tags/tags.module";
+import { FavoritesModule } from "./modules/favorites/favorites.module";
+import { CommentsModule } from "./modules/comments/comments.module";
+import { ActivitiesModule } from "./modules/activities/activities.module";
+import { SearchModule } from "./modules/search/search.module";
+import { ExportModule } from "./modules/export/export.module";
+import { ImportModule } from "./modules/import/import.module";
+import { RealtimeModule } from "./modules/realtime/realtime.module";
 
 @Module({
   imports: [
     // 配置模块
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ".env",
     }),
 
     // 数据库模块
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
+      type: "postgres",
+      host: process.env.DB_HOST || "localhost",
       port: parseInt(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
-      database: process.env.DB_DATABASE || 'knowledge_base',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: process.env.NODE_ENV === 'development', // 生产环境使用迁移
-      logging: process.env.NODE_ENV === 'development',
-      migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
+      username: process.env.DB_USERNAME || "postgres",
+      password: process.env.DB_PASSWORD || "postgres",
+      database: process.env.DB_DATABASE || "knowledge_base",
+      entities: [__dirname + "/**/*.entity{.ts,.js}"],
+      synchronize: process.env.NODE_ENV === "development", // 生产环境使用迁移
+      logging: process.env.NODE_ENV === "development",
+      migrations: [__dirname + "/database/migrations/*{.ts,.js}"],
       migrationsRun: true,
     }),
 
@@ -1458,7 +1479,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
     CacheModule.register({
       isGlobal: true,
       store: redisStore,
-      host: process.env.REDIS_HOST || 'localhost',
+      host: process.env.REDIS_HOST || "localhost",
       port: parseInt(process.env.REDIS_PORT) || 6379,
       ttl: 300, // 默认 5 分钟
     }),
@@ -1466,7 +1487,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
     // Bull 队列
     BullModule.forRoot({
       redis: {
-        host: process.env.REDIS_HOST || 'localhost',
+        host: process.env.REDIS_HOST || "localhost",
         port: parseInt(process.env.REDIS_PORT) || 6379,
       },
     }),
@@ -1493,6 +1514,7 @@ export class AppModule {}
 ```
 
 #### documents.controller.ts 示例
+
 ```typescript
 import {
   Controller,
@@ -1506,24 +1528,24 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { DocumentsService } from './documents.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { CreateDocumentDto } from './dto/create-document.dto';
-import { UpdateDocumentDto } from './dto/update-document.dto';
-import { PaginationDto } from '../../common/dto/pagination.dto';
+} from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
+import { DocumentsService } from "./documents.service";
+import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { CreateDocumentDto } from "./dto/create-document.dto";
+import { UpdateDocumentDto } from "./dto/update-document.dto";
+import { PaginationDto } from "../../common/dto/pagination.dto";
 
-@ApiTags('documents')
+@ApiTags("documents")
 @ApiBearerAuth()
-@Controller('documents')
+@Controller("documents")
 @UseGuards(JwtAuthGuard)
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
   @Post()
-  @ApiOperation({ summary: '创建文档' })
+  @ApiOperation({ summary: "创建文档" })
   async create(
     @Body() createDocumentDto: CreateDocumentDto,
     @CurrentUser() user: any,
@@ -1532,61 +1554,66 @@ export class DocumentsController {
   }
 
   @Get()
-  @ApiOperation({ summary: '获取文档列表' })
+  @ApiOperation({ summary: "获取文档列表" })
   async findAll(@Query() query: PaginationDto, @CurrentUser() user: any) {
     return this.documentsService.findAll(query, user.userId);
   }
 
-  @Get(':docId')
-  @ApiOperation({ summary: '获取文档详情' })
-  async findOne(@Param('docId') docId: string, @CurrentUser() user: any) {
+  @Get(":docId")
+  @ApiOperation({ summary: "获取文档详情" })
+  async findOne(@Param("docId") docId: string, @CurrentUser() user: any) {
     return this.documentsService.findOne(docId, user.userId);
   }
 
-  @Get(':docId/content')
-  @ApiOperation({ summary: '获取文档内容（渲染树）' })
+  @Get(":docId/content")
+  @ApiOperation({ summary: "获取文档内容（渲染树）" })
   async getContent(
-    @Param('docId') docId: string,
-    @Query('version') version: number,
+    @Param("docId") docId: string,
+    @Query("version") version: number,
     @CurrentUser() user: any,
   ) {
     return this.documentsService.getContent(docId, version, user.userId);
   }
 
-  @Patch(':docId')
-  @ApiOperation({ summary: '更新文档元数据' })
+  @Patch(":docId")
+  @ApiOperation({ summary: "更新文档元数据" })
   async update(
-    @Param('docId') docId: string,
+    @Param("docId") docId: string,
     @Body() updateDocumentDto: UpdateDocumentDto,
     @CurrentUser() user: any,
   ) {
     return this.documentsService.update(docId, updateDocumentDto, user.userId);
   }
 
-  @Post(':docId/publish')
-  @ApiOperation({ summary: '发布文档' })
-  async publish(@Param('docId') docId: string, @CurrentUser() user: any) {
+  @Post(":docId/publish")
+  @ApiOperation({ summary: "发布文档" })
+  async publish(@Param("docId") docId: string, @CurrentUser() user: any) {
     return this.documentsService.publish(docId, user.userId);
   }
 
-  @Delete(':docId')
+  @Delete(":docId")
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: '删除文档' })
-  async remove(@Param('docId') docId: string, @CurrentUser() user: any) {
+  @ApiOperation({ summary: "删除文档" })
+  async remove(@Param("docId") docId: string, @CurrentUser() user: any) {
     return this.documentsService.remove(docId, user.userId);
   }
 }
 ```
 
 #### documents.service.ts 示例
+
 ```typescript
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Document } from '../../entities/document.entity';
-import { DocumentEngine } from '../../engine/document.engine';
-import { CreateDocumentDto } from './dto/create-document.dto';
-import { UpdateDocumentDto } from './dto/update-document.dto';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Document } from "../../entities/document.entity";
+import { DocumentEngine } from "../../engine/document.engine";
+import { CreateDocumentDto } from "./dto/create-document.dto";
+import { UpdateDocumentDto } from "./dto/update-document.dto";
 
 @Injectable()
 export class DocumentsService {
@@ -1613,13 +1640,13 @@ export class DocumentsService {
 
   async findAll(query: any, userId: string) {
     const { workspaceId, page = 1, pageSize = 20 } = query;
-    
+
     // 检查权限
     await this.checkWorkspacePermission(workspaceId, userId);
 
     const [items, total] = await this.documentRepository.findAndCount({
-      where: { workspaceId, status: 'normal' },
-      order: { updatedAt: 'DESC' },
+      where: { workspaceId, status: "normal" },
+      order: { updatedAt: "DESC" },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
@@ -1632,9 +1659,9 @@ export class DocumentsService {
 
   async findOne(docId: string, userId: string) {
     const doc = await this.documentRepository.findOne({ where: { docId } });
-    
+
     if (!doc) {
-      throw new NotFoundException('文档不存在');
+      throw new NotFoundException("文档不存在");
     }
 
     // 检查权限
@@ -1645,10 +1672,10 @@ export class DocumentsService {
 
   async getContent(docId: string, version: number, userId: string) {
     const doc = await this.findOne(docId, userId);
-    
+
     // 使用文档引擎获取渲染树
     const tree = await this.documentEngine.getRenderedTree(docId, version);
-    
+
     return {
       docId: doc.docId,
       docVer: version || doc.head,
@@ -1659,7 +1686,7 @@ export class DocumentsService {
 
   async update(docId: string, updateDto: UpdateDocumentDto, userId: string) {
     const doc = await this.findOne(docId, userId);
-    
+
     // 检查编辑权限
     await this.checkDocumentEditPermission(doc, userId);
 
@@ -1675,7 +1702,7 @@ export class DocumentsService {
 
   async publish(docId: string, userId: string) {
     const doc = await this.findOne(docId, userId);
-    
+
     // 检查发布权限
     await this.checkDocumentPublishPermission(doc, userId);
 
@@ -1690,13 +1717,13 @@ export class DocumentsService {
 
   async remove(docId: string, userId: string) {
     const doc = await this.findOne(docId, userId);
-    
+
     // 检查删除权限
     await this.checkDocumentDeletePermission(doc, userId);
 
     await this.documentRepository.update(
       { docId },
-      { status: 'deleted', updatedBy: userId },
+      { status: "deleted", updatedBy: userId },
     );
   }
 
@@ -1765,6 +1792,7 @@ interface ErrorResponse {
 由于接口设计与前面 MongoDB 版本基本相同，这里只列出关键差异：
 
 #### 1. 认证接口 (同前)
+
 - POST /api/v1/auth/register
 - POST /api/v1/auth/login
 - POST /api/v1/auth/refresh
@@ -1772,6 +1800,7 @@ interface ErrorResponse {
 - GET /api/v1/auth/me
 
 #### 2. 工作空间接口 (同前)
+
 - POST /api/v1/workspaces
 - GET /api/v1/workspaces
 - GET /api/v1/workspaces/:workspaceId
@@ -1779,6 +1808,7 @@ interface ErrorResponse {
 - POST /api/v1/workspaces/:workspaceId/members
 
 #### 3. 文档接口 (同前)
+
 - POST /api/v1/documents
 - GET /api/v1/documents
 - GET /api/v1/documents/:docId
@@ -1790,6 +1820,7 @@ interface ErrorResponse {
 - GET /api/v1/documents/search
 
 #### 4. 块接口 (同前)
+
 - POST /api/v1/blocks
 - PATCH /api/v1/blocks/:blockId/content
 - POST /api/v1/blocks/:blockId/move
@@ -1798,17 +1829,20 @@ interface ErrorResponse {
 - POST /api/v1/blocks/batch
 
 #### 5. 版本控制接口 (同前)
+
 - GET /api/v1/documents/:docId/revisions
 - GET /api/v1/documents/:docId/diff
 - POST /api/v1/documents/:docId/revert
 - POST /api/v1/documents/:docId/snapshots
 
 #### 6. 资产接口 (同前)
+
 - POST /api/v1/assets/upload
 - GET /api/v1/assets
 - DELETE /api/v1/assets/:assetId
 
 #### 7. 其他接口 (同前)
+
 - 标签、收藏、评论、活动日志、导入/导出等接口
 
 ### PostgreSQL 特有的搜索接口
@@ -1818,7 +1852,7 @@ interface ErrorResponse {
 @ApiOperation({ summary: '全文搜索文档' })
 async search(@Query() query: SearchQueryDto, @CurrentUser() user: any) {
   const { q, workspaceId, page = 1, pageSize = 20 } = query;
-  
+
   // 使用 PostgreSQL 全文搜索
   const results = await this.documentRepository
     .createQueryBuilder('doc')
@@ -1844,11 +1878,11 @@ async search(@Query() query: SearchQueryDto, @CurrentUser() user: any) {
 
 ```typescript
 // jwt.strategy.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { ConfigService } from '@nestjs/config';
-import { UsersService } from '../users/users.service';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { ConfigService } from "@nestjs/config";
+import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -1859,15 +1893,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_SECRET'),
+      secretOrKey: configService.get("JWT_SECRET"),
     });
   }
 
   async validate(payload: any) {
     const user = await this.usersService.findByUserId(payload.userId);
-    
-    if (!user || user.status !== 'active') {
-      throw new UnauthorizedException('用户不存在或已被禁用');
+
+    if (!user || user.status !== "active") {
+      throw new UnauthorizedException("用户不存在或已被禁用");
     }
 
     return {
@@ -1944,8 +1978,8 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import { Response } from 'express';
+} from "@nestjs/common";
+import { Response } from "express";
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -1955,14 +1989,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
-    let code = 'INTERNAL_ERROR';
+    let message = "Internal server error";
+    let code = "INTERNAL_ERROR";
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
-      if (typeof exceptionResponse === 'object') {
+
+      if (typeof exceptionResponse === "object") {
         message = (exceptionResponse as any).message || message;
         code = (exceptionResponse as any).code || code;
       } else {
@@ -1986,7 +2020,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       error: {
         code,
         message,
-        ...(process.env.NODE_ENV === 'development' && {
+        ...(process.env.NODE_ENV === "development" && {
           stack: exception instanceof Error ? exception.stack : undefined,
         }),
       },
@@ -2000,34 +2034,34 @@ export class HttpExceptionFilter implements ExceptionFilter {
 ```typescript
 export enum ErrorCode {
   // 认证错误 (1xxx)
-  AUTH_FAILED = 'AUTH_FAILED',
-  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
-  TOKEN_INVALID = 'TOKEN_INVALID',
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  
+  AUTH_FAILED = "AUTH_FAILED",
+  TOKEN_EXPIRED = "TOKEN_EXPIRED",
+  TOKEN_INVALID = "TOKEN_INVALID",
+  UNAUTHORIZED = "UNAUTHORIZED",
+
   // 权限错误 (2xxx)
-  ACCESS_DENIED = 'ACCESS_DENIED',
-  PERMISSION_DENIED = 'PERMISSION_DENIED',
-  
+  ACCESS_DENIED = "ACCESS_DENIED",
+  PERMISSION_DENIED = "PERMISSION_DENIED",
+
   // 资源错误 (3xxx)
-  NOT_FOUND = 'NOT_FOUND',
-  ALREADY_EXISTS = 'ALREADY_EXISTS',
-  RESOURCE_LOCKED = 'RESOURCE_LOCKED',
-  
+  NOT_FOUND = "NOT_FOUND",
+  ALREADY_EXISTS = "ALREADY_EXISTS",
+  RESOURCE_LOCKED = "RESOURCE_LOCKED",
+
   // 验证错误 (4xxx)
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  INVALID_PARAMETER = 'INVALID_PARAMETER',
-  MISSING_PARAMETER = 'MISSING_PARAMETER',
-  
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  INVALID_PARAMETER = "INVALID_PARAMETER",
+  MISSING_PARAMETER = "MISSING_PARAMETER",
+
   // 业务逻辑错误 (5xxx)
-  VERSION_CONFLICT = 'VERSION_CONFLICT',
-  QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
-  OPERATION_FAILED = 'OPERATION_FAILED',
-  
+  VERSION_CONFLICT = "VERSION_CONFLICT",
+  QUOTA_EXCEEDED = "QUOTA_EXCEEDED",
+  OPERATION_FAILED = "OPERATION_FAILED",
+
   // 服务器错误 (9xxx)
-  INTERNAL_ERROR = 'INTERNAL_ERROR',
-  DATABASE_ERROR = 'DATABASE_ERROR',
-  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
+  INTERNAL_ERROR = "INTERNAL_ERROR",
+  DATABASE_ERROR = "DATABASE_ERROR",
+  SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE",
 }
 ```
 
@@ -2067,40 +2101,38 @@ export class Document {
 ### 2. Redis 缓存
 
 ```typescript
-import { Injectable, Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { Injectable, Inject } from "@nestjs/common";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 @Injectable()
 export class DocumentsService {
-  constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async getDocument(docId: string) {
     // 尝试从缓存获取
     const cacheKey = `doc:${docId}`;
     const cached = await this.cacheManager.get(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
 
     // 从数据库获取
     const doc = await this.documentRepository.findOne({ where: { docId } });
-    
+
     // 存入缓存（5分钟）
     await this.cacheManager.set(cacheKey, doc, 300);
-    
+
     return doc;
   }
 
   async updateDocument(docId: string, data: any) {
     const updated = await this.documentRepository.update({ docId }, data);
-    
+
     // 清除缓存
     await this.cacheManager.del(`doc:${docId}`);
-    
+
     return updated;
   }
 }
@@ -2113,15 +2145,15 @@ export class DocumentsService {
 async batchCreateBlocks(operations: CreateBlockDto[]) {
   return this.dataSource.transaction(async (manager) => {
     const blocks = [];
-    
+
     for (const op of operations) {
       const block = manager.create(Block, op);
       blocks.push(block);
     }
-    
+
     // 批量插入
     await manager.save(blocks);
-    
+
     return blocks;
   });
 }
@@ -2153,6 +2185,7 @@ TypeOrmModule.forRoot({
 ### Docker 部署
 
 #### Dockerfile
+
 ```dockerfile
 FROM node:18-alpine AS builder
 
@@ -2183,8 +2216,9 @@ CMD ["node", "dist/main"]
 ```
 
 #### docker-compose.yml
+
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   # NestJS 应用
@@ -2334,6 +2368,7 @@ npm run typeorm migration:revert
 ### 🚀 实施步骤
 
 **阶段 1：初始化项目**
+
 ```bash
 # 安装 NestJS CLI
 npm i -g @nestjs/cli
@@ -2350,16 +2385,19 @@ npm install @nestjs/bull bull
 ```
 
 **阶段 2：数据库设置**
+
 - 创建 PostgreSQL 数据库
 - 定义 Entity
 - 运行迁移
 
 **阶段 3：核心功能开发**
+
 - 认证模块
 - 文档引擎
 - API 端点
 
 **阶段 4：测试与部署**
+
 - 单元测试
 - 集成测试
 - Docker 部署

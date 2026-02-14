@@ -20,20 +20,24 @@
 ## 🚀 技术栈
 
 ### 核心框架
+
 - **NestJS 11.x** - 企业级 Node.js 框架
 - **TypeScript 5.x** - 类型安全的 JavaScript
 - **SWC** - 快速编译工具（替代 tsc）
 
 ### 数据库
+
 - **PostgreSQL** - 关系型数据库
 - **TypeORM 0.3.x** - ORM 框架
 
 ### 认证与安全
+
 - **Passport.js** - 认证中间件
 - **JWT** - JSON Web Token 认证
 - **bcryptjs** - 密码加密
 
 ### 工具库
+
 - **class-validator** - DTO 验证
 - **class-transformer** - 数据转换
 - **Swagger/OpenAPI** - API 文档生成
@@ -116,6 +120,7 @@ pnpm run start:prod
 ```
 
 启动成功后：
+
 - API 服务：http://localhost:5200
 - Swagger 文档：http://localhost:5200/api/docs
 
@@ -132,6 +137,7 @@ pnpm run start:prod
 ### 主要接口
 
 #### 认证模块
+
 - `POST /api/v1/auth/register` - 用户注册
 - `POST /api/v1/auth/login` - 用户登录
 - `POST /api/v1/auth/refresh` - 刷新令牌
@@ -139,6 +145,7 @@ pnpm run start:prod
 - `GET /api/v1/auth/me` - 获取当前用户信息
 
 #### 工作空间模块
+
 - `POST /api/v1/workspaces` - 创建工作空间
 - `GET /api/v1/workspaces` - 获取工作空间列表
 - `GET /api/v1/workspaces/:workspaceId` - 获取工作空间详情
@@ -150,6 +157,7 @@ pnpm run start:prod
 - `DELETE /api/v1/workspaces/:workspaceId/members/:userId` - 移除成员
 
 #### 文档模块
+
 - `POST /api/v1/documents` - 创建文档
 - `GET /api/v1/documents` - 获取文档列表
 - `GET /api/v1/documents/:docId` - 获取文档详情
@@ -161,6 +169,7 @@ pnpm run start:prod
 - `GET /api/v1/documents/search` - 搜索文档
 
 #### 块模块
+
 - `POST /api/v1/blocks` - 创建块
 - `PATCH /api/v1/blocks/:blockId/content` - 更新块内容
 - `POST /api/v1/blocks/:blockId/move` - 移动块
@@ -219,6 +228,7 @@ pnpm run test:e2e
 当前完成度：**50%**
 
 ### ✅ 已完成
+
 - 基础架构和配置
 - 认证模块（JWT、刷新令牌）
 - 工作空间模块（CRUD、成员管理）
@@ -226,10 +236,12 @@ pnpm run test:e2e
 - 块模块（CRUD、版本控制、批量操作）
 
 ### 🚧 进行中
+
 - 版本控制模块（文档修订历史）
 - 资产模块（文件上传）
 
 ### 📝 待开发
+
 - 标签模块
 - 收藏模块
 - 评论模块

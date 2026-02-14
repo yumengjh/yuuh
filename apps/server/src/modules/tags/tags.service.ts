@@ -34,7 +34,11 @@ export class TagsService {
     await this.workspacesService.checkAccess(createTagDto.workspaceId, userId);
 
     const existing = await this.tagRepository.findOne({
-      where: { workspaceId: createTagDto.workspaceId, name: createTagDto.name.trim(), isDeleted: false },
+      where: {
+        workspaceId: createTagDto.workspaceId,
+        name: createTagDto.name.trim(),
+        isDeleted: false,
+      },
     });
     if (existing) {
       throw new ConflictException('该工作空间下已存在同名标签');
@@ -51,7 +55,14 @@ export class TagsService {
       isDeleted: false,
     });
     const saved = await this.tagRepository.save(tag);
-    await this.activitiesService.record(createTagDto.workspaceId, TAG_ACTIONS.CREATE, 'tag', saved.tagId, userId, { name: saved.name });
+    await this.activitiesService.record(
+      createTagDto.workspaceId,
+      TAG_ACTIONS.CREATE,
+      'tag',
+      saved.tagId,
+      userId,
+      { name: saved.name },
+    );
     return saved;
   }
 
@@ -89,7 +100,7 @@ export class TagsService {
 
   async update(tagId: string, updateTagDto: UpdateTagDto, userId: string) {
     const tag = await this.findOne(tagId, userId);
-    
+
     // 已删除的标签不能更新
     if (tag.isDeleted) {
       throw new NotFoundException('标签不存在');
@@ -110,7 +121,14 @@ export class TagsService {
     }
 
     const saved = await this.tagRepository.save(tag);
-    await this.activitiesService.record(tag.workspaceId, TAG_ACTIONS.UPDATE, 'tag', tagId, userId, updateTagDto as object);
+    await this.activitiesService.record(
+      tag.workspaceId,
+      TAG_ACTIONS.UPDATE,
+      'tag',
+      tagId,
+      userId,
+      updateTagDto as object,
+    );
     return saved;
   }
 
@@ -121,7 +139,7 @@ export class TagsService {
     const result = await this.dataSource.transaction(async (manager) => {
       // 1. 从 tag.documentIds 中获取所有使用该标签的文档ID
       let documentIds = tag.documentIds || [];
-      
+
       // 回退机制：如果 documentIds 为空但 usageCount > 0，说明可能是旧数据，需要查询
       if (documentIds.length === 0 && tag.usageCount > 0) {
         console.log(`标签 ${tag.tagId} 的 documentIds 为空但 usageCount > 0，回退到查询方式`);
@@ -132,10 +150,10 @@ export class TagsService {
           .andWhere('doc.tags @> :tagId', { tagId: [tag.tagId] })
           .select('doc.docId')
           .getMany();
-        documentIds = documents.map(doc => doc.docId);
+        documentIds = documents.map((doc) => doc.docId);
         console.log(`通过查询找到 ${documentIds.length} 个使用该标签的文档`);
       }
-      
+
       console.log(`删除标签 ${tag.tagId}，找到 ${documentIds.length} 个使用该标签的文档`);
 
       // 2. 从所有文档的 tags 数组中移除该标签ID（只更新未删除的文档）
@@ -148,7 +166,7 @@ export class TagsService {
           .andWhere('doc.workspaceId = :workspaceId', { workspaceId: tag.workspaceId })
           .andWhere('doc.status != :status', { status: 'deleted' })
           .getMany();
-        
+
         // 批量更新每个文档的 tags 数组
         for (const doc of documents) {
           if (doc.tags && doc.tags.includes(tag.tagId)) {
@@ -157,7 +175,7 @@ export class TagsService {
             removedCount++;
           }
         }
-        
+
         console.log(`已从 ${removedCount} 个文档中移除标签 ${tag.tagId}`);
       }
 
@@ -173,14 +191,10 @@ export class TagsService {
     });
 
     // 记录活动日志
-    await this.activitiesService.record(
-      tag.workspaceId,
-      TAG_ACTIONS.DELETE,
-      'tag',
-      tagId,
-      userId,
-      { name: tag.name, removedFromDocuments: result.removedFromDocuments },
-    );
+    await this.activitiesService.record(tag.workspaceId, TAG_ACTIONS.DELETE, 'tag', tagId, userId, {
+      name: tag.name,
+      removedFromDocuments: result.removedFromDocuments,
+    });
 
     return result;
   }

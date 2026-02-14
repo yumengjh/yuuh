@@ -10,4 +10,3 @@ export class QueryEffectiveSettingsDto {
   @IsString()
   workspaceId?: string;
 }
-

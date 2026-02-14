@@ -120,10 +120,7 @@ export class WorkspacesService {
       queryBuilder.andWhere('workspace.ownerId = :userId', { userId });
     }
 
-    queryBuilder
-      .orderBy('workspace.updatedAt', 'DESC')
-      .skip(skip)
-      .take(pageSize);
+    queryBuilder.orderBy('workspace.updatedAt', 'DESC').skip(skip).take(pageSize);
 
     const [workspaces, total] = await queryBuilder.getManyAndCount();
 
@@ -173,11 +170,7 @@ export class WorkspacesService {
   /**
    * 更新工作空间
    */
-  async update(
-    workspaceId: string,
-    updateWorkspaceDto: UpdateWorkspaceDto,
-    userId: string,
-  ) {
+  async update(workspaceId: string, updateWorkspaceDto: UpdateWorkspaceDto, userId: string) {
     const workspace = await this.workspaceRepository.findOne({
       where: { workspaceId },
     });
@@ -260,11 +253,7 @@ export class WorkspacesService {
   /**
    * 邀请成员
    */
-  async inviteMember(
-    workspaceId: string,
-    inviteMemberDto: InviteMemberDto,
-    userId: string,
-  ) {
+  async inviteMember(workspaceId: string, inviteMemberDto: InviteMemberDto, userId: string) {
     const workspace = await this.workspaceRepository.findOne({
       where: { workspaceId },
     });
@@ -391,9 +380,7 @@ export class WorkspacesService {
     );
 
     // 确保 owner 在列表中
-    const ownerInList = validMemberList.find(
-      (m) => m.userId === workspace.ownerId,
-    );
+    const ownerInList = validMemberList.find((m) => m.userId === workspace.ownerId);
     if (!ownerInList && workspace.owner) {
       validMemberList.unshift({
         userId: workspace.owner.userId,
@@ -475,11 +462,7 @@ export class WorkspacesService {
   /**
    * 移除成员
    */
-  async removeMember(
-    workspaceId: string,
-    targetUserId: string,
-    userId: string,
-  ) {
+  async removeMember(workspaceId: string, targetUserId: string, userId: string) {
     const workspace = await this.workspaceRepository.findOne({
       where: { workspaceId },
     });
@@ -522,10 +505,7 @@ export class WorkspacesService {
   /**
    * 获取用户在工作空间中的角色
    */
-  async getUserRole(
-    workspaceId: string,
-    userId: string,
-  ): Promise<WorkspaceRole | null> {
+  async getUserRole(workspaceId: string, userId: string): Promise<WorkspaceRole | null> {
     const workspace = await this.workspaceRepository.findOne({
       where: { workspaceId },
     });
@@ -575,10 +555,7 @@ export class WorkspacesService {
   /**
    * 检查用户是否有编辑权限（owner、admin、editor）
    */
-  async checkEditPermission(
-    workspaceId: string,
-    userId: string,
-  ): Promise<void> {
+  async checkEditPermission(workspaceId: string, userId: string): Promise<void> {
     const role = await this.getUserRole(workspaceId, userId);
     if (
       !role ||
@@ -593,10 +570,7 @@ export class WorkspacesService {
   /**
    * 检查用户是否有管理权限（owner、admin）
    */
-  async checkAdminPermission(
-    workspaceId: string,
-    userId: string,
-  ): Promise<void> {
+  async checkAdminPermission(workspaceId: string, userId: string): Promise<void> {
     const role = await this.getUserRole(workspaceId, userId);
     if (!role || (role !== WorkspaceRole.OWNER && role !== WorkspaceRole.ADMIN)) {
       throw new ForbiddenException('您没有管理权限');

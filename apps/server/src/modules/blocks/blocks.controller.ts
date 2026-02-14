@@ -11,13 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiResponse,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { BlocksService } from './blocks.service';
 import { CreateBlockDto } from './dto/create-block.dto';
 import { UpdateBlockDto } from './dto/update-block.dto';
@@ -40,10 +34,7 @@ export class BlocksController {
   @ApiResponse({ status: 201, description: '创建成功' })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @ApiResponse({ status: 403, description: '没有权限' })
-  async create(
-    @Body() createBlockDto: CreateBlockDto,
-    @CurrentUser() user: any,
-  ) {
+  async create(@Body() createBlockDto: CreateBlockDto, @CurrentUser() user: any) {
     return this.blocksService.create(createBlockDto, user.userId);
   }
 
@@ -83,10 +74,7 @@ export class BlocksController {
   @ApiResponse({ status: 200, description: '删除成功' })
   @ApiResponse({ status: 404, description: '块不存在' })
   @ApiResponse({ status: 403, description: '没有权限' })
-  async remove(
-    @Param('blockId') blockId: string,
-    @CurrentUser() user: any,
-  ) {
+  async remove(@Param('blockId') blockId: string, @CurrentUser() user: any) {
     return this.blocksService.remove(blockId, user.userId);
   }
 
@@ -110,10 +98,7 @@ export class BlocksController {
   @ApiResponse({ status: 200, description: '批量操作成功' })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @ApiResponse({ status: 403, description: '没有权限' })
-  async batch(
-    @Body() batchBlockDto: BatchBlockDto,
-    @CurrentUser() user: any,
-  ) {
+  async batch(@Body() batchBlockDto: BatchBlockDto, @CurrentUser() user: any) {
     return this.blocksService.batch(batchBlockDto, user.userId);
   }
 }

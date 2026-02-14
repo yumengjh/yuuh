@@ -10,4 +10,3 @@ export class UpdateWorkspaceSettingsDto {
   @Type(() => SettingsPatchDto)
   settings: SettingsPatchDto;
 }
-

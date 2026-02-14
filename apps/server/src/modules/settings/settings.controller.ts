@@ -10,13 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SettingsService } from './settings.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -55,8 +49,7 @@ export class SettingsController {
   @Get('settings/effective')
   @ApiOperation({
     summary: '获取生效设置（可选 workspaceId）',
-    description:
-      '返回 userSettings / workspaceSettings / effectiveSettings / sources',
+    description: '返回 userSettings / workspaceSettings / effectiveSettings / sources',
   })
   @ApiResponse({ status: 200, description: '获取成功' })
   @ApiResponse({ status: 401, description: '未认证' })
@@ -66,10 +59,7 @@ export class SettingsController {
     @Query() query: QueryEffectiveSettingsDto,
     @CurrentUser() user: { userId: string },
   ) {
-    return this.settingsService.getEffectiveSettings(
-      user.userId,
-      query.workspaceId,
-    );
+    return this.settingsService.getEffectiveSettings(user.userId, query.workspaceId);
   }
 
   @Get('workspaces/:workspaceId/settings')
@@ -104,11 +94,7 @@ export class SettingsController {
     @Body() body: UpdateWorkspaceSettingsDto,
     @CurrentUser() user: { userId: string },
   ) {
-    return this.settingsService.updateWorkspaceSettings(
-      workspaceId,
-      user.userId,
-      body.settings,
-    );
+    return this.settingsService.updateWorkspaceSettings(workspaceId, user.userId, body.settings);
   }
 
   @Delete('workspaces/:workspaceId/settings')

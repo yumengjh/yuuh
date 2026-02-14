@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleDestroy } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Document } from '../../../entities/document.entity';
@@ -19,10 +14,7 @@ export class VersionControlService implements OnModuleDestroy {
 
   // 按文档隔离的待创建版本计数器
   // key: docId, value: { count: number, lastUpdate: number }
-  private readonly pendingVersions = new Map<
-    string,
-    { count: number; lastUpdate: number }
-  >();
+  private readonly pendingVersions = new Map<string, { count: number; lastUpdate: number }>();
 
   // 清理过期数据的间隔（30分钟）
   private readonly CLEANUP_INTERVAL = 30 * 60 * 1000;
@@ -73,11 +65,7 @@ export class VersionControlService implements OnModuleDestroy {
    * @param message 版本消息（可选）
    * @returns 创建的版本号
    */
-  async createVersion(
-    docId: string,
-    userId: string,
-    message?: string,
-  ): Promise<number> {
+  async createVersion(docId: string, userId: string, message?: string): Promise<number> {
     // 获取待创建版本的数量（在事务外获取，避免事务问题）
     const pendingCount = this.getPendingVersionCount(docId);
 
@@ -117,9 +105,7 @@ export class VersionControlService implements OnModuleDestroy {
     // 清除该文档的待创建版本计数（在事务成功后清除）
     this.pendingVersions.delete(docId);
 
-    this.logger.log(
-      `文档 ${docId} 创建版本 ${newVersion}，包含 ${pendingCount} 个待处理操作`,
-    );
+    this.logger.log(`文档 ${docId} 创建版本 ${newVersion}，包含 ${pendingCount} 个待处理操作`);
 
     return newVersion;
   }

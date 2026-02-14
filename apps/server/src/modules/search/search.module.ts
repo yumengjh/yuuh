@@ -7,10 +7,7 @@ import { SearchService } from './search.service';
 import { SearchController } from './search.controller';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Document, BlockVersion]),
-    WorkspacesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Document, BlockVersion]), WorkspacesModule],
   controllers: [SearchController],
   providers: [SearchService],
   exports: [SearchService],
