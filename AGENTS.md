@@ -198,3 +198,11 @@ export function Example() {
 
 - 若规则与实际代码冲突，以代码与 lint 配置为准，并在更新后修订本文件。
 - 发现缺口或需要新增流程，请直接补充本文件并在 PR 说明理由。
+
+## 完成任务后执行命令进行检查：
+
+pnpm lint:<任务模块>
+
+pnpm --filter @infinitedoc/<任务模块> exec tsc -p tsconfig.json --noEmit
+
+- 主要是进行类型检查和语法验证，确保代码质量和一致性，可以按需调整。
