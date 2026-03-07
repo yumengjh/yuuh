@@ -1,0 +1,37 @@
+.document-reader {
+  background: #ffffff;
+}
+
+.document-reader__card {
+  background: transparent;
+}
+
+.document-reader__article {
+  width: 100%;
+}
+
+.document-reader__content {
+  min-height: 120px;
+}
+
+.document-reader__content .shiki {
+  margin: 14px 0 16px;
+  border: 1px solid var(--doc-code-border);
+  border-radius: 10px;
+  overflow: auto;
+}
+
+.document-reader__content .shiki code {
+  display: block;
+  font-family: var(
+    --app-doc-code-font,
+    SFMono-Regular,
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    Courier,
+    monospace
+  ) !important;
+  white-space: pre;
+  tab-size: 2;
+}

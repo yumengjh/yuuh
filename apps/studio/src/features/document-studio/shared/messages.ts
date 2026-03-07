@@ -1,0 +1,15 @@
+export const DOCUMENT_STUDIO_COPY = {
+  loadDocumentFailed: "文档加载失败，请稍后重试",
+  authExpired: "登录状态已失效，请重新登录",
+  loadingDocument: "正在加载文档...",
+  preparingDocument: "正在准备文档...",
+  loadingFullDocument: "正在加载完整文档...",
+  loadFullDocumentFailed: "加载完整文档失败",
+  loadBeforeEditFailed: (message: string) => `进入编辑前加载完整文档失败，已继续进入编辑：${message}`,
+  loadingContent: "正在加载文档内容...",
+  emptyContent: "暂无内容",
+  loadedBlocks: "已加载",
+  loadMore: "加载更多",
+  loadingMore: "正在加载更多...",
+  retry: "重试",
+} as const;

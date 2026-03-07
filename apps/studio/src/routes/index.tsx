@@ -1,5 +1,6 @@
 import { lazy, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
+import { featureFlags } from "../config/featureFlags";
 
 const MainPage = lazy(() => import("../component/Main/main"));
 const BlankHomePage = lazy(() => import("../pages/BlankHome"));
@@ -28,7 +29,7 @@ export type AppRoute = {
   children?: AppRoute[];
 };
 
-export const appRoutes: AppRoute[] = [
+const baseRoutes: AppRoute[] = [
   {
     key: "home",
     label: "空白页",
@@ -53,15 +54,6 @@ export const appRoutes: AppRoute[] = [
     path: "/history",
     element: <HistoryPage />,
     inSidebar: false,
-    showSidebar: false,
-    showHeader: true,
-  },
-  {
-    key: "api-test",
-    label: "接口测试",
-    path: "/api-test",
-    element: <ApiTestPage />,
-    inSidebar: true,
     showSidebar: false,
     showHeader: true,
   },
@@ -153,6 +145,21 @@ export const appRoutes: AppRoute[] = [
   },
 ];
 
+const apiTestRoute: AppRoute = {
+  key: "api-test",
+  label: "接口调试",
+  path: "/api-test",
+  element: <ApiTestPage />,
+  inSidebar: true,
+  showSidebar: false,
+  showHeader: true,
+};
+
+export const appRoutes: AppRoute[] = featureFlags.enableApiTest
+  ? [...baseRoutes, apiTestRoute]
+  : baseRoutes;
+
 export const sidebarItems = appRoutes
   .filter((route) => route.inSidebar)
   .map(({ key, label, path }) => ({ key, label, path: path || "/" }));
+

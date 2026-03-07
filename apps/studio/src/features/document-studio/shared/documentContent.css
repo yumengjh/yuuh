@@ -1,0 +1,234 @@
+.document-content {
+  --doc-text-color: #1f2329;
+  --doc-muted-color: #5f6368;
+  --doc-code-bg: #f6f8fa;
+  --doc-code-border: #e5e7eb;
+  --doc-inline-code-bg: #f3f4f6;
+  --doc-inline-code-color: #1f2937;
+  --doc-link-color: #1d4ed8;
+  --doc-link-hover-color: #1e40af;
+  font-family:
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-size: var(--app-editor-font-size, 16px);
+  line-height: 1.75;
+  color: var(--doc-text-color);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  word-break: break-word;
+}
+
+.document-content :where(p) {
+  margin: 0 0 12px;
+}
+
+.document-content :where(h1, h2, h3, h4, h5, h6) {
+  margin: 0 0 10px;
+  font-weight: 650;
+  color: #0f172a;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.document-content :where(h1) {
+  margin-top: 24px;
+  font-size: 28px;
+}
+
+.document-content :where(h2) {
+  margin-top: 22px;
+  font-size: 24px;
+}
+
+.document-content :where(h3) {
+  margin-top: 20px;
+  font-size: 20px;
+}
+
+.document-content :where(h4) {
+  margin-top: 18px;
+  font-size: 18px;
+}
+
+.document-content :where(h5) {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+.document-content :where(h6) {
+  margin-top: 16px;
+  font-size: 15px;
+  color: var(--doc-muted-color);
+}
+
+.document-content :where(ul, ol) {
+  margin: 0 0 12px;
+  padding-left: 1.65em;
+}
+
+.document-content :where(li) {
+  margin: 4px 0;
+}
+
+.document-content :where(ul ul, ul ol, ol ul, ol ol) {
+  margin: 6px 0;
+}
+
+.document-content pre {
+  margin: 14px 0 16px;
+  overflow: auto;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: var(
+    --app-doc-code-font,
+    SFMono-Regular,
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    Courier,
+    monospace
+  ) !important;
+  font-size: 13.5px;
+  line-height: 1.65;
+  border: 1px solid var(--doc-code-border);
+  background: var(--doc-code-bg);
+  color: #0f172a;
+}
+
+.document-content pre code {
+  display: block;
+  background: transparent !important;
+  color: inherit;
+  font-family: var(
+    --app-doc-code-font,
+    SFMono-Regular,
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    Courier,
+    monospace
+  ) !important;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.document-content code:not(pre code) {
+  font-family: var(
+    --app-doc-code-font,
+    SFMono-Regular,
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    Courier,
+    monospace
+  );
+  font-size: 0.88em;
+  color: var(--doc-inline-code-color);
+  background: var(--doc-inline-code-bg);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.08em 0.42em;
+}
+
+.document-content blockquote {
+  margin: 14px 0;
+  padding: 8px 0 8px 12px;
+  border-left: 3px solid #cbd5e1;
+  color: #475569;
+  background: #f8fafc;
+  border-radius: 0 8px 8px 0;
+}
+
+.document-content a,
+.document-content a.tiptap-link {
+  color: var(--doc-link-color);
+  text-decoration: underline;
+  text-decoration-color: rgba(37, 99, 235, 0.45);
+  text-underline-offset: 2px;
+}
+
+.document-content a:hover,
+.document-content a.tiptap-link:hover {
+  color: var(--doc-link-hover-color);
+  text-decoration-color: rgba(30, 64, 175, 0.55);
+}
+
+.document-content ul.task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.document-content li.task-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.document-content li.task-list-item input[type="checkbox"] {
+  margin-top: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.document-content li.task-list-item > p {
+  margin: 0;
+  flex: 1;
+}
+
+.document-content mark {
+  background-color: #fde68a;
+  color: #713f12;
+  border-radius: 4px;
+  padding: 0 0.15em;
+}
+
+.document-content u {
+  text-decoration: underline;
+  text-decoration-color: #64748b;
+  text-decoration-thickness: 1px;
+}
+
+.document-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.document-content hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 24px 0;
+}
+
+.document-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.document-content th,
+.document-content td {
+  border: 1px solid #e5e7eb;
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.document-content th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.tiptap-card[data-code-theme="dark"] .document-content pre {
+  border-color: #30363d;
+  background: #0d1117;
+  color: #c9d1d9;
+}
