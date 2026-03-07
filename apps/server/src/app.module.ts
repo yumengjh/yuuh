@@ -77,7 +77,7 @@ import { RuntimeConfig } from './entities/runtime-config.entity';
           RuntimeConfig,
         ],
         synchronize: configService.get<string>('app.env') === 'development',
-        logging: configService.get<string>('app.env') === 'development',
+        logging: configService.get<boolean>('database.logging') ?? false,
         extra: {
           max: configService.get<number>('database.extra.max'),
           min: configService.get<number>('database.extra.min'),
