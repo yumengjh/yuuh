@@ -260,13 +260,19 @@ curl -X POST "http://localhost:5200/api/v1/runtime-configs/rate-limit/reset" \
 
 ## 环境变量说明
 
-| 变量                              | 默认值  | 说明                 |
-| --------------------------------- | ------- | -------------------- |
-| `RATE_LIMIT_ENABLED`              | `true`  | 默认是否启用限流     |
-| `RATE_LIMIT_TTL`                  | `60000` | 默认时间窗口（毫秒） |
-| `RATE_LIMIT_MAX`                  | `100`   | 默认窗口内请求上限   |
-| `RUNTIME_CONFIG_POLL_INTERVAL_MS` | `5000`  | 多实例同步轮询间隔   |
-| `SYSTEM_ADMIN_TOKEN`              | 空      | 运行时配置管理令牌   |
+| 变量                              | 默认值  | 说明                                                                                                           |
+| --------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------- |
+| `RATE_LIMIT_ENABLED`              | `true`  | 默认是否启用限流                                                                                               |
+| `RATE_LIMIT_TTL`                  | `60000` | 默认时间窗口（毫秒）                                                                                           |
+| `RATE_LIMIT_MAX`                  | `100`   | 默认窗口内请求上限                                                                                             |
+| `RUNTIME_CONFIG_POLL_INTERVAL_MS` | `5000`  | 多实例同步轮询间隔                                                                                             |
+| `SYSTEM_ADMIN_TOKEN`              | 空      | 运行时配置管理令牌                                                                                             |
+| `PUBLIC_SITE_ORIGINS`             | 空      | publish 站点白名单；支持精确 origin、`*`、`https://*.example.com`；当前仍为静态环境变量，不纳入 runtime center |
+| `PUBLIC_SITE_ALLOW_NO_ORIGIN`     | `false` | 是否允许无 `Origin` / `Referer` 的匿名请求访问 `@SitePublic()` 接口                                            |
+
+> 说明：`PUBLIC_SITE_ORIGINS` 目前只在应用启动时读取，用于 `@SitePublic()` 请求来源校验和 CORS 白名单合并；后续如需在线调整，再纳入运行时配置中心。
+>
+> `PUBLIC_SITE_ALLOW_NO_ORIGIN` 也仅在启动时读取，且只影响 `@SitePublic()` 接口的匿名访问判定。
 
 ## 兼容性与回滚策略
 

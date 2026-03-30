@@ -29,6 +29,7 @@ import { QueryRevisionsDto } from './dto/query-revisions.dto';
 import { SearchQueryDto } from './dto/search-query.dto';
 import { ActivitiesService } from '../activities/activities.service';
 import { DOC_ACTIONS } from '../activities/constants/activity-actions';
+import { SITE_PUBLIC_ANONYMOUS_USER_ID } from '../../common/decorators/public.decorator';
 
 @Injectable()
 export class DocumentsService {
@@ -626,23 +627,150 @@ export class DocumentsService {
     limit?: number,
   ) {
     const document = await this.findOne(docId, userId);
-
-    // 确定要使用的版本号
     const docVer = version || document.head;
+    return this.getContentByDocument(document, docVer, maxDepth, startBlockId, limit);
+  }
 
-    // 检查文档版本是否存在
+  async findAllSitePublic(queryDto: QueryDocumentsDto) {
+    return this.findAllForSitePublic(queryDto);
+  }
+
+  async findOneSitePublic(docId: string) {
+    return this.findPublicOne(docId);
+  }
+
+  async getContentSitePublic(
+    docId: string,
+    maxDepth?: number,
+    startBlockId?: string,
+    limit?: number,
+  ) {
+    const publicDocument = await this.getPublicDocumentEntity(docId);
+    return this.getContentByDocument(
+      publicDocument,
+      publicDocument.publishedHead,
+      maxDepth,
+      startBlockId,
+      limit,
+    );
+  }
+
+  private async findAllForSitePublic(queryDto: QueryDocumentsDto) {
+    const {
+      page = 1,
+      pageSize = 20,
+      workspaceId,
+      visibility,
+      parentId,
+      tags,
+      category,
+      sortBy = 'updatedAt',
+      sortOrder = 'DESC',
+    } = queryDto;
+
+    if (!workspaceId) {
+      throw new BadRequestException('workspaceId is required for site public document queries');
+    }
+
+    await this.workspacesService.findOne(workspaceId, SITE_PUBLIC_ANONYMOUS_USER_ID);
+
+    const skip = (page - 1) * pageSize;
+    const queryBuilder = this.documentRepository
+      .createQueryBuilder('document')
+      .where('document.workspaceId = :workspaceId', { workspaceId })
+      .andWhere('document.status != :deleted', { deleted: 'deleted' })
+      .andWhere('document.publishedHead > 0');
+
+    if (visibility) {
+      queryBuilder.andWhere('document.visibility = :visibility', { visibility });
+    }
+
+    if (parentId !== undefined) {
+      if (parentId === null) {
+        queryBuilder.andWhere('document.parentId IS NULL');
+      } else {
+        queryBuilder.andWhere('document.parentId = :parentId', { parentId });
+      }
+    }
+
+    if (tags && tags.length > 0) {
+      queryBuilder.andWhere('document.tags && :tags', { tags });
+    }
+
+    if (category) {
+      queryBuilder.andWhere('document.category = :category', { category });
+    }
+
+    queryBuilder.orderBy(`document.${sortBy}`, sortOrder as 'ASC' | 'DESC');
+    queryBuilder.skip(skip).take(pageSize);
+
+    const [items, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      items: items.map((item) => this.toPublicDocumentMeta(item)),
+      total,
+      page,
+      pageSize,
+    };
+  }
+
+  private async findPublicOne(docId: string) {
+    const document = await this.getPublicDocumentEntity(docId);
+    document.viewCount += 1;
+    await this.documentRepository.save(document);
+    return this.toPublicDocumentMeta(document);
+  }
+
+  private async getPublicDocumentEntity(docId: string): Promise<Document> {
+    const document = await this.documentRepository.findOne({
+      where: { docId },
+    });
+
+    if (!document || document.status === 'deleted' || document.publishedHead <= 0) {
+      throw new NotFoundException('Public document not found or not published');
+    }
+
+    return document;
+  }
+
+  private toPublicDocumentMeta(document: Document) {
+    return {
+      docId: document.docId,
+      workspaceId: document.workspaceId,
+      title: document.title,
+      icon: document.icon,
+      cover: document.cover,
+      createdBy: document.createdBy,
+      status: document.status,
+      visibility: document.visibility,
+      tags: document.tags,
+      category: document.category,
+      publishedHead: document.publishedHead,
+      viewCount: document.viewCount,
+      favoriteCount: document.favoriteCount,
+      createdAt: document.createdAt,
+      updatedAt: document.updatedAt,
+    };
+  }
+
+  private async getContentByDocument(
+    document: Document,
+    docVer: number,
+    maxDepth?: number,
+    startBlockId?: string,
+    limit?: number,
+  ) {
     const revision = await this.docRevisionRepository.findOne({
-      where: { docId, docVer },
+      where: { docId: document.docId, docVer },
     });
 
     if (!revision) {
       throw new NotFoundException('文档版本不存在');
     }
 
-    // 如果指定了 startBlockId，使用优化的按需查询方式
     if (startBlockId) {
       const result = await this.buildContentTreeFromStartBlock(
-        docId,
+        document.docId,
         document.rootBlockId,
         startBlockId,
         revision.createdAt,
@@ -654,12 +782,10 @@ export class DocumentsService {
         throw new NotFoundException('文档版本不存在');
       }
 
-      // 检查根块是否被删除
       if (result.tree && typeof result.tree === 'object' && '__rootBlockDeleted' in result.tree) {
         throw new BadRequestException('根块已被删除，无法获取文档内容。请恢复根块或重新创建文档。');
       }
 
-      // 检查根块是否不存在
       if (result.tree && typeof result.tree === 'object' && '__rootBlockMissing' in result.tree) {
         throw new NotFoundException('根块不存在，无法获取文档内容。');
       }
@@ -678,18 +804,14 @@ export class DocumentsService {
       };
     }
 
-    // 如果没有指定 startBlockId，使用原来的方式（需要获取所有块的版本映射）
-    // 获取该文档版本对应的块版本映射
-    const blockVersionMap = await this.getBlockVersionMapForVersion(docId, docVer);
-
-    // 根据块版本映射构建内容树（支持分页）
+    const blockVersionMap = await this.getBlockVersionMapForVersion(document.docId, docVer);
     const result = await this.buildContentTreeFromVersionMap(
-      docId,
+      document.docId,
       document.rootBlockId,
       blockVersionMap,
       maxDepth,
       startBlockId,
-      limit || 1000, // 默认最多返回1000个块
+      limit || 1000,
     );
 
     if (!result || !result.tree) {
@@ -698,12 +820,10 @@ export class DocumentsService {
       throw new NotFoundException('文档版本不存在');
     }
 
-    // 检查根块是否被删除
     if (result.tree && typeof result.tree === 'object' && '__rootBlockDeleted' in result.tree) {
       throw new BadRequestException('根块已被删除，无法获取文档内容。请恢复根块或重新创建文档。');
     }
 
-    // 检查根块是否不存在
     if (result.tree && typeof result.tree === 'object' && '__rootBlockMissing' in result.tree) {
       throw new NotFoundException('根块不存在，无法获取文档内容。');
     }

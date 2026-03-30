@@ -7,6 +7,11 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { ConfigService } from '@nestjs/config';
 import boxen from 'boxen';
 import chalk from 'chalk';
+import {
+  isOriginAllowedByPatterns,
+  normalizeOrigin,
+  parseSiteOriginPatterns,
+} from './common/utils/site-origin.util';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -30,13 +35,30 @@ async function bootstrap() {
   const port = configService.get<number>('app.port') || 5200;
   const swaggerUiPath = joinPath(apiPrefix, swaggerPath);
   const swaggerJsonPath = joinPath(apiPrefix, `${swaggerPath}-json`);
+  const corsOrigins = [
+    ...parseSiteOriginPatterns(configService.get<string>('app.corsOrigin')),
+    ...(configService.get<string[]>('runtime.publicSiteOrigins') ?? []),
+  ];
 
   // 全局前缀
   app.setGlobalPrefix(apiPrefix);
 
   // 跨域
   app.enableCors({
-    origin: configService.get<string>('app.corsOrigin') || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const normalizedOrigin = normalizeOrigin(origin);
+      if (normalizedOrigin && isOriginAllowedByPatterns(normalizedOrigin, corsOrigins)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

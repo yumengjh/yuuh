@@ -2,17 +2,28 @@
 
 认证模块提供用户注册、登录、令牌管理等功能。
 
+## 认证与站点公开说明
+
+除 `@Public()` 标记的注册、登录、刷新令牌接口外，认证模块默认走 JWT。
+
+其中 `GET /api/v1/auth/users/:userId` 额外支持站点公开访问：
+
+- 带 `Authorization`：按登录态返回完整资料
+- 不带 token：仅允许来自 `PUBLIC_SITE_ORIGINS` 的站点请求匿名访问
+- 站点公开响应会裁剪敏感字段，不返回 `email`、`status`
+- 请求来源未命中白名单时返回 `403 Forbidden`
+
 ## 接口列表
 
-| 方法  | 路径                  | 说明                     | 认证 |
-| ----- | --------------------- | ------------------------ | ---- |
-| POST  | `/auth/register`      | 用户注册                 | 否   |
-| POST  | `/auth/login`         | 用户登录                 | 否   |
-| POST  | `/auth/refresh`       | 刷新令牌                 | 否   |
-| POST  | `/auth/logout`        | 用户登出                 | 是   |
-| GET   | `/auth/me`            | 获取当前用户             | 是   |
-| PATCH | `/auth/me`            | 更新当前用户信息         | 是   |
-| GET   | `/auth/users/:userId` | 根据 userId 获取用户信息 | 是   |
+| 方法  | 路径                  | 说明                     | 认证           |
+| ----- | --------------------- | ------------------------ | -------------- |
+| POST  | `/auth/register`      | 用户注册                 | 否             |
+| POST  | `/auth/login`         | 用户登录                 | 否             |
+| POST  | `/auth/refresh`       | 刷新令牌                 | 否             |
+| POST  | `/auth/logout`        | 用户登出                 | 是             |
+| GET   | `/auth/me`            | 获取当前用户             | 是             |
+| PATCH | `/auth/me`            | 更新当前用户信息         | 是             |
+| GET   | `/auth/users/:userId` | 根据 userId 获取用户信息 | JWT / 站点公开 |
 
 ## 用户注册
 
@@ -239,15 +250,17 @@ Authorization: Bearer <your-access-token>
 
 **接口：** `GET /api/v1/auth/users/:userId`
 
-**说明：** 根据用户 ID 查询用户基础信息（需鉴权）。
+**说明：** 根据用户 ID 查询用户基础信息。该接口支持登录态访问，也支持受允许站点的匿名公开访问。
 
-**返回字段：** `username`、`displayName`、`email`、`avatar`、`bio`、`status`、`updatedAt`
+**返回字段：**
 
-**请求头：**
+- 登录态：`userId`、`username`、`displayName`、`email`、`avatar`、`bio`、`status`、`updatedAt`
+- 站点公开：`userId`、`username`、`displayName`、`avatar`、`bio`、`updatedAt`
 
-```
-Authorization: Bearer <your-access-token>
-```
+**请求方式（二选一）：**
+
+- 登录态：`Authorization: Bearer <your-access-token>`
+- 站点公开：不带 token，但请求来源必须命中 `PUBLIC_SITE_ORIGINS`
 
 **路径参数：**
 
@@ -272,10 +285,27 @@ Authorization: Bearer <your-access-token>
 }
 ```
 
+**站点公开响应示例：**
+
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "u_1705123456789_abc123",
+    "username": "john_doe",
+    "displayName": "John Doe",
+    "avatar": "https://example.com/avatar.jpg",
+    "bio": "这是我的简介",
+    "updatedAt": "2026-02-11T03:30:00.000Z"
+  }
+}
+```
+
 **状态码：**
 
 - `200 OK` - 获取成功
 - `401 Unauthorized` - Token 无效或已过期
+- `403 Forbidden` - 站点公开请求来源不被允许
 - `404 Not Found` - 用户不存在
 
 ## 用户登出

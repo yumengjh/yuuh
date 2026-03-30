@@ -19,6 +19,7 @@ import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { ActivitiesService } from '../activities/activities.service';
 import { WORKSPACE_ACTIONS, MEMBER_ACTIONS } from '../activities/constants/activity-actions';
+import { isSitePublicAnonymousUserId } from '../../common/decorators/public.decorator';
 
 @Injectable()
 export class WorkspacesService {
@@ -156,9 +157,24 @@ export class WorkspacesService {
       throw new NotFoundException('工作空间不存在');
     }
 
-    // 检查权限
-    await this.checkAccess(workspaceId, userId);
+    if (isSitePublicAnonymousUserId(userId)) {
+      if (workspace.status !== 'active') {
+        throw new NotFoundException('工作空间不存在');
+      }
 
+      return {
+        workspaceId: workspace.workspaceId,
+        name: workspace.name,
+        description: workspace.description,
+        icon: workspace.icon,
+        ownerId: workspace.ownerId,
+        status: workspace.status,
+        createdAt: workspace.createdAt,
+        updatedAt: workspace.updatedAt,
+      };
+    }
+
+    await this.checkAccess(workspaceId, userId);
     const role = await this.getUserRole(workspaceId, userId);
 
     return {
@@ -168,7 +184,7 @@ export class WorkspacesService {
   }
 
   /**
-   * 更新工作空间
+   * ??????
    */
   async update(workspaceId: string, updateWorkspaceDto: UpdateWorkspaceDto, userId: string) {
     const workspace = await this.workspaceRepository.findOne({

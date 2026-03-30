@@ -237,17 +237,36 @@ export class AuthService {
     return user;
   }
 
-  async getUserProfileByUserId(userId: string) {
+  async getUserProfileByUserId(
+    userId: string,
+    accessMode: 'authenticated' | 'site-public' = 'authenticated',
+  ) {
+    const isSitePublic = accessMode === 'site-public';
+    const select = isSitePublic
+      ? ['userId', 'username', 'displayName', 'avatar', 'bio', 'updatedAt']
+      : ['userId', 'username', 'displayName', 'email', 'avatar', 'bio', 'status', 'updatedAt'];
     const user = await this.userRepository.findOne({
       where: { userId },
-      select: ['username', 'displayName', 'email', 'avatar', 'bio', 'status', 'updatedAt'],
+      select: select as (keyof User)[],
     });
 
     if (!user) {
       throw new NotFoundException('用户不存在');
     }
 
+    if (isSitePublic) {
+      return {
+        userId: user.userId,
+        username: user.username,
+        displayName: user.displayName,
+        avatar: user.avatar,
+        bio: user.bio,
+        updatedAt: user.updatedAt,
+      };
+    }
+
     return {
+      userId: user.userId,
       username: user.username,
       displayName: user.displayName,
       email: user.email,

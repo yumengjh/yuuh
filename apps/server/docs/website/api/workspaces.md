@@ -2,19 +2,28 @@
 
 工作空间模块提供工作空间的创建、管理、成员管理等功能。
 
+## 站点公开访问说明
+
+`GET /api/v1/workspaces/:workspaceId` 支持通过 `@SitePublic()` 开放给指定站点匿名访问。
+
+- 带 `Authorization`：按登录态返回完整工作空间信息
+- 不带 token：请求来源必须命中 `PUBLIC_SITE_ORIGINS`
+- 站点公开模式下仅允许访问 `status = active` 的工作空间
+- 站点公开响应只返回公开安全字段，不包含 `userRole`、`memberCount`、`documentCount`
+
 ## 接口列表
 
-| 方法   | 路径                                       | 说明         | 认证 |
-| ------ | ------------------------------------------ | ------------ | ---- |
-| POST   | `/workspaces`                              | 创建工作空间 | 是   |
-| GET    | `/workspaces`                              | 工作空间列表 | 是   |
-| GET    | `/workspaces/:workspaceId`                 | 工作空间详情 | 是   |
-| PATCH  | `/workspaces/:workspaceId`                 | 更新工作空间 | 是   |
-| DELETE | `/workspaces/:workspaceId`                 | 删除工作空间 | 是   |
-| POST   | `/workspaces/:workspaceId/members`         | 邀请成员     | 是   |
-| GET    | `/workspaces/:workspaceId/members`         | 成员列表     | 是   |
-| PATCH  | `/workspaces/:workspaceId/members/:userId` | 更新成员角色 | 是   |
-| DELETE | `/workspaces/:workspaceId/members/:userId` | 移除成员     | 是   |
+| 方法   | 路径                                       | 说明         | 认证           |
+| ------ | ------------------------------------------ | ------------ | -------------- |
+| POST   | `/workspaces`                              | 创建工作空间 | 是             |
+| GET    | `/workspaces`                              | 工作空间列表 | 是             |
+| GET    | `/workspaces/:workspaceId`                 | 工作空间详情 | JWT / 站点公开 |
+| PATCH  | `/workspaces/:workspaceId`                 | 更新工作空间 | 是             |
+| DELETE | `/workspaces/:workspaceId`                 | 删除工作空间 | 是             |
+| POST   | `/workspaces/:workspaceId/members`         | 邀请成员     | 是             |
+| GET    | `/workspaces/:workspaceId/members`         | 成员列表     | 是             |
+| PATCH  | `/workspaces/:workspaceId/members/:userId` | 更新成员角色 | 是             |
+| DELETE | `/workspaces/:workspaceId/members/:userId` | 移除成员     | 是             |
 
 ## 权限说明
 
@@ -90,9 +99,8 @@ Content-Type: application/json
 
 **请求头：**
 
-```
-Authorization: Bearer <your-access-token>
-```
+- 登录态：`Authorization: Bearer <your-access-token>`
+- 站点公开：可不带 token，但请求来源必须命中 `PUBLIC_SITE_ORIGINS`
 
 **查询参数：**
 
@@ -168,11 +176,29 @@ Authorization: Bearer <your-access-token>
 }
 ```
 
+**站点公开响应示例：**
+
+```json
+{
+  "success": true,
+  "data": {
+    "workspaceId": "ws_1705123456789_abc123",
+    "name": "我的工作空间",
+    "description": "这是一个工作空间描述",
+    "icon": "📚",
+    "ownerId": "u_1705123456789_owner001",
+    "status": "active",
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
 **状态码：**
 
 - `200 OK` - 获取成功
-- `404 Not Found` - 工作空间不存在
-- `403 Forbidden` - 没有权限访问
+- `403 Forbidden` - 没有权限访问或站点公开请求来源不被允许
+- `404 Not Found` - 工作空间不存在，或工作空间不可公开访问
 
 ## 更新工作空间
 

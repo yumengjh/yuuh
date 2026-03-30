@@ -16,6 +16,7 @@ import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { QueryTagsDto } from './dto/query-tags.dto';
 import { TAG_ACTIONS } from '../activities/constants/activity-actions';
+import { isSitePublicAnonymousUserId } from '../../common/decorators/public.decorator';
 
 @Injectable()
 export class TagsService {
@@ -71,7 +72,11 @@ export class TagsService {
     if (!workspaceId) {
       throw new BadRequestException('workspaceId 为必填');
     }
-    await this.workspacesService.checkAccess(workspaceId, userId);
+    if (isSitePublicAnonymousUserId(userId)) {
+      await this.workspacesService.findOne(workspaceId, userId);
+    } else {
+      await this.workspacesService.checkAccess(workspaceId, userId);
+    }
 
     const skip = (page - 1) * pageSize;
     const [items, total] = await this.tagRepository.findAndCount({

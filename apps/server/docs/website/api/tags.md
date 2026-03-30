@@ -2,6 +2,15 @@
 
 标签模块提供标签的创建、管理、使用统计等功能。
 
+## 站点公开访问说明
+
+`GET /api/v1/tags` 支持通过 `@SitePublic()` 开放给指定站点匿名访问。
+
+- 带 `Authorization`：按登录态校验工作空间权限
+- 不带 token：请求来源必须命中 `PUBLIC_SITE_ORIGINS`
+- 站点公开模式下仍然要求传 `workspaceId`
+- 只有可公开访问的工作空间才能被匿名读取标签列表
+
 ## 标签系统概述
 
 ### 标签和文档的关联方式
@@ -61,14 +70,14 @@
 
 ## 接口列表
 
-| 方法   | 路径                 | 说明         | 认证 |
-| ------ | -------------------- | ------------ | ---- |
-| POST   | `/tags`              | 创建标签     | 是   |
-| GET    | `/tags`              | 标签列表     | 是   |
-| GET    | `/tags/:tagId`       | 标签详情     | 是   |
-| GET    | `/tags/:tagId/usage` | 标签使用统计 | 是   |
-| PATCH  | `/tags/:tagId`       | 更新标签     | 是   |
-| DELETE | `/tags/:tagId`       | 删除标签     | 是   |
+| 方法   | 路径                 | 说明         | 认证           |
+| ------ | -------------------- | ------------ | -------------- |
+| POST   | `/tags`              | 创建标签     | 是             |
+| GET    | `/tags`              | 标签列表     | JWT / 站点公开 |
+| GET    | `/tags/:tagId`       | 标签详情     | 是             |
+| GET    | `/tags/:tagId/usage` | 标签使用统计 | 是             |
+| PATCH  | `/tags/:tagId`       | 更新标签     | 是             |
+| DELETE | `/tags/:tagId`       | 删除标签     | 是             |
 
 ## 创建标签
 
@@ -131,9 +140,8 @@ Content-Type: application/json
 
 **请求头：**
 
-```
-Authorization: Bearer <your-access-token>
-```
+- 登录态：`Authorization: Bearer <your-access-token>`
+- 站点公开：可不带 token，但请求来源必须命中 `PUBLIC_SITE_ORIGINS`
 
 **查询参数：**
 
@@ -169,6 +177,8 @@ Authorization: Bearer <your-access-token>
 
 - `200 OK` - 获取成功
 - `400 Bad Request` - 缺少 workspaceId 参数
+- `403 Forbidden` - 站点公开请求来源不被允许
+- `404 Not Found` - 工作空间不存在，或工作空间不可公开访问
 
 ## 获取标签详情
 

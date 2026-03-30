@@ -20,6 +20,7 @@ import {
 } from './utils/settings.util';
 import { generateSettingsProfileId } from '../../common/utils/id-generator.util';
 import { SETTINGS_ACTIONS } from '../activities/constants/activity-actions';
+import { isSitePublicAnonymousUserId } from '../../common/decorators/public.decorator';
 
 @Injectable()
 export class SettingsService {
@@ -62,7 +63,11 @@ export class SettingsService {
   }
 
   async getWorkspaceSettings(workspaceId: string, userId: string) {
-    await this.workspacesService.checkAccess(workspaceId, userId);
+    if (isSitePublicAnonymousUserId(userId)) {
+      await this.workspacesService.findOne(workspaceId, userId);
+    } else {
+      await this.workspacesService.checkAccess(workspaceId, userId);
+    }
     const workspaceRawSettings = await this.getRawSettings('workspace', workspaceId);
     return {
       settings: workspaceRawSettings,

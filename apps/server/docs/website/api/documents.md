@@ -2,25 +2,41 @@
 
 文档模块提供文档的创建、编辑、版本控制、发布等功能。
 
+## 站点公开访问说明
+
+以下只读接口支持通过 `@SitePublic()` 开放给指定站点匿名访问：
+
+- `GET /api/v1/documents`
+- `GET /api/v1/documents/:docId`
+- `GET /api/v1/documents/:docId/content`
+
+访问规则：
+
+- 带 `Authorization` 时，仍按 JWT 鉴权处理
+- 不带 token 时，请求来源必须命中 `PUBLIC_SITE_ORIGINS`
+- 站点公开模式下只返回 **已发布文档**（`publishedHead > 0`）
+- `GET /documents` 在站点公开模式下必须传 `workspaceId`
+- `GET /documents/:docId/content` 在站点公开模式下固定返回 `publishedHead` 对应内容，不支持匿名读取草稿或任意历史版本
+
 ## 接口列表
 
-| 方法   | 路径                                 | 说明               | 认证 |
-| ------ | ------------------------------------ | ------------------ | ---- |
-| POST   | `/documents`                         | 创建文档           | 是   |
-| GET    | `/documents`                         | 文档列表           | 是   |
-| GET    | `/documents/search`                  | 搜索文档           | 是   |
-| GET    | `/documents/:docId`                  | 文档详情           | 是   |
-| GET    | `/documents/:docId/content`          | 文档内容/渲染树    | 是   |
-| PATCH  | `/documents/:docId`                  | 更新文档元数据     | 是   |
-| POST   | `/documents/:docId/publish`          | 发布文档           | 是   |
-| POST   | `/documents/:docId/move`             | 移动文档           | 是   |
-| DELETE | `/documents/:docId`                  | 删除文档           | 是   |
-| GET    | `/documents/:docId/revisions`        | 修订历史           | 是   |
-| GET    | `/documents/:docId/diff`             | 版本对比           | 是   |
-| POST   | `/documents/:docId/revert`           | 回滚到指定版本     | 是   |
-| POST   | `/documents/:docId/snapshots`        | 创建快照           | 是   |
-| POST   | `/documents/:docId/commit`           | 手动触发创建版本   | 是   |
-| GET    | `/documents/:docId/pending-versions` | 获取待创建版本数量 | 是   |
+| 方法   | 路径                                 | 说明               | 认证           |
+| ------ | ------------------------------------ | ------------------ | -------------- |
+| POST   | `/documents`                         | 创建文档           | 是             |
+| GET    | `/documents`                         | 文档列表           | JWT / 站点公开 |
+| GET    | `/documents/search`                  | 搜索文档           | 是             |
+| GET    | `/documents/:docId`                  | 文档详情           | JWT / 站点公开 |
+| GET    | `/documents/:docId/content`          | 文档内容/渲染树    | JWT / 站点公开 |
+| PATCH  | `/documents/:docId`                  | 更新文档元数据     | 是             |
+| POST   | `/documents/:docId/publish`          | 发布文档           | 是             |
+| POST   | `/documents/:docId/move`             | 移动文档           | 是             |
+| DELETE | `/documents/:docId`                  | 删除文档           | 是             |
+| GET    | `/documents/:docId/revisions`        | 修订历史           | 是             |
+| GET    | `/documents/:docId/diff`             | 版本对比           | 是             |
+| POST   | `/documents/:docId/revert`           | 回滚到指定版本     | 是             |
+| POST   | `/documents/:docId/snapshots`        | 创建快照           | 是             |
+| POST   | `/documents/:docId/commit`           | 手动触发创建版本   | 是             |
+| GET    | `/documents/:docId/pending-versions` | 获取待创建版本数量 | 是             |
 
 ## 创建文档
 
@@ -108,15 +124,14 @@ Content-Type: application/json
 
 **请求头：**
 
-```
-Authorization: Bearer <your-access-token>
-```
+- 登录态：`Authorization: Bearer <your-access-token>`
+- 站点公开：可不带 token，但请求来源必须命中 `PUBLIC_SITE_ORIGINS`
 
 **查询参数：**
 
 | 参数          | 类型     | 必填 | 说明                                                |
 | ------------- | -------- | ---- | --------------------------------------------------- |
-| `workspaceId` | string   | ❌   | 工作空间ID（不传则查询有权限的所有空间）            |
+| `workspaceId` | string   | ❌   | 工作空间ID（登录态可不传；站点公开访问时必传）      |
 | `status`      | string   | ❌   | 文档状态：`draft`、`normal`、`archived`             |
 | `visibility`  | string   | ❌   | 可见性：`private`、`workspace`、`public`            |
 | `parentId`    | string   | ❌   | 父文档ID（用于查询子文档）                          |
@@ -150,9 +165,17 @@ Authorization: Bearer <your-access-token>
 }
 ```
 
+**站点公开模式补充说明：**
+
+- 返回结果只包含 `publishedHead > 0` 的文档
+- 列表项会返回公开安全字段，如 `docId`、`workspaceId`、`title`、`icon`、`cover`、`createdBy`、`status`、`visibility`、`tags`、`category`、`publishedHead`、`viewCount`、`favoriteCount`、`createdAt`、`updatedAt`
+
 **状态码：**
 
 - `200 OK` - 获取成功
+- `400 Bad Request` - 站点公开访问缺少 `workspaceId`
+- `403 Forbidden` - 站点公开请求来源不被允许
+- `404 Not Found` - 工作空间不存在或不可公开访问
 
 ## 搜索文档
 
@@ -162,9 +185,8 @@ Authorization: Bearer <your-access-token>
 
 **请求头：**
 
-```
-Authorization: Bearer <your-access-token>
-```
+- 登录态：`Authorization: Bearer <your-access-token>`
+- 站点公开：可不带 token，但请求来源必须命中 `PUBLIC_SITE_ORIGINS`
 
 **查询参数：**
 
@@ -253,11 +275,17 @@ Authorization: Bearer <your-access-token>
 }
 ```
 
+**站点公开响应说明：**
+
+- 仅当文档已发布时可访问；未发布文档会返回 `404 Not Found`
+- 公开响应不返回 `head`、`rootBlockId` 等编辑态字段
+- 公开响应会返回 `publishedHead`，用于标识当前公开版本
+
 **状态码：**
 
 - `200 OK` - 获取成功
-- `404 Not Found` - 文档不存在
-- `403 Forbidden` - 没有权限访问
+- `403 Forbidden` - 没有权限访问或站点公开请求来源不被允许
+- `404 Not Found` - 文档不存在，或文档未发布
 
 ## 获取文档内容
 
@@ -267,9 +295,8 @@ Authorization: Bearer <your-access-token>
 
 **请求头：**
 
-```
-Authorization: Bearer <your-access-token>
-```
+- 登录态：`Authorization: Bearer <your-access-token>`
+- 站点公开：可不带 token，但请求来源必须命中 `PUBLIC_SITE_ORIGINS`
 
 **路径参数：**
 
@@ -279,12 +306,12 @@ Authorization: Bearer <your-access-token>
 
 **查询参数：**
 
-| 参数           | 类型   | 必填 | 说明                                                                          |
-| -------------- | ------ | ---- | ----------------------------------------------------------------------------- |
-| `version`      | number | ❌   | 文档版本号（不传则使用最新版本 `head`）                                       |
-| `maxDepth`     | number | ❌   | 最大层级深度（从根块开始计算，0=只返回根块，1=根块+第一层，默认返回所有层级） |
-| `startBlockId` | string | ❌   | 起始块ID（用于分页，返回该块及其后续兄弟块）                                  |
-| `limit`        | number | ❌   | 每页返回的最大块数量（默认1000，最大10000）                                   |
+| 参数           | 类型   | 必填 | 说明                                                                                                |
+| -------------- | ------ | ---- | --------------------------------------------------------------------------------------------------- |
+| `version`      | number | ❌   | 文档版本号（登录态不传则使用最新版本 `head`；站点公开访问时会忽略该参数并固定返回 `publishedHead`） |
+| `maxDepth`     | number | ❌   | 最大层级深度（从根块开始计算，0=只返回根块，1=根块+第一层，默认返回所有层级）                       |
+| `startBlockId` | string | ❌   | 起始块ID（用于分页，返回该块及其后续兄弟块）                                                        |
+| `limit`        | number | ❌   | 每页返回的最大块数量（默认1000，最大10000）                                                         |
 
 **响应示例：**
 
@@ -367,12 +394,13 @@ GET /api/v1/documents/doc_123/content
 - 如果不指定 `version`，返回最新版本（`head`）的内容
 - 如果指定 `version`，返回该版本的内容（基于时间点计算）
 - **分页功能**：系统针对超大型文档优化，支持按层级和数量分页，避免一次性返回过多数据
+- 站点公开访问时，始终基于 `publishedHead` 返回内容，不支持匿名读取草稿内容
 
 **状态码：**
 
 - `200 OK` - 获取成功
-- `404 Not Found` - 文档或版本不存在
-- `403 Forbidden` - 没有权限访问
+- `403 Forbidden` - 没有权限访问或站点公开请求来源不被允许
+- `404 Not Found` - 文档不存在、文档未发布，或指定版本不存在
 
 ## 更新文档元数据
 

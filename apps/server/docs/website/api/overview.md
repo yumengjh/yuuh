@@ -42,11 +42,46 @@ http://localhost:5200/api/v1/auth/register
 
 ### 认证方式
 
-除注册、登录、刷新令牌外，其余接口均需 JWT 认证：
+默认情况下，除注册、登录、刷新令牌外，其余接口均需 JWT 认证：
 
 ```
 Authorization: Bearer <your-access-token>
 ```
+
+同时，部分只读接口支持通过 `@SitePublic()` 开放给指定站点匿名访问：
+
+- 如果请求带有 `Authorization` 头，仍按 JWT 鉴权处理
+- 如果请求不带 token，则只允许来自 `PUBLIC_SITE_ORIGINS` 的站点来源匿名访问
+- 服务端优先校验 `Origin`，缺失时回退校验 `Referer`
+- 未命中允许站点时返回 `403 Forbidden`
+- `PUBLIC_SITE_ORIGINS` 会同时并入后端 CORS 白名单
+
+### 站点公开接口（SitePublic）
+
+| 方法 | 路径                                | 说明                                                 |
+| ---- | ----------------------------------- | ---------------------------------------------------- |
+| GET  | `/auth/users/:userId`               | 获取作者公开资料；匿名公开响应不返回 `email`         |
+| GET  | `/documents`                        | 获取已发布文档列表；匿名访问时必须传 `workspaceId`   |
+| GET  | `/documents/:docId`                 | 获取已发布文档详情                                   |
+| GET  | `/documents/:docId/content`         | 获取已发布文档内容；匿名访问固定返回 `publishedHead` |
+| GET  | `/tags`                             | 获取指定工作空间标签列表                             |
+| GET  | `/workspaces/:workspaceId`          | 获取工作空间公开信息                                 |
+| GET  | `/workspaces/:workspaceId/settings` | 获取工作空间公开设置                                 |
+
+### 相关环境变量
+
+```bash
+PUBLIC_SITE_ORIGINS=https://publish.example.com,https://docs.example.com
+PUBLIC_SITE_ALLOW_NO_ORIGIN=false
+```
+
+`PUBLIC_SITE_ORIGINS` 现支持以下写法：
+
+- 精确匹配：`https://publish.example.com`
+- 全量放开：`*`
+- 子域通配符：`https://*.example.com`
+
+`PUBLIC_SITE_ALLOW_NO_ORIGIN=true` 时，仅 `@SitePublic()` 接口会放行不带 `Origin` / `Referer` 的匿名请求。
 
 ## API 接口分类
 
@@ -54,15 +89,15 @@ Authorization: Bearer <your-access-token>
 
 用户注册、登录、令牌管理等基础认证功能。
 
-| 方法  | 路径                  | 说明                     | 认证 |
-| ----- | --------------------- | ------------------------ | ---- |
-| POST  | `/auth/register`      | 用户注册                 | 否   |
-| POST  | `/auth/login`         | 用户登录                 | 否   |
-| POST  | `/auth/refresh`       | 刷新令牌                 | 否   |
-| POST  | `/auth/logout`        | 用户登出                 | 是   |
-| GET   | `/auth/me`            | 获取当前用户             | 是   |
-| PATCH | `/auth/me`            | 更新当前用户信息         | 是   |
-| GET   | `/auth/users/:userId` | 根据 userId 获取用户信息 | 是   |
+| 方法  | 路径                  | 说明                     | 认证           |
+| ----- | --------------------- | ------------------------ | -------------- |
+| POST  | `/auth/register`      | 用户注册                 | 否             |
+| POST  | `/auth/login`         | 用户登录                 | 否             |
+| POST  | `/auth/refresh`       | 刷新令牌                 | 否             |
+| POST  | `/auth/logout`        | 用户登出                 | 是             |
+| GET   | `/auth/me`            | 获取当前用户             | 是             |
+| PATCH | `/auth/me`            | 更新当前用户信息         | 是             |
+| GET   | `/auth/users/:userId` | 根据 userId 获取用户信息 | JWT / 站点公开 |
 
 **详细文档：** [认证 API](./auth.md)
 
@@ -70,17 +105,17 @@ Authorization: Bearer <your-access-token>
 
 工作空间的创建、管理、成员管理等功能。
 
-| 方法   | 路径                                       | 说明         | 认证 |
-| ------ | ------------------------------------------ | ------------ | ---- |
-| POST   | `/workspaces`                              | 创建工作空间 | 是   |
-| GET    | `/workspaces`                              | 工作空间列表 | 是   |
-| GET    | `/workspaces/:workspaceId`                 | 工作空间详情 | 是   |
-| PATCH  | `/workspaces/:workspaceId`                 | 更新工作空间 | 是   |
-| DELETE | `/workspaces/:workspaceId`                 | 删除工作空间 | 是   |
-| POST   | `/workspaces/:workspaceId/members`         | 邀请成员     | 是   |
-| GET    | `/workspaces/:workspaceId/members`         | 成员列表     | 是   |
-| PATCH  | `/workspaces/:workspaceId/members/:userId` | 更新成员角色 | 是   |
-| DELETE | `/workspaces/:workspaceId/members/:userId` | 移除成员     | 是   |
+| 方法   | 路径                                       | 说明         | 认证           |
+| ------ | ------------------------------------------ | ------------ | -------------- |
+| POST   | `/workspaces`                              | 创建工作空间 | 是             |
+| GET    | `/workspaces`                              | 工作空间列表 | 是             |
+| GET    | `/workspaces/:workspaceId`                 | 工作空间详情 | JWT / 站点公开 |
+| PATCH  | `/workspaces/:workspaceId`                 | 更新工作空间 | 是             |
+| DELETE | `/workspaces/:workspaceId`                 | 删除工作空间 | 是             |
+| POST   | `/workspaces/:workspaceId/members`         | 邀请成员     | 是             |
+| GET    | `/workspaces/:workspaceId/members`         | 成员列表     | 是             |
+| PATCH  | `/workspaces/:workspaceId/members/:userId` | 更新成员角色 | 是             |
+| DELETE | `/workspaces/:workspaceId/members/:userId` | 移除成员     | 是             |
 
 **详细文档：** [工作空间 API](./workspaces.md)
 
@@ -88,23 +123,23 @@ Authorization: Bearer <your-access-token>
 
 文档的创建、编辑、版本控制、发布等功能。
 
-| 方法   | 路径                                 | 说明               | 认证 |
-| ------ | ------------------------------------ | ------------------ | ---- |
-| POST   | `/documents`                         | 创建文档           | 是   |
-| GET    | `/documents`                         | 文档列表           | 是   |
-| GET    | `/documents/search`                  | 搜索文档           | 是   |
-| GET    | `/documents/:docId`                  | 文档详情           | 是   |
-| GET    | `/documents/:docId/content`          | 文档内容/渲染树    | 是   |
-| PATCH  | `/documents/:docId`                  | 更新文档元数据     | 是   |
-| POST   | `/documents/:docId/publish`          | 发布文档           | 是   |
-| POST   | `/documents/:docId/move`             | 移动文档           | 是   |
-| DELETE | `/documents/:docId`                  | 删除文档           | 是   |
-| GET    | `/documents/:docId/revisions`        | 修订历史           | 是   |
-| GET    | `/documents/:docId/diff`             | 版本对比           | 是   |
-| POST   | `/documents/:docId/revert`           | 回滚到指定版本     | 是   |
-| POST   | `/documents/:docId/snapshots`        | 创建快照           | 是   |
-| POST   | `/documents/:docId/commit`           | 手动触发创建版本   | 是   |
-| GET    | `/documents/:docId/pending-versions` | 获取待创建版本数量 | 是   |
+| 方法   | 路径                                 | 说明               | 认证           |
+| ------ | ------------------------------------ | ------------------ | -------------- |
+| POST   | `/documents`                         | 创建文档           | 是             |
+| GET    | `/documents`                         | 文档列表           | JWT / 站点公开 |
+| GET    | `/documents/search`                  | 搜索文档           | 是             |
+| GET    | `/documents/:docId`                  | 文档详情           | JWT / 站点公开 |
+| GET    | `/documents/:docId/content`          | 文档内容/渲染树    | JWT / 站点公开 |
+| PATCH  | `/documents/:docId`                  | 更新文档元数据     | 是             |
+| POST   | `/documents/:docId/publish`          | 发布文档           | 是             |
+| POST   | `/documents/:docId/move`             | 移动文档           | 是             |
+| DELETE | `/documents/:docId`                  | 删除文档           | 是             |
+| GET    | `/documents/:docId/revisions`        | 修订历史           | 是             |
+| GET    | `/documents/:docId/diff`             | 版本对比           | 是             |
+| POST   | `/documents/:docId/revert`           | 回滚到指定版本     | 是             |
+| POST   | `/documents/:docId/snapshots`        | 创建快照           | 是             |
+| POST   | `/documents/:docId/commit`           | 手动触发创建版本   | 是             |
+| GET    | `/documents/:docId/pending-versions` | 获取待创建版本数量 | 是             |
 
 **详细文档：** [文档 API](./documents.md)
 
@@ -127,14 +162,14 @@ Authorization: Bearer <your-access-token>
 
 标签的创建、管理、使用统计等功能。
 
-| 方法   | 路径                 | 说明         | 认证 |
-| ------ | -------------------- | ------------ | ---- |
-| POST   | `/tags`              | 创建标签     | 是   |
-| GET    | `/tags`              | 标签列表     | 是   |
-| GET    | `/tags/:tagId`       | 标签详情     | 是   |
-| GET    | `/tags/:tagId/usage` | 标签使用统计 | 是   |
-| PATCH  | `/tags/:tagId`       | 更新标签     | 是   |
-| DELETE | `/tags/:tagId`       | 删除标签     | 是   |
+| 方法   | 路径                 | 说明         | 认证           |
+| ------ | -------------------- | ------------ | -------------- |
+| POST   | `/tags`              | 创建标签     | 是             |
+| GET    | `/tags`              | 标签列表     | JWT / 站点公开 |
+| GET    | `/tags/:tagId`       | 标签详情     | 是             |
+| GET    | `/tags/:tagId/usage` | 标签使用统计 | 是             |
+| PATCH  | `/tags/:tagId`       | 更新标签     | 是             |
+| DELETE | `/tags/:tagId`       | 删除标签     | 是             |
 
 **详细文档：** [标签 API](./tags.md)
 
@@ -179,14 +214,14 @@ Authorization: Bearer <your-access-token>
 
 阅读/编辑体验设置与工作空间覆盖配置。
 
-| 方法   | 路径                                | 说明                             | 认证 |
-| ------ | ----------------------------------- | -------------------------------- | ---- |
-| GET    | `/settings/me`                      | 获取当前用户设置（含默认值）     | 是   |
-| PATCH  | `/settings/me`                      | 更新当前用户设置                 | 是   |
-| GET    | `/settings/effective`               | 获取生效设置（可带 workspaceId） | 是   |
-| GET    | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置             | 是   |
-| PATCH  | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置             | 是   |
-| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置             | 是   |
+| 方法   | 路径                                | 说明                             | 认证           |
+| ------ | ----------------------------------- | -------------------------------- | -------------- |
+| GET    | `/settings/me`                      | 获取当前用户设置（含默认值）     | 是             |
+| PATCH  | `/settings/me`                      | 更新当前用户设置                 | 是             |
+| GET    | `/settings/effective`               | 获取生效设置（可带 workspaceId） | 是             |
+| GET    | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置             | JWT / 站点公开 |
+| PATCH  | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置             | 是             |
+| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置             | 是             |
 
 **详细文档：** [设置 API](./settings.md)
 

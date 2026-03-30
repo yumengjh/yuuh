@@ -18,6 +18,7 @@ import { UpdateMySettingsDto } from './dto/update-my-settings.dto';
 import { QueryEffectiveSettingsDto } from './dto/query-effective-settings.dto';
 import { UpdateWorkspaceSettingsDto } from './dto/update-workspace-settings.dto';
 import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { SitePublic } from '../../common/decorators/public.decorator';
 
 @ApiTags('settings')
 @Controller()
@@ -63,6 +64,7 @@ export class SettingsController {
   }
 
   @Get('workspaces/:workspaceId/settings')
+  @SitePublic()
   @ApiOperation({ summary: '获取工作空间覆盖设置（原始覆盖）' })
   @ApiParam({ name: 'workspaceId', description: '工作空间ID' })
   @ApiResponse({ status: 200, description: '获取成功' })

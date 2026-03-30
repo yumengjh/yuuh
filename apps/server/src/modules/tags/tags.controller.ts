@@ -18,6 +18,7 @@ import { UpdateTagDto } from './dto/update-tag.dto';
 import { QueryTagsDto } from './dto/query-tags.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { SitePublic } from '../../common/decorators/public.decorator';
 
 @ApiTags('tags')
 @Controller('tags')
@@ -36,6 +37,7 @@ export class TagsController {
   }
 
   @Get()
+  @SitePublic()
   @ApiOperation({ summary: '获取标签列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
   async findAll(@Query() dto: QueryTagsDto, @CurrentUser() user: any) {

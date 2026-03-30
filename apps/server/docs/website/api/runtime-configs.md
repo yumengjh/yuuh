@@ -4,6 +4,10 @@
 第一阶段已支持全局限流配置热更新。
 
 > 说明：该模块与用户偏好设置（`/settings/*`）解耦，属于运维级配置中心。
+>
+> 当前 publish 站点白名单 `PUBLIC_SITE_ORIGINS` **还不在运行时配置中心内管理**，仍通过环境变量静态加载，并同时用于 `@SitePublic()` 守卫与 CORS 白名单。
+>
+> 同时可通过 `PUBLIC_SITE_ALLOW_NO_ORIGIN` 控制是否允许不带 `Origin` / `Referer` 的匿名请求访问 `@SitePublic()` 接口；该开关不影响普通 JWT 保护接口。
 
 ## 鉴权方式
 

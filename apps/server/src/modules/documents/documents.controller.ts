@@ -26,6 +26,7 @@ import { QueryContentDto } from './dto/query-content.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { AuditLog } from '../../common/decorators/audit-log.decorator';
+import { SitePublic, isSitePublicAnonymousUserId } from '../../common/decorators/public.decorator';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -46,9 +47,13 @@ export class DocumentsController {
   }
 
   @Get()
+  @SitePublic()
   @ApiOperation({ summary: '获取文档列表' })
   @ApiResponse({ status: 200, description: '获取成功' })
   async findAll(@Query() queryDto: QueryDocumentsDto, @CurrentUser() user: any) {
+    if (isSitePublicAnonymousUserId(user?.userId)) {
+      return this.documentsService.findAllSitePublic(queryDto);
+    }
     return this.documentsService.findAll(queryDto, user.userId);
   }
 
@@ -60,16 +65,21 @@ export class DocumentsController {
   }
 
   @Get(':docId')
+  @SitePublic()
   @ApiOperation({ summary: '获取文档详情' })
   @ApiParam({ name: 'docId', description: '文档ID' })
   @ApiResponse({ status: 200, description: '获取成功' })
   @ApiResponse({ status: 404, description: '文档不存在' })
   @ApiResponse({ status: 403, description: '没有权限访问' })
   async findOne(@Param('docId') docId: string, @CurrentUser() user: any) {
+    if (isSitePublicAnonymousUserId(user?.userId)) {
+      return this.documentsService.findOneSitePublic(docId);
+    }
     return this.documentsService.findOne(docId, user.userId);
   }
 
   @Get(':docId/content')
+  @SitePublic()
   @ApiOperation({ summary: '获取文档内容（渲染树，支持分页）' })
   @ApiParam({ name: 'docId', description: '文档ID' })
   @ApiResponse({ status: 200, description: '获取成功' })
@@ -79,6 +89,14 @@ export class DocumentsController {
     @Query() queryDto: QueryContentDto,
     @CurrentUser() user: any,
   ) {
+    if (isSitePublicAnonymousUserId(user?.userId)) {
+      return this.documentsService.getContentSitePublic(
+        docId,
+        queryDto.maxDepth,
+        queryDto.startBlockId,
+        queryDto.limit,
+      );
+    }
     return this.documentsService.getContent(
       docId,
       queryDto.version,

@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import { parseSiteOriginPatterns } from '../common/utils/site-origin.util';
 
 const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
   if (value === undefined) {
@@ -31,6 +32,8 @@ const parseIntWithDefault = (
 export default registerAs('runtime', () => ({
   pollIntervalMs: parseIntWithDefault(process.env.RUNTIME_CONFIG_POLL_INTERVAL_MS, 5000, 1000),
   systemAdminToken: process.env.SYSTEM_ADMIN_TOKEN || '',
+  publicSiteOrigins: parseSiteOriginPatterns(process.env.PUBLIC_SITE_ORIGINS),
+  publicSiteAllowNoOrigin: parseBoolean(process.env.PUBLIC_SITE_ALLOW_NO_ORIGIN, false),
   rateLimit: {
     enabled: parseBoolean(process.env.RATE_LIMIT_ENABLED, true),
     ttlMs: parseIntWithDefault(process.env.RATE_LIMIT_TTL, 60000, 1000),

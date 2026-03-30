@@ -6,16 +6,25 @@
 - 工作空间覆盖设置（团队统一）
 - 生效设置计算（含来源映射）
 
+## 站点公开访问说明
+
+`GET /api/v1/workspaces/:workspaceId/settings` 支持通过 `@SitePublic()` 开放给指定站点匿名访问。
+
+- 带 `Authorization`：按登录态校验工作空间权限
+- 不带 token：请求来源必须命中 `PUBLIC_SITE_ORIGINS`
+- 站点公开模式下仅允许读取可公开访问工作空间的原始覆盖设置
+- 返回结构保持不变，仍为 `{ settings: ... }`
+
 ## 接口列表
 
-| 方法   | 路径                                | 说明                                | 认证 |
-| ------ | ----------------------------------- | ----------------------------------- | ---- |
-| GET    | `/settings/me`                      | 获取当前用户设置（含默认值）        | 是   |
-| PATCH  | `/settings/me`                      | 更新当前用户设置（部分更新）        | 是   |
-| GET    | `/settings/effective`               | 获取生效设置（可选 workspaceId）    | 是   |
-| GET    | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置（原始覆盖）    | 是   |
-| PATCH  | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置（owner/admin） | 是   |
-| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置（owner/admin） | 是   |
+| 方法   | 路径                                | 说明                                | 认证           |
+| ------ | ----------------------------------- | ----------------------------------- | -------------- |
+| GET    | `/settings/me`                      | 获取当前用户设置（含默认值）        | 是             |
+| PATCH  | `/settings/me`                      | 更新当前用户设置（部分更新）        | 是             |
+| GET    | `/settings/effective`               | 获取生效设置（可选 workspaceId）    | 是             |
+| GET    | `/workspaces/:workspaceId/settings` | 获取工作空间覆盖设置（原始覆盖）    | JWT / 站点公开 |
+| PATCH  | `/workspaces/:workspaceId/settings` | 更新工作空间覆盖设置（owner/admin） | 是             |
+| DELETE | `/workspaces/:workspaceId/settings` | 清空工作空间覆盖设置（owner/admin） | 是             |
 
 ---
 
@@ -98,6 +107,7 @@
 
 - 返回 workspace 原始覆盖设置
 - 不与用户设置合并
+- 站点公开访问时，前提是请求来源命中 `PUBLIC_SITE_ORIGINS`
 
 **状态码：**
 

@@ -20,6 +20,7 @@ import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { SitePublic } from '../../common/decorators/public.decorator';
 
 @ApiTags('workspaces')
 @Controller('workspaces')
@@ -45,6 +46,7 @@ export class WorkspacesController {
   }
 
   @Get(':workspaceId')
+  @SitePublic()
   @ApiOperation({ summary: '获取工作空间详情' })
   @ApiParam({ name: 'workspaceId', description: '工作空间ID' })
   @ApiResponse({ status: 200, description: '获取成功' })
