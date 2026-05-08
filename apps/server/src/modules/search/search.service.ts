@@ -7,6 +7,7 @@ import { BlockVersion } from '../../entities/block-version.entity';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { SearchQueryDto } from './dto/search-query.dto';
 import { AdvancedSearchDto } from './dto/advanced-search.dto';
+import { isSqlite } from '../../common/db-type';
 
 @Injectable()
 export class SearchService {
@@ -27,7 +28,7 @@ export class SearchService {
   }
 
   /**
-   * 全局搜索：文档标题 + 块内容，PostgreSQL 全文搜索
+   * 全局搜索：文档标题 + 块内容
    */
   async globalSearch(dto: SearchQueryDto, userId: string) {
     const { query, workspaceId, type = 'all', page = 1, pageSize = 20 } = dto;
@@ -50,9 +51,6 @@ export class SearchService {
 
     const params = { query, titleLike, workspaceIds, deleted: 'deleted' };
     const baseDocWhere = 'd.workspaceId IN (:...workspaceIds) AND d.status != :deleted';
-    const docMatch = '(d.searchVector @@ plainto_tsquery(:query) OR d.title ILIKE :titleLike)';
-    const blockMatch =
-      '(bv.searchVector @@ plainto_tsquery(:query) OR bv.plainText ILIKE :titleLike)';
 
     const result: {
       documents: { items: any[]; total: number; page: number; pageSize: number };
@@ -63,6 +61,10 @@ export class SearchService {
     };
 
     if (type === 'doc' || type === 'all') {
+      const docMatch = isSqlite()
+        ? 'd.title LIKE :titleLike'
+        : '(d.searchVector @@ plainto_tsquery(:query) OR d.title ILIKE :titleLike)';
+
       const qb = this.documentRepository
         .createQueryBuilder('d')
         .where(baseDocWhere)
@@ -70,8 +72,12 @@ export class SearchService {
         .setParameters(params)
         .select(['d.docId', 'd.title', 'd.workspaceId', 'd.updatedAt', 'd.createdAt']);
 
+      const docOrder = isSqlite()
+        ? 'd.updatedAt'
+        : 'COALESCE(ts_rank(d.searchVector, plainto_tsquery(:query)), 0)';
+
       const [items, total] = await qb
-        .orderBy('COALESCE(ts_rank(d.searchVector, plainto_tsquery(:query)), 0)', 'DESC')
+        .orderBy(docOrder, 'DESC')
         .addOrderBy('d.updatedAt', 'DESC')
         .skip(skip)
         .take(pageSize)
@@ -81,6 +87,10 @@ export class SearchService {
     }
 
     if (type === 'block' || type === 'all') {
+      const blockMatch = isSqlite()
+        ? 'bv.plainText LIKE :titleLike'
+        : '(bv.searchVector @@ plainto_tsquery(:query) OR bv.plainText ILIKE :titleLike)';
+
       const blockParams = { ...params, isDeleted: false };
       const qb = this.blockVersionRepository
         .createQueryBuilder('bv')
@@ -99,9 +109,13 @@ export class SearchService {
           'd.updatedAt AS "docUpdatedAt"',
         ]);
 
+      const blockOrder = isSqlite()
+        ? 'd.updatedAt'
+        : 'COALESCE(ts_rank(bv.searchVector, plainto_tsquery(:query)), 0)';
+
       const total = await qb.getCount();
       const rawItems = await qb
-        .orderBy('COALESCE(ts_rank(bv.searchVector, plainto_tsquery(:query)), 0)', 'DESC')
+        .orderBy(blockOrder, 'DESC')
         .addOrderBy('d.updatedAt', 'DESC')
         .skip(skip)
         .take(pageSize)
@@ -171,9 +185,13 @@ export class SearchService {
     if (createdBy) params.createdBy = createdBy;
 
     const baseDocWhere = 'd.workspaceId IN (:...workspaceIds) AND d.status != :deleted';
-    const docMatch = '(d.searchVector @@ plainto_tsquery(:query) OR d.title ILIKE :titleLike)';
-    const blockMatch =
-      '(bv.searchVector @@ plainto_tsquery(:query) OR bv.plainText ILIKE :titleLike)';
+
+    const docMatch = isSqlite()
+      ? 'd.title LIKE :titleLike'
+      : '(d.searchVector @@ plainto_tsquery(:query) OR d.title ILIKE :titleLike)';
+    const blockMatch = isSqlite()
+      ? 'bv.plainText LIKE :titleLike'
+      : '(bv.searchVector @@ plainto_tsquery(:query) OR bv.plainText ILIKE :titleLike)';
 
     const result: {
       documents: { items: any[]; total: number; page: number; pageSize: number };
@@ -185,13 +203,17 @@ export class SearchService {
 
     const docOrder =
       sortBy === 'rank'
-        ? `COALESCE(ts_rank(d.searchVector, plainto_tsquery(:query)), 0)`
+        ? isSqlite()
+          ? 'd.updatedAt'
+          : `COALESCE(ts_rank(d.searchVector, plainto_tsquery(:query)), 0)`
         : sortBy === 'createdAt'
           ? 'd.createdAt'
           : 'd.updatedAt';
     const blockOrder =
       sortBy === 'rank'
-        ? `COALESCE(ts_rank(bv.searchVector, plainto_tsquery(:query)), 0)`
+        ? isSqlite()
+          ? 'd.updatedAt'
+          : `COALESCE(ts_rank(bv.searchVector, plainto_tsquery(:query)), 0)`
         : 'd.updatedAt';
 
     if (type === 'doc' || type === 'all') {
@@ -209,7 +231,13 @@ export class SearchService {
           'd.createdBy',
         ]);
 
-      if (tags?.length) qb.andWhere('d.tags && :tags');
+      if (tags?.length) {
+        if (isSqlite()) {
+          qb.andWhere('d.tags LIKE :tagLike', { tagLike: `%"${tags[0]}%"` });
+        } else {
+          qb.andWhere('d.tags && :tags');
+        }
+      }
       if (startDate) qb.andWhere('d.updatedAt >= :startDate');
       if (endDate) qb.andWhere('d.updatedAt <= :endDate');
       if (createdBy) qb.andWhere('d.createdBy = :createdBy');
@@ -242,7 +270,13 @@ export class SearchService {
           'd.updatedAt AS "docUpdatedAt"',
         ]);
 
-      if (tags?.length) qb.andWhere('d.tags && :tags');
+      if (tags?.length) {
+        if (isSqlite()) {
+          qb.andWhere('d.tags LIKE :tagLike', { tagLike: `%"${tags[0]}%"` });
+        } else {
+          qb.andWhere('d.tags && :tags');
+        }
+      }
       if (startDate) qb.andWhere('d.updatedAt >= :startDate');
       if (endDate) qb.andWhere('d.updatedAt <= :endDate');
       if (createdBy) qb.andWhere('d.createdBy = :createdBy');

@@ -7,6 +7,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('sessions')
 @Index(['sessionId'])
@@ -41,6 +42,9 @@ export class Session {
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   lastActivityAt: Date;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   deviceInfo: object;
 }

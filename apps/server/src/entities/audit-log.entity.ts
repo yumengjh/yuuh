@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('audit_logs')
 @Index(['timestamp'])
@@ -30,10 +31,13 @@ export class AuditLog {
   @Column({ length: 50 })
   resourceId: string;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: isSqlite() ? 'simple-json' : 'jsonb', nullable: true })
   changes: object;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   metadata: object;
 
   @Column({ nullable: true, length: 45 })

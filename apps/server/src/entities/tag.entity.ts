@@ -7,6 +7,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('tags')
 @Index(['workspaceId', 'name'], { unique: true })
@@ -43,12 +44,16 @@ export class Tag {
   @Column({ default: 0 })
   usageCount: number;
 
-  @Column('text', { array: true, default: [] })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'text',
+    array: !isSqlite(),
+    default: () => (isSqlite() ? "'[]'" : "'{}'"),
+  })
   documentIds: string[];
 
   @Column({ default: false })
   isDeleted: boolean;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: isSqlite() ? 'datetime' : 'timestamp', nullable: true })
   deletedAt: Date;
 }

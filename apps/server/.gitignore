@@ -17,6 +17,9 @@ dist-ssr
 # 上传文件目录
 uploads/
 
+# SQLite 数据库文件
+data/
+
 cache/
 
 dist-bundle/

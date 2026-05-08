@@ -8,6 +8,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('comments')
 @Index(['docId'])
@@ -43,7 +44,11 @@ export class Comment {
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ type: 'text', array: true, default: [] })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'text',
+    array: !isSqlite(),
+    default: () => (isSqlite() ? "'[]'" : "'{}'"),
+  })
   mentions: string[];
 
   @ManyToOne('Comment')

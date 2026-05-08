@@ -9,6 +9,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('documents')
 @Index(['workspaceId', 'status'])
@@ -75,13 +76,17 @@ export class Document {
   @Column({ default: 0 })
   favoriteCount: number;
 
-  @Column({ type: 'text', array: true, default: [] })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'text',
+    array: !isSqlite(),
+    default: () => (isSqlite() ? "'[]'" : "'{}'"),
+  })
   tags: string[];
 
   @Column({ nullable: true })
   category: string;
 
-  @Column({ type: 'tsvector', nullable: true })
+  @Column({ type: isSqlite() ? 'simple-json' : 'tsvector', nullable: true })
   searchVector: any;
 
   // 关联

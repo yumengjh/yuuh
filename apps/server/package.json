@@ -28,7 +28,8 @@
     "docs:build:raw": "cd docs/website && vitepress build",
     "docs:preview": "cd docs/website && vitepress preview",
     "openapi:export": "ts-node -r tsconfig-paths/register scripts/export-openapi.ts",
-    "batch-insert-blocks": "node scripts/batch-insert-blocks.js"
+    "batch-insert-blocks": "node scripts/batch-insert-blocks.js",
+    "rebuild:sqlite": "cd node_modules/better-sqlite3 && npx node-gyp rebuild"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^2.1.1",
@@ -42,6 +43,7 @@
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/typeorm": "^10.0.1",
     "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.9.0",
     "boxen": "^8.0.1",
     "chalk": "^5.6.2",
     "class-transformer": "^0.5.1",

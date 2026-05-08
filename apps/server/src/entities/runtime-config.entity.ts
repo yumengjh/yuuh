@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('runtime_configs')
 export class RuntimeConfig {
@@ -14,7 +15,11 @@ export class RuntimeConfig {
   @Column({ name: 'config_key', type: 'varchar', length: 100, unique: true })
   configKey: string;
 
-  @Column({ name: 'config_value', type: 'jsonb', default: {} })
+  @Column({
+    name: 'config_value',
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   configValue: Record<string, unknown>;
 
   @Column({ name: 'updated_by', type: 'varchar', length: 64, nullable: true })

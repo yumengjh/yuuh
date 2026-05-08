@@ -8,6 +8,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('workspaces')
 export class Workspace {
@@ -42,7 +43,10 @@ export class Workspace {
   @Column({ default: 'active' })
   status: string;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   settings: object;
 
   // 关联

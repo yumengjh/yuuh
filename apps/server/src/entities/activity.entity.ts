@@ -7,6 +7,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('activities')
 @Index(['workspaceId', 'createdAt'])
@@ -41,10 +42,16 @@ export class Activity {
   @Column()
   userId: string;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   details: object;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   metadata: object;
 
   @CreateDateColumn()

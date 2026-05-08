@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('doc_snapshots')
 @Index(['docId', 'docVer'])
@@ -25,6 +26,6 @@ export class DocSnapshot {
   @Column()
   rootBlockId: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: isSqlite() ? 'simple-json' : 'jsonb' })
   blockVersionMap: object;
 }

@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('doc_revisions')
 @Index(['docId', 'docVer'])
@@ -36,7 +37,7 @@ export class DocRevision {
   @Column({ default: 'draft' })
   branch: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: isSqlite() ? 'simple-json' : 'jsonb' })
   patches: object[];
 
   @Column()
@@ -45,6 +46,9 @@ export class DocRevision {
   @Column({ default: 'editor' })
   source: string;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   opSummary: object;
 }

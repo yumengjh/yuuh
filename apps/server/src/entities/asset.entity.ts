@@ -7,6 +7,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('assets')
 @Index(['workspaceId'])
@@ -67,6 +68,9 @@ export class Asset {
   @Column({ default: 0 })
   refCount: number;
 
-  @Column({ type: 'jsonb', default: [] })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'[]'" : "'[]'"),
+  })
   refs: object[];
 }

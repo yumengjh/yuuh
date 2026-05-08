@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('users')
 export class User {
@@ -45,7 +46,10 @@ export class User {
   @Column({ default: 'active' })
   status: string;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   settings: object;
 
   // 关联

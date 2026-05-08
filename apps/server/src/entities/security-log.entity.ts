@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('security_logs')
 @Index(['timestamp'])
@@ -34,7 +35,10 @@ export class SecurityLog {
   @Column({ type: 'text', nullable: true })
   userAgent: string;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   details: object;
 
   @Column({ nullable: true, length: 20 })

@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 @Entity('block_versions')
 @Index(['blockId', 'ver'])
@@ -41,7 +42,7 @@ export class BlockVersion {
   @Column({ default: false })
   collapsed: boolean;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: isSqlite() ? 'simple-json' : 'jsonb' })
   payload: object;
 
   @Column()
@@ -50,9 +51,12 @@ export class BlockVersion {
   @Column({ type: 'text', nullable: true })
   plainText: string;
 
-  @Column({ type: 'jsonb', default: [] })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'[]'" : "'[]'"),
+  })
   refs: object[];
 
-  @Column({ type: 'tsvector', nullable: true })
+  @Column({ type: isSqlite() ? 'simple-json' : 'tsvector', nullable: true })
   searchVector: any;
 }

@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
+import { isSqlite } from '../common/db-type';
 
 export type SettingsScopeType = 'user' | 'workspace';
 
@@ -26,7 +27,10 @@ export class SettingsProfile {
   @Column({ name: 'scope_id', length: 64 })
   scopeId: string;
 
-  @Column({ type: 'jsonb', default: {} })
+  @Column({
+    type: isSqlite() ? 'simple-json' : 'jsonb',
+    default: () => (isSqlite() ? "'{}'" : "'{}'"),
+  })
   settings: Record<string, any>;
 
   @CreateDateColumn({ name: 'created_at' })

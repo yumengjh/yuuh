@@ -49,45 +49,55 @@ import { RuntimeConfig } from './entities/runtime-config.entity';
     // 数据库模块
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('database.host'),
-        port: configService.get<number>('database.port'),
-        username: configService.get<string>('database.username'),
-        password: configService.get<string>('database.password'),
-        database: configService.get<string>('database.database'),
-        entities: [
-          User,
-          Workspace,
-          WorkspaceMember,
-          Document,
-          Block,
-          BlockVersion,
-          DocRevision,
-          DocSnapshot,
-          Asset,
-          Tag,
-          Favorite,
-          Comment,
-          Activity,
-          Session,
-          AuditLog,
-          SecurityLog,
-          SettingsProfile,
-          RuntimeConfig,
-        ],
-        synchronize: configService.get<string>('app.env') === 'development',
-        logging: configService.get<boolean>('database.logging') ?? false,
-        extra: {
-          max: configService.get<number>('database.extra.max'),
-          min: configService.get<number>('database.extra.min'),
-          idleTimeoutMillis: configService.get<number>('database.extra.idleTimeoutMillis'),
-          connectionTimeoutMillis: configService.get<number>(
-            'database.extra.connectionTimeoutMillis',
-          ),
-        },
-        manualInitialization: process.env.OPENAPI_EXPORT === 'true',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const dbType = configService.get<string>('database.type') || 'postgres';
+        const isSqlite = dbType === 'better-sqlite3';
+
+        const baseConfig: Record<string, unknown> = {
+          type: dbType,
+          database: configService.get<string>('database.database'),
+          entities: [
+            User,
+            Workspace,
+            WorkspaceMember,
+            Document,
+            Block,
+            BlockVersion,
+            DocRevision,
+            DocSnapshot,
+            Asset,
+            Tag,
+            Favorite,
+            Comment,
+            Activity,
+            Session,
+            AuditLog,
+            SecurityLog,
+            SettingsProfile,
+            RuntimeConfig,
+          ],
+          synchronize: configService.get<string>('app.env') === 'development',
+          logging: configService.get<boolean>('database.logging') ?? false,
+          manualInitialization: process.env.OPENAPI_EXPORT === 'true',
+        };
+
+        if (!isSqlite) {
+          baseConfig.host = configService.get<string>('database.host');
+          baseConfig.port = configService.get<number>('database.port');
+          baseConfig.username = configService.get<string>('database.username');
+          baseConfig.password = configService.get<string>('database.password');
+          baseConfig.extra = {
+            max: configService.get<number>('database.extra.max'),
+            min: configService.get<number>('database.extra.min'),
+            idleTimeoutMillis: configService.get<number>('database.extra.idleTimeoutMillis'),
+            connectionTimeoutMillis: configService.get<number>(
+              'database.extra.connectionTimeoutMillis',
+            ),
+          };
+        }
+
+        return baseConfig;
+      },
       inject: [ConfigService],
     }),
 
